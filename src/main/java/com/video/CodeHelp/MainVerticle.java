@@ -7,10 +7,11 @@ import com.video.CodeHelp.Verticles.CodeHelpRoutingHandler;
 import com.video.CodeHelp.modules.CodeHelpModule;
 import io.vertx.core.*;
 import io.vertx.core.DeploymentOptions;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 @Slf4j
 public class MainVerticle extends AbstractVerticle {
@@ -18,6 +19,7 @@ public class MainVerticle extends AbstractVerticle {
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
     try {
+      log.info("Started");
       deployVerticles(startPromise);
       Runtime.getRuntime().addShutdownHook(new Thread(() -> destroyVertx()));
     } catch (Exception e) {
@@ -27,8 +29,7 @@ public class MainVerticle extends AbstractVerticle {
   }
 
   public void deployVerticles(Promise<Void> startPromise) {
-    CodeHelpConfig cofig = new CodeHelpConfig();
-    CodeHelpModule codeHelpModule = new CodeHelpModule(cofig);
+    CodeHelpModule codeHelpModule = new CodeHelpModule();
     Injector injector = Guice.createInjector(codeHelpModule);
     Promise codeRoutingHandlerPromise = Promise.promise();
     DeploymentOptions codeRoutingHandlerDeploymentOptions = new DeploymentOptions();
