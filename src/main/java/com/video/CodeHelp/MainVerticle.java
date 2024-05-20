@@ -19,7 +19,7 @@ public class MainVerticle extends AbstractVerticle {
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
     try {
-      log.info("Started");
+      log.info("Started the main verticle");
       deployVerticles(startPromise);
       Runtime.getRuntime().addShutdownHook(new Thread(() -> destroyVertx()));
     } catch (Exception e) {
