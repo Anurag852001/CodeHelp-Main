@@ -1,6 +1,7 @@
 package com.video.CodeHelp.modules;
 
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
@@ -8,12 +9,9 @@ import com.google.inject.Provides;
 import com.video.CodeHelp.Service.WelcomeService;
 import jakarta.inject.Singleton;
 
-public class CodeHelpModule implements Module {
+public class CodeHelpModule extends AbstractModule {
 
-  @Override
-  public void configure(Binder binder) {
 
-  }
 
   public CodeHelpModule() {
 
