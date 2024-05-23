@@ -8,6 +8,7 @@ public class WelcomeService {
 
   @Inject
   public WelcomeService(){
+    log.info("Intializing the welcome service");
     intoWelcomeService();
   }
 
