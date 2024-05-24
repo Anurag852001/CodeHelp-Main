@@ -24,9 +24,11 @@ public class CodeHelpRoutingRouter extends AbstractVerticle {
 
     log.info("Starting the Code help router");
     router = Router.router(vertx);
-    router.route(ApiEnums.WELCOME_API.getApiKey())
+    router.get(ApiEnums.WELCOME_API.getApiKey())
       .handler(codeHelpRoutingHandler);
+
 
     server.requestHandler(router).listen(8000);
   }
+
 }

@@ -15,11 +15,20 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
   public void start() {
     EventBus eventBus = vertx.eventBus();
     log.info("Starting the admin verticle");
-    eventBus.consumer(ApiEnums.WELCOME_API.getEventPath(), future -> {
-        JsonObject response = new JsonObject();
-        response.put(DataConstants.SUCCESS, true);
-        response.put(DataConstants.MESSAGE, "Welcome to code help");
-        future.reply(response);
+    eventBus.consumer(ApiEnums.WELCOME_API.getEventPath(), handler -> {
+      vertx.executeBlocking(future -> {
+        try {
+          JsonObject response = new JsonObject();
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, "Welcome to code help");
+          future.complete(response);
+          handler.reply(response);
+        } catch (Exception e){
+          log.error("Error while welcome api",e);
+          JsonObject responseFail = new JsonObject();
+          future.fail(e);
+        }
       });
+    });
   }
 }

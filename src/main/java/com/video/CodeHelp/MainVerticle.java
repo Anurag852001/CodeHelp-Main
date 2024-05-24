@@ -22,6 +22,7 @@ public class MainVerticle extends AbstractVerticle {
     try {
       log.info("Starting the main verticle");
       deployVerticles(startPromise);
+      log.info("Total threads:{}",Thread.activeCount());
       Runtime.getRuntime().addShutdownHook(new Thread(() -> destroyVertx()));
     } catch (Exception e) {
       log.error("Error occured while staring the ",e);
@@ -34,8 +35,8 @@ public class MainVerticle extends AbstractVerticle {
 
     Promise codeRoutingHandlerPromise = Promise.promise();
       CompletableFuture deployVerticle =  CompletableFuture.runAsync(()->{
-      vertx.deployVerticle(CodeHelpAdminVerticle.class.getName());
-      vertx.deployVerticle(CodeHelpRoutingRouter.class.getName());
+      vertx.deployVerticle(CodeHelpAdminVerticle.class.getName(), new DeploymentOptions().setWorker(true).setWorkerPoolSize(50));
+      vertx.deployVerticle(CodeHelpRoutingRouter.class.getName(),new DeploymentOptions().setWorker(true).setWorkerPoolSize(50));
       codeRoutingHandlerPromise.complete();
     });
     deployVerticle.join();
