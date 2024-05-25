@@ -19,6 +19,7 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
   private final Vertx vertx;
   private final EventBus eventBus;
 
+
   @Inject
   public CodeHelpRoutingHandler(Vertx vertx, EventBus eventBus) {
     this.vertx = vertx;

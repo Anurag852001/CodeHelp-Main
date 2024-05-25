@@ -6,10 +6,23 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
+@Singleton
 @Slf4j
 public class CodeHelpAdminVerticle extends AbstractVerticle {
+
+  private  WelcomeService welcomeService;
+  @Inject
+  public CodeHelpAdminVerticle(WelcomeService welcomeService) {
+    log.info("Intializing the codeHelpAdminVerticle");
+    this.welcomeService = welcomeService;
+  }
+
+  public  CodeHelpAdminVerticle(){
+
+  }
 
   @Override
   public void start() {
@@ -21,6 +34,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
           JsonObject response = new JsonObject();
           response.put(DataConstants.SUCCESS, true);
           response.put(DataConstants.MESSAGE, "Welcome to code help");
+          welcomeService.intoWelcomeService();
           future.complete(response);
           handler.reply(response);
         } catch (Exception e){
