@@ -9,7 +9,12 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.shareddata.SharedData;
 import jakarta.inject.Singleton;
+import jdk.jfr.Percentage;
 import lombok.extern.slf4j.Slf4j;
+import org.jdbi.v3.core.Jdbi;
+
+import javax.sql.DataSource;
+import java.util.Properties;
 
 @Singleton
 @Slf4j
@@ -20,6 +25,7 @@ public class CodeHelpModule extends AbstractModule {
   public CodeHelpModule(Vertx vertx) {
     log.info("Starting the codeHelp module");
     this.vertx = vertx;
+    provideJdbi();
   }
 
   @Override
@@ -36,4 +42,14 @@ public class CodeHelpModule extends AbstractModule {
     return new WelcomeService();
   }
 
+  @Singleton
+  @Provides
+  public Jdbi provideJdbi(){
+    Properties properties = new Properties();
+    properties.setProperty("username","root");
+    properties.setProperty("password","12345678");
+    Jdbi jdbi = Jdbi.create("jdbc:localhost:3306",properties);
+    log.info("Connecting to db was successful");
+    return jdbi;
+  }
 }
