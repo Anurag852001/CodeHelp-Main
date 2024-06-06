@@ -1,13 +1,13 @@
 package com.video.CodeHelp;
 
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
-import com.video.CodeHelp.Service.CodeHelpAdminVerticle;
-import com.video.CodeHelp.Verticles.CodeHelpRoutingRouter;
+import com.video.CodeHelp.Guice.GuiceVerticleFactory;
+import com.video.CodeHelp.Verticles.CodeHelpAdminVerticle;
+import com.video.CodeHelp.Verticles.CodeHelpRouter;
 import com.video.CodeHelp.modules.CodeHelpModule;
 import io.vertx.core.*;
-import io.vertx.core.DeploymentOptions;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.CompletableFuture;
@@ -18,30 +18,36 @@ import java.util.function.Supplier;
 public class MainVerticle extends AbstractVerticle {
 
   @Override
-  public void start(Promise<Void> startPromise)  {
+  public void start(Promise<Void> startPromise) {
     try {
       log.info("Starting the main verticle");
-      deployVerticles(startPromise);
-      log.info("Total threads:{}",Thread.activeCount());
+      CodeHelpModule codeHelpModule = new CodeHelpModule(vertx);
+      Injector injector = Guice.createInjector(codeHelpModule);
+      GuiceVerticleFactory verticleFactory = new GuiceVerticleFactory(injector);
+      vertx.registerVerticleFactory(verticleFactory);
+      deployVerticles(startPromise, injector);
+      log.info("Total threads:{}", Thread.activeCount());
       Runtime.getRuntime().addShutdownHook(new Thread(() -> destroyVertx()));
     } catch (Exception e) {
-      log.error("Error occured while staring the ",e);
+      log.error("Error occured while staring the main verticle ", e);
+      startPromise.fail(e);
       vertx.close();
     }
   }
 
-  public void deployVerticles(Promise<Void> startPromise)  {
-    CodeHelpModule codeHelpModule = new CodeHelpModule();
-
-    Promise codeRoutingHandlerPromise = Promise.promise();
-      CompletableFuture deployVerticle =  CompletableFuture.runAsync(()->{
-      vertx.deployVerticle(CodeHelpAdminVerticle.class.getName(), new DeploymentOptions().setWorker(true).setWorkerPoolSize(50));
-      vertx.deployVerticle(CodeHelpRoutingRouter.class.getName(),new DeploymentOptions().setWorker(true).setWorkerPoolSize(50));
-      codeRoutingHandlerPromise.complete();
-    });
-    deployVerticle.join();
-    startPromise.complete();
-    Injector injector = Guice.createInjector(codeHelpModule);
+  public void deployVerticles(Promise<Void> startPromise, Injector injector) {
+    try {
+      log.info("Deploying verticles");
+      DeploymentOptions codeHelpAdminDeploymentOptions = new DeploymentOptions().setWorker(true).setWorkerPoolSize(10);
+      DeploymentOptions codeHelpRouterDeploymentOptions = new DeploymentOptions().setWorker(true).setWorkerPoolSize(10);
+      CompletableFuture.runAsync(() -> {
+        vertx.deployVerticle(injector.getInstance(CodeHelpAdminVerticle.class), codeHelpAdminDeploymentOptions);
+        vertx.deployVerticle(injector.getInstance(CodeHelpRouter.class), codeHelpRouterDeploymentOptions);
+      }).get();
+      startPromise.complete();
+    } catch (Exception e) {
+      log.error("Error while starting verticles", e);
+    }
   }
 
   public void destroyVertx() {
@@ -59,4 +65,5 @@ public class MainVerticle extends AbstractVerticle {
       };
     }
   }
+
 }
