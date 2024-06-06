@@ -3,11 +3,7 @@ package com.video.CodeHelp.modules;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-
-import com.video.CodeHelp.Service.CodeHelpAdminVerticle;
 import com.video.CodeHelp.Service.WelcomeService;
-import com.video.CodeHelp.Verticles.CodeHelpRoutingRouter;
-import io.netty.bootstrap.Bootstrap;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.file.FileSystem;
@@ -38,18 +34,6 @@ public class CodeHelpModule extends AbstractModule {
   @Provides
   public WelcomeService providesWelcomeService(){
     return new WelcomeService();
-  }
-
-
-  @Provides
-  public CodeHelpRoutingRouter providesCodeHelpRoutingRouter(WelcomeService welcomeService){
-    return new CodeHelpRoutingRouter();
-  }
-
-  @Provides
-  @Singleton
-  public CodeHelpAdminVerticle providesCodeHelpAdmin(WelcomeService welcomeService){
-    return new CodeHelpAdminVerticle(welcomeService);
   }
 
 }

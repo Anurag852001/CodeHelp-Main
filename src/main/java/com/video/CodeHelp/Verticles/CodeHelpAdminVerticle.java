@@ -1,7 +1,8 @@
-package com.video.CodeHelp.Service;
+package com.video.CodeHelp.Verticles;
 
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApiEnums;
+import com.video.CodeHelp.Service.WelcomeService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
@@ -13,16 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CodeHelpAdminVerticle extends AbstractVerticle {
 
-  private  WelcomeService welcomeService;
+  private WelcomeService welcomeService;
   @Inject
   public CodeHelpAdminVerticle(WelcomeService welcomeService) {
     log.info("Intializing the codeHelpAdminVerticle");
     this.welcomeService = welcomeService;
   }
 
-  public  CodeHelpAdminVerticle(){
-
-  }
 
   @Override
   public void start() {
