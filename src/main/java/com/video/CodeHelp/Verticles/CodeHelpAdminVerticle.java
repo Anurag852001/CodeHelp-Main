@@ -2,10 +2,14 @@ package com.video.CodeHelp.Verticles;
 
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApiEnums;
+import com.video.CodeHelp.Pojo.SaveCodeHelpConfigRequest;
 import com.video.CodeHelp.Service.WelcomeService;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.RoutingContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +44,13 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
           JsonObject responseFail = new JsonObject();
           future.fail(e);
         }
+      });
+    });
+
+    eventBus.consumer(ApiEnums.CONFIG_SAVE_API.getEventPath(),  message->{
+      vertx.executeBlocking(future->{
+        SaveCodeHelpConfigRequest request = new JsonObject(message.body()).mapTo(SaveCodeHelpConfigRequest.class);
+
       });
     });
   }

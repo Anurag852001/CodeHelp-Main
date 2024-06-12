@@ -11,6 +11,9 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
+import static com.video.CodeHelp.Enums.ApiEnums.CONFIG_SAVE_API;
+import static com.video.CodeHelp.Enums.ApiEnums.WELCOME_API;
+
 
 @Slf4j
 @Singleton
@@ -30,15 +33,29 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
   public void handle(RoutingContext routingContext) {
     Promise promise = Promise.promise();
     log.info("Recieved request for api :{}", routingContext.currentRoute().getPath());
-    if (routingContext.currentRoute().getPath().equalsIgnoreCase(ApiEnums.WELCOME_API.getApiKey())) {
-      eventBus.request(ApiEnums.WELCOME_API.getEventPath(), routingContext.getBody(), messageAsyncResult -> {
-        if (messageAsyncResult.succeeded()) {
-          promise.complete(messageAsyncResult);
-          handleSuccessResponse(routingContext, messageAsyncResult);
-        } else {
-          promise.fail(messageAsyncResult.cause());
-        }
-      });
+    ApiEnums api = ApiEnums.fromValue(routingContext.currentRoute().getPath());
+    switch (api) {
+      case WELCOME_API:
+        eventBus.request(WELCOME_API.getEventPath(), routingContext.getBody(), messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            promise.complete(messageAsyncResult);
+            handleSuccessResponse(routingContext, messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+      case CONFIG_SAVE_API:
+        eventBus.request(CONFIG_SAVE_API.getEventPath(), routingContext.getBody(), messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            promise.complete(messageAsyncResult);
+            handleSuccessResponse(routingContext, messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
+      default:
+        break;
     }
   }
 
