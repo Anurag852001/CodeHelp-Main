@@ -6,6 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -34,9 +35,10 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
     Promise promise = Promise.promise();
     log.info("Recieved request for api :{}", routingContext.currentRoute().getPath());
     ApiEnums api = ApiEnums.fromValue(routingContext.currentRoute().getPath());
+    JsonObject body = routingContext.getBodyAsJson();
     switch (api) {
       case WELCOME_API:
-        eventBus.request(WELCOME_API.getEventPath(), routingContext.getBody(), messageAsyncResult -> {
+        eventBus.request(WELCOME_API.getEventPath(), body, messageAsyncResult -> {
           if (messageAsyncResult.succeeded()) {
             promise.complete(messageAsyncResult);
             handleSuccessResponse(routingContext, messageAsyncResult);
@@ -45,7 +47,7 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
           }
         });
       case CONFIG_SAVE_API:
-        eventBus.request(CONFIG_SAVE_API.getEventPath(), routingContext.getBody(), messageAsyncResult -> {
+        eventBus.request(CONFIG_SAVE_API.getEventPath(), body, messageAsyncResult -> {
           if (messageAsyncResult.succeeded()) {
             promise.complete(messageAsyncResult);
             handleSuccessResponse(routingContext, messageAsyncResult);
@@ -53,8 +55,6 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
             promise.fail(messageAsyncResult.cause());
           }
         });
-        break;
-      default:
         break;
     }
   }

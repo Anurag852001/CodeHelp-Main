@@ -14,7 +14,7 @@ public enum ApiEnums {
   String apiKey;
   String eventPath;
 
-  public ApiEnums fromValue(String apiKey) {
+  public static ApiEnums fromValue(String apiKey) {
     for (ApiEnums api : ApiEnums.values()) {
       if (api.getApiKey().equalsIgnoreCase(apiKey)) {
         return api;

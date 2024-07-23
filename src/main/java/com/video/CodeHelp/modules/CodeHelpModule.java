@@ -3,9 +3,13 @@ package com.video.CodeHelp.modules;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.video.CodeHelp.Dao.CodeHelpConfigDao;
+import com.video.CodeHelp.Exception.CodeHelpException;
+import com.video.CodeHelp.Service.CodeHelpConfigService;
 import com.video.CodeHelp.Service.WelcomeService;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.shareddata.SharedData;
 import jakarta.inject.Singleton;
@@ -14,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jdbi.v3.core.Jdbi;
 
 import javax.sql.DataSource;
+import java.net.http.HttpResponse;
 import java.util.Properties;
 
 @Singleton
@@ -41,6 +46,25 @@ public class CodeHelpModule extends AbstractModule {
   public WelcomeService providesWelcomeService(){
     return new WelcomeService();
   }
+
+  @Provides
+  @Singleton
+  public CodeHelpConfigDao providesCodeHelpConfigDao(Jdbi jdbi){
+    try{
+      return jdbi.onDemand(CodeHelpConfigDao.class);
+    } catch (Exception e){
+      log.error("Error while initializing CodeHelpConfigDao",e);
+      throw new CodeHelpException(ReplyFailure.ERROR,"Error while initializing CodeHelpConfigDao");
+    }
+  }
+
+  @Singleton
+  @Provides
+  public CodeHelpConfigService prividesCodeHelpConfigService(CodeHelpConfigDao configDao){
+    return new CodeHelpConfigService(configDao);
+  }
+
+
 
   @Singleton
   @Provides

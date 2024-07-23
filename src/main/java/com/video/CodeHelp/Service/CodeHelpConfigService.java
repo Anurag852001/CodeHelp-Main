@@ -17,12 +17,11 @@ public class CodeHelpConfigService {
   }
 
 
-  public void saveCodeHelpConfig(SaveCodeHelpConfigRequest request){
+  public Integer saveCodeHelpConfig(SaveCodeHelpConfigRequest request){
     Long startTime = System.currentTimeMillis();
-    codeHelpConfigDao.saveCodeHelpConfig(request);
+    Integer id = codeHelpConfigDao.saveCodeHelpConfig(request);
     log.info("Time taken to save config to db:{} ms",System.currentTimeMillis()-startTime);
-
-
+    return id;
   }
 
 }

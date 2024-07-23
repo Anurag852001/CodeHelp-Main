@@ -3,6 +3,7 @@ package com.video.CodeHelp.Verticles;
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApiEnums;
 import com.video.CodeHelp.Pojo.SaveCodeHelpConfigRequest;
+import com.video.CodeHelp.Service.CodeHelpConfigService;
 import com.video.CodeHelp.Service.WelcomeService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
@@ -19,10 +20,12 @@ import lombok.extern.slf4j.Slf4j;
 public class CodeHelpAdminVerticle extends AbstractVerticle {
 
   private WelcomeService welcomeService;
+  private CodeHelpConfigService configService;
   @Inject
-  public CodeHelpAdminVerticle(WelcomeService welcomeService) {
+  public CodeHelpAdminVerticle(WelcomeService welcomeService,CodeHelpConfigService configService) {
     log.info("Intializing the codeHelpAdminVerticle");
     this.welcomeService = welcomeService;
+    this.configService = configService;
   }
 
 
@@ -49,8 +52,20 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
 
     eventBus.consumer(ApiEnums.CONFIG_SAVE_API.getEventPath(),  message->{
       vertx.executeBlocking(future->{
-        SaveCodeHelpConfigRequest request = new JsonObject(message.body()).mapTo(SaveCodeHelpConfigRequest.class);
-
+        try {
+          JsonObject body = new JsonObject(message.body().toString());
+          SaveCodeHelpConfigRequest request = body.mapTo(SaveCodeHelpConfigRequest.class);
+          JsonObject response = new JsonObject();
+          Integer id = configService.saveCodeHelpConfig(request);
+          response.put(DataConstants.SUCCESS,true);
+          response.put(DataConstants.MESSAGE,"Config saved successfully");
+          response.put(DataConstants.ID,id);
+          message.reply(response);
+          future.complete(response);
+        } catch (Exception e){
+          log.error("Error while saving config", e);
+          future.fail(e.getMessage());
+        }
       });
     });
   }

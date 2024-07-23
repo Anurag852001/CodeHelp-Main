@@ -1,11 +1,13 @@
 package com.video.CodeHelp.Verticles;
 
+import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApiEnums;
 import com.video.CodeHelp.Handler.CodeHelpRoutingHandler;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.BodyHandler;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,7 +34,10 @@ public class CodeHelpRouter extends AbstractVerticle {
         .handler(codeHelpRoutingHandler);
 
       router.post(ApiEnums.CONFIG_SAVE_API.getApiKey())
-          .handler(codeHelpRoutingHandler);
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
 
       server.requestHandler(router).listen(8000);
     } catch (Exception e) {
