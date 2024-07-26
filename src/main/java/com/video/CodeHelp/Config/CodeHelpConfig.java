@@ -1,12 +1,18 @@
 package com.video.CodeHelp.Config;
 
-import lombok.extern.slf4j.Slf4j;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.video.CodeHelp.Config.configPojos.MySqlConfig;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
-import java.util.logging.Logger;
 
-@Slf4j
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CodeHelpConfig {
-  public static void main(String[] args) {
-    log.info("Hello");
-  }
+  public Integer port;
+  public String environment;
+  public MySqlConfig mySqlConfig;
 }

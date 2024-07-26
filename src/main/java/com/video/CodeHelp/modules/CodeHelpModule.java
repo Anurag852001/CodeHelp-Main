@@ -3,6 +3,7 @@ package com.video.CodeHelp.modules;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.video.CodeHelp.Config.CodeHelpConfig;
 import com.video.CodeHelp.Dao.CodeHelpConfigDao;
 import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Service.CodeHelpConfigService;
@@ -15,10 +16,12 @@ import io.vertx.core.shareddata.SharedData;
 import jakarta.inject.Singleton;
 import jdk.jfr.Percentage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.jdbi.v3.core.Jdbi;
 
 import javax.sql.DataSource;
 import java.net.http.HttpResponse;
+import java.sql.Connection;
 import java.util.Properties;
 
 @Singleton
@@ -26,11 +29,12 @@ import java.util.Properties;
 public class CodeHelpModule extends AbstractModule {
 
   private final Vertx vertx;
+  private final CodeHelpConfig config;
 
-  public CodeHelpModule(Vertx vertx) {
+  public CodeHelpModule(Vertx vertx,CodeHelpConfig config) {
     log.info("Starting the codeHelp module");
     this.vertx = vertx;
-    provideJdbi();
+    this.config = config;
   }
 
   @Override
@@ -68,12 +72,28 @@ public class CodeHelpModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public Jdbi provideJdbi(){
-    Properties properties = new Properties();
-    properties.setProperty("username","root");
-    properties.setProperty("password","12345678");
-    Jdbi jdbi = Jdbi.create("jdbc:localhost:3306",properties);
-    log.info("Connecting to db was successful");
-    return jdbi;
+  public Jdbi provideJdbi() {
+    try {
+      // Configure BasicDataSource
+      BasicDataSource dataSource = new BasicDataSource();
+      dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+      dataSource.setUrl("jdbc:mysql://localhost:3306/codehelp");
+      dataSource.setUsername(config.mySqlConfig.getUsername());
+      dataSource.setPassword(config.mySqlConfig.getPassword());
+      dataSource.setDefaultAutoCommit(false);
+      dataSource.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+      dataSource.setMinIdle(5);
+      dataSource.setMaxIdle(20);
+      dataSource.setMaxWaitMillis(10000);
+
+      // Initialize Jdbi with the DataSource
+      Jdbi jdbi = Jdbi.create(dataSource);
+
+      return jdbi;
+    } catch (Exception e) {
+      log.error("Error while initializing Jdbi", e);
+      throw new CodeHelpException(ReplyFailure.ERROR, "Error while initializing Jdbi");
+    }
   }
+
 }

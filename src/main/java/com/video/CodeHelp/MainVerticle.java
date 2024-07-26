@@ -3,14 +3,20 @@ package com.video.CodeHelp;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.video.CodeHelp.Config.CodeHelpConfig;
+import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Guice.GuiceVerticleFactory;
 import com.video.CodeHelp.Verticles.CodeHelpAdminVerticle;
 import com.video.CodeHelp.Verticles.CodeHelpRouter;
 import com.video.CodeHelp.modules.CodeHelpModule;
+import io.vertx.config.ConfigRetriever;
 import io.vertx.core.*;
+import io.vertx.core.eventbus.ReplyFailure;
+import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 
@@ -21,7 +27,10 @@ public class MainVerticle extends AbstractVerticle {
   public void start(Promise<Void> startPromise) {
     try {
       log.info("Starting the main verticle");
-      CodeHelpModule codeHelpModule = new CodeHelpModule(vertx);
+      ConfigRetriever configRetriever = ConfigRetriever.create(vertx);
+      CodeHelpConfig config = getConfig(configRetriever);
+      log.info("The full config is :{}", JsonObject.mapFrom(config));
+      CodeHelpModule codeHelpModule = new CodeHelpModule(vertx,config);
       Injector injector = Guice.createInjector(codeHelpModule);
       GuiceVerticleFactory verticleFactory = new GuiceVerticleFactory(injector);
       vertx.registerVerticleFactory(verticleFactory);
@@ -48,6 +57,18 @@ public class MainVerticle extends AbstractVerticle {
     } catch (Exception e) {
       log.error("Error while starting verticles", e);
     }
+  }
+
+  public CodeHelpConfig getConfig(ConfigRetriever configRetriever){
+    AtomicReference<CodeHelpConfig> config = new AtomicReference<>();
+    configRetriever.getConfig(handler->{
+      if(handler.succeeded()){
+        config.set(handler.result().mapTo(CodeHelpConfig.class));
+      } else{
+        throw new CodeHelpException(ReplyFailure.ERROR,"Failed to retrieve Config");
+      }
+    });
+    return config.get();
   }
 
   public void destroyVertx() {
