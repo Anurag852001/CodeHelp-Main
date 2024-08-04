@@ -18,6 +18,8 @@ import jdk.jfr.Percentage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.extension.Extensions;
+import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 
 import javax.sql.DataSource;
 import java.net.http.HttpResponse;
@@ -86,9 +88,10 @@ public class CodeHelpModule extends AbstractModule {
       dataSource.setMaxIdle(20);
       dataSource.setMaxWaitMillis(10000);
 
-      // Initialize Jdbi with the DataSource
+      // Initialize Jdbi with the DataSource=
       Jdbi jdbi = Jdbi.create(dataSource);
-
+      jdbi.installPlugin(new SqlObjectPlugin());
+      jdbi.open().execute("Select * from config");
       return jdbi;
     } catch (Exception e) {
       log.error("Error while initializing Jdbi", e);
