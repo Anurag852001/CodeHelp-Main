@@ -1,3 +1,9 @@
 {
-  "PORT": 8000
+  "PORT": 8000,
+  "mySqlConfig":{
+    "username": "root",
+    "password": "12345678",
+    "testStatement": "SELECT 1",
+    "database": "codehelp"
+  }
 }

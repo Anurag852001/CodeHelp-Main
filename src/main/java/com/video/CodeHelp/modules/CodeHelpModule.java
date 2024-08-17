@@ -3,9 +3,10 @@ package com.video.CodeHelp.modules;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.video.CodeHelp.Dao.CodeHelpConfigDao;
+import com.video.CodeHelp.Config.CodeHelpConfig;
+import com.video.CodeHelp.Dao.ConfigDao;
 import com.video.CodeHelp.Exception.CodeHelpException;
-import com.video.CodeHelp.Service.CodeHelpConfigService;
+import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.Service.WelcomeService;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -13,24 +14,22 @@ import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.shareddata.SharedData;
 import jakarta.inject.Singleton;
-import jdk.jfr.Percentage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.jdbi.v3.core.Jdbi;
-
-import javax.sql.DataSource;
-import java.net.http.HttpResponse;
-import java.util.Properties;
+import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 
 @Singleton
 @Slf4j
 public class CodeHelpModule extends AbstractModule {
 
   private final Vertx vertx;
+  private final CodeHelpConfig config;
 
-  public CodeHelpModule(Vertx vertx) {
+  public CodeHelpModule(Vertx vertx,CodeHelpConfig config) {
     log.info("Starting the codeHelp module");
     this.vertx = vertx;
-    provideJdbi();
+    this.config = config;
   }
 
   @Override
@@ -47,11 +46,38 @@ public class CodeHelpModule extends AbstractModule {
     return new WelcomeService();
   }
 
+
+  @Singleton
+  @Provides
+  public Jdbi provideJdbi() {
+    try {
+      BasicDataSource dataSource = new BasicDataSource();
+      dataSource.setUrl("jdbc:mysql://127.0.0.1:3306/codehelp");
+      dataSource.setUsername(config.mySqlConfig.getUsername());
+      dataSource.setPassword(config.mySqlConfig.getPassword());
+      dataSource.setValidationQuery("SELECT 1");
+      dataSource.setMaxIdle(20);
+      dataSource.setMaxWaitMillis(10000);
+
+      // Initialize Jdbi with the DataSource=
+      Jdbi jdbi = Jdbi.create(dataSource);
+      jdbi.installPlugin(new SqlObjectPlugin());
+
+      jdbi.useHandle(handle -> {
+        handle.execute("SELECT 1");
+      });
+      log.info("Success");
+      return jdbi;
+    } catch (Exception e) {
+      log.error("Error while initializing Jdbi", e);
+      throw new CodeHelpException(ReplyFailure.ERROR, "Error while initializing Jdbi");
+    }
+  }
   @Provides
   @Singleton
-  public CodeHelpConfigDao providesCodeHelpConfigDao(Jdbi jdbi){
+  public ConfigDao providesCodeHelpConfigDao(Jdbi jdbi){
     try{
-      return jdbi.onDemand(CodeHelpConfigDao.class);
+      return jdbi.onDemand(ConfigDao.class);
     } catch (Exception e){
       log.error("Error while initializing CodeHelpConfigDao",e);
       throw new CodeHelpException(ReplyFailure.ERROR,"Error while initializing CodeHelpConfigDao");
@@ -60,20 +86,12 @@ public class CodeHelpModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public CodeHelpConfigService prividesCodeHelpConfigService(CodeHelpConfigDao configDao){
-    return new CodeHelpConfigService(configDao);
+  public ConfigService prividesCodeHelpConfigService(ConfigDao configDao){
+    return new ConfigService(configDao);
   }
 
 
 
-  @Singleton
-  @Provides
-  public Jdbi provideJdbi(){
-    Properties properties = new Properties();
-    properties.setProperty("username","root");
-    properties.setProperty("password","12345678");
-    Jdbi jdbi = Jdbi.create("jdbc:localhost:3306",properties);
-    log.info("Connecting to db was successful");
-    return jdbi;
-  }
+
+
 }
