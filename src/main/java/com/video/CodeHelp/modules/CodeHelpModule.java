@@ -53,6 +53,33 @@ public class CodeHelpModule extends AbstractModule {
     return new WelcomeService();
   }
 
+
+  @Singleton
+  @Provides
+  public Jdbi provideJdbi() {
+    try {
+      BasicDataSource dataSource = new BasicDataSource();
+      dataSource.setUrl("jdbc:mysql://127.0.0.1:3306/codehelp");
+      dataSource.setUsername(config.mySqlConfig.getUsername());
+      dataSource.setPassword(config.mySqlConfig.getPassword());
+      dataSource.setValidationQuery("SELECT 1");
+      dataSource.setMaxIdle(20);
+      dataSource.setMaxWaitMillis(10000);
+
+      // Initialize Jdbi with the DataSource=
+      Jdbi jdbi = Jdbi.create(dataSource);
+      jdbi.installPlugin(new SqlObjectPlugin());
+
+      jdbi.useHandle(handle -> {
+        handle.execute("SELECT 1");
+      });
+      log.info("Success");
+      return jdbi;
+    } catch (Exception e) {
+      log.error("Error while initializing Jdbi", e);
+      throw new CodeHelpException(ReplyFailure.ERROR, "Error while initializing Jdbi");
+    }
+  }
   @Provides
   @Singleton
   public CodeHelpConfigDao providesCodeHelpConfigDao(Jdbi jdbi){
@@ -72,31 +99,6 @@ public class CodeHelpModule extends AbstractModule {
 
 
 
-  @Singleton
-  @Provides
-  public Jdbi provideJdbi() {
-    try {
-      // Configure BasicDataSource
-      BasicDataSource dataSource = new BasicDataSource();
-      dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-      dataSource.setUrl("jdbc:mysql://localhost:3306/codehelp");
-      dataSource.setUsername(config.mySqlConfig.getUsername());
-      dataSource.setPassword(config.mySqlConfig.getPassword());
-      dataSource.setDefaultAutoCommit(false);
-      dataSource.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-      dataSource.setMinIdle(5);
-      dataSource.setMaxIdle(20);
-      dataSource.setMaxWaitMillis(10000);
 
-      // Initialize Jdbi with the DataSource=
-      Jdbi jdbi = Jdbi.create(dataSource);
-      jdbi.installPlugin(new SqlObjectPlugin());
-      jdbi.open().execute("Select * from config");
-      return jdbi;
-    } catch (Exception e) {
-      log.error("Error while initializing Jdbi", e);
-      throw new CodeHelpException(ReplyFailure.ERROR, "Error while initializing Jdbi");
-    }
-  }
 
 }

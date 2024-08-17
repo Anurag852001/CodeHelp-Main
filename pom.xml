@@ -38,12 +38,15 @@
     </dependencies>
   </dependencyManagement>
 
+
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-client</artifactId>
       <version>${vertx.version}</version>
     </dependency>
+
+
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
@@ -75,11 +78,7 @@
       <artifactId>vertx-junit5</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.jdbi</groupId>
-      <artifactId>jdbi3-core</artifactId>
-      <version>3.1.0</version>
-    </dependency>
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
@@ -88,8 +87,13 @@
     </dependency>
     <dependency>
       <groupId>org.jdbi</groupId>
+      <artifactId>jdbi3-core</artifactId>
+      <version>3.32.0</version> <!-- Replace with the latest version -->
+    </dependency>
+    <dependency>
+      <groupId>org.jdbi</groupId>
       <artifactId>jdbi3-sqlobject</artifactId>
-      <version>3.1.0</version>
+      <version>3.32.0</version> <!-- Replace with the latest version -->
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
