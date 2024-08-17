@@ -39,6 +39,14 @@ public class CodeHelpRouter extends AbstractVerticle {
         .handler(BodyHandler.create())
         .handler(codeHelpRoutingHandler);
 
+
+      router.post( ApiEnums.CONFIG_GET_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
+
       server.requestHandler(router).listen(8000);
     } catch (Exception e) {
       log.error("error occured while starting the server", e);

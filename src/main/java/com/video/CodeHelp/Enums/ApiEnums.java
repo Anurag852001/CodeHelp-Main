@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public enum ApiEnums {
   WELCOME_API("/welcome/api", "welcomeApiHandler"),
-  CONFIG_SAVE_API("/save/config", "saveConfig");
+
+  //config apis
+  CONFIG_SAVE_API("/save/config", "saveConfig"),
+  CONFIG_GET_API("/get/config", "getConfig");
 
   String apiKey;
   String eventPath;

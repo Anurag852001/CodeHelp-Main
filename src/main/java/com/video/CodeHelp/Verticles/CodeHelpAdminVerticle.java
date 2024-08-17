@@ -2,15 +2,13 @@ package com.video.CodeHelp.Verticles;
 
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApiEnums;
-import com.video.CodeHelp.Pojo.SaveCodeHelpConfigRequest;
-import com.video.CodeHelp.Service.CodeHelpConfigService;
+import com.video.CodeHelp.Pojo.Config;
+import com.video.CodeHelp.Pojo.SaveConfigRequest;
+import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.Service.WelcomeService;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.RoutingContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 public class CodeHelpAdminVerticle extends AbstractVerticle {
 
   private WelcomeService welcomeService;
-  private CodeHelpConfigService configService;
+  private ConfigService configService;
+
   @Inject
-  public CodeHelpAdminVerticle(WelcomeService welcomeService,CodeHelpConfigService configService) {
+  public CodeHelpAdminVerticle(WelcomeService welcomeService, ConfigService configService) {
     log.info("Intializing the codeHelpAdminVerticle");
     this.welcomeService = welcomeService;
     this.configService = configService;
@@ -42,31 +41,54 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
           welcomeService.intoWelcomeService();
           future.complete(response);
           handler.reply(response);
-        } catch (Exception e){
-          log.error("Error while welcome api",e);
+        } catch (Exception e) {
+          log.error("Error while welcome api", e);
           JsonObject responseFail = new JsonObject();
           future.fail(e);
         }
       });
     });
 
-    eventBus.consumer(ApiEnums.CONFIG_SAVE_API.getEventPath(),  message->{
-      vertx.executeBlocking(future->{
+    eventBus.consumer(ApiEnums.CONFIG_SAVE_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
         try {
           JsonObject body = new JsonObject(message.body().toString());
-          SaveCodeHelpConfigRequest request = body.mapTo(SaveCodeHelpConfigRequest.class);
+          SaveConfigRequest request = body.mapTo(SaveConfigRequest.class);
           JsonObject response = new JsonObject();
-          Integer id = configService.saveCodeHelpConfig(request);
-          response.put(DataConstants.SUCCESS,true);
-          response.put(DataConstants.MESSAGE,"Config saved successfully");
-          response.put(DataConstants.ID,id);
+          Long id = configService.saveCodeHelpConfig(request);
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, "Config saved successfully");
+          response.put(DataConstants.ID, id);
           message.reply(response);
           future.complete(response);
-        } catch (Exception e){
+        } catch (Exception e) {
           log.error("Error while saving config", e);
-          future.fail(e.getMessage());
+          message.reply(e);
+          future.fail(e);
         }
       });
     });
+
+    eventBus.consumer(ApiEnums.CONFIG_GET_API.getEventPath(), message -> {
+        vertx.executeBlocking(future -> {
+            try {
+              JsonObject request = new JsonObject(message.body().toString());
+              Config config = configService.getCodeHelpConfig(request.getString(DataConstants.CONFIG_KEY), request.getString(DataConstants.CONFIG_TYPE));
+              JsonObject configJ = JsonObject.mapFrom(config);
+              JsonObject response = new JsonObject().put(DataConstants.MESSAGE, DataConstants.SUCCESS);
+              response.put(DataConstants.SUCCESS, true);
+              response.put(DataConstants.DATA, configJ);
+              message.reply(response);
+              future.complete(response);
+            } catch (Exception e) {
+              log.error("Error while getting config", e);
+              message.reply(e);
+              future.fail(e);
+            }
+          }
+        );
+      }
+    );
+
   }
 }

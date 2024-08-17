@@ -12,8 +12,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.video.CodeHelp.Enums.ApiEnums.CONFIG_SAVE_API;
-import static com.video.CodeHelp.Enums.ApiEnums.WELCOME_API;
+import static com.video.CodeHelp.Enums.ApiEnums.*;
 
 
 @Slf4j
@@ -48,6 +47,15 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
         });
       case CONFIG_SAVE_API:
         eventBus.request(CONFIG_SAVE_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            promise.complete(messageAsyncResult);
+            handleSuccessResponse(routingContext, messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+      case CONFIG_GET_API:
+        eventBus.request(CONFIG_GET_API.getEventPath(), body, messageAsyncResult -> {
           if (messageAsyncResult.succeeded()) {
             promise.complete(messageAsyncResult);
             handleSuccessResponse(routingContext, messageAsyncResult);
