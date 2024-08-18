@@ -54,6 +54,15 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
             promise.fail(messageAsyncResult.cause());
           }
         });
+      case CONFIG_UPDATE_API:
+        eventBus.request(CONFIG_UPDATE_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            promise.complete(messageAsyncResult);
+            handleSuccessResponse(routingContext, messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
       case CONFIG_GET_API:
         eventBus.request(CONFIG_GET_API.getEventPath(), body, messageAsyncResult -> {
           if (messageAsyncResult.succeeded()) {

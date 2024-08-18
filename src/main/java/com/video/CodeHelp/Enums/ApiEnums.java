@@ -12,7 +12,8 @@ public enum ApiEnums {
 
   //config apis
   CONFIG_SAVE_API("/save/config", "saveConfig"),
-  CONFIG_GET_API("/get/config", "getConfig");
+  CONFIG_GET_API("/get/config", "getConfig"),
+  CONFIG_UPDATE_API("/update/config", "updateConfig");
 
   String apiKey;
   String eventPath;

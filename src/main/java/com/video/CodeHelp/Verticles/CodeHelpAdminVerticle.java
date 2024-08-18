@@ -3,7 +3,7 @@ package com.video.CodeHelp.Verticles;
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApiEnums;
 import com.video.CodeHelp.Pojo.Config;
-import com.video.CodeHelp.Pojo.SaveConfigRequest;
+import com.video.CodeHelp.Pojo.SaveOrUpdateConfigRequest;
 import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.Service.WelcomeService;
 import io.vertx.core.AbstractVerticle;
@@ -37,7 +37,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
         try {
           JsonObject response = new JsonObject();
           response.put(DataConstants.SUCCESS, true);
-          response.put(DataConstants.MESSAGE, "Welcome to code help");
+          response.put(DataConstants.MESSAGE, "Welcome to code help!!");
           welcomeService.intoWelcomeService();
           future.complete(response);
           handler.reply(response);
@@ -53,7 +53,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
       vertx.executeBlocking(future -> {
         try {
           JsonObject body = new JsonObject(message.body().toString());
-          SaveConfigRequest request = body.mapTo(SaveConfigRequest.class);
+          SaveOrUpdateConfigRequest request = body.mapTo(SaveOrUpdateConfigRequest.class);
           JsonObject response = new JsonObject();
           Long id = configService.saveCodeHelpConfig(request);
           response.put(DataConstants.SUCCESS, true);
@@ -61,6 +61,26 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
           response.put(DataConstants.ID, id);
           message.reply(response);
           future.complete(response);
+        } catch (Exception e) {
+          log.error("Error while saving config", e);
+          message.reply(e);
+          future.fail(e);
+        }
+      });
+    });
+
+    eventBus.consumer(ApiEnums.CONFIG_UPDATE_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          JsonObject body = new JsonObject(message.body().toString());
+          SaveOrUpdateConfigRequest request = body.mapTo(SaveOrUpdateConfigRequest.class);
+          JsonObject response = new JsonObject();
+          Long id = configService.updateCodeHelpConfig(request);
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, "Config updated successfully");
+          response.put(DataConstants.ID, id);
+          future.complete(response);
+          message.reply(response);
         } catch (Exception e) {
           log.error("Error while saving config", e);
           message.reply(e);
