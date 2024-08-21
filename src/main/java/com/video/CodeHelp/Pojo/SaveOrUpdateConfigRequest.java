@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SaveConfigRequest {
+public class SaveOrUpdateConfigRequest {
+  Long id;
   ConfigTypeEnum configType;
   String configKey;
   String configValue;

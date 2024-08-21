@@ -39,26 +39,38 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
       case WELCOME_API:
         eventBus.request(WELCOME_API.getEventPath(), body, messageAsyncResult -> {
           if (messageAsyncResult.succeeded()) {
-            promise.complete(messageAsyncResult);
             handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
           } else {
             promise.fail(messageAsyncResult.cause());
           }
         });
+        break;
       case CONFIG_SAVE_API:
         eventBus.request(CONFIG_SAVE_API.getEventPath(), body, messageAsyncResult -> {
           if (messageAsyncResult.succeeded()) {
-            promise.complete(messageAsyncResult);
             handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
           } else {
             promise.fail(messageAsyncResult.cause());
           }
         });
+        break;
+      case CONFIG_UPDATE_API:
+        eventBus.request(CONFIG_UPDATE_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
       case CONFIG_GET_API:
         eventBus.request(CONFIG_GET_API.getEventPath(), body, messageAsyncResult -> {
           if (messageAsyncResult.succeeded()) {
-            promise.complete(messageAsyncResult);
             handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
           } else {
             promise.fail(messageAsyncResult.cause());
           }
