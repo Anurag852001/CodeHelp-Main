@@ -30,20 +30,21 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
 
   @Override
   public void start() {
+
     EventBus eventBus = vertx.eventBus();
     log.info("Starting the admin verticle");
-    eventBus.consumer(ApiEnums.WELCOME_API.getEventPath(), handler -> {
+
+    eventBus.consumer(ApiEnums.WELCOME_API.getEventPath(), message -> {
       vertx.executeBlocking(future -> {
         try {
           JsonObject response = new JsonObject();
           response.put(DataConstants.SUCCESS, true);
           response.put(DataConstants.MESSAGE, "Welcome to code help!!");
           welcomeService.intoWelcomeService();
+          message.reply(response);
           future.complete(response);
-          handler.reply(response);
         } catch (Exception e) {
           log.error("Error while welcome api", e);
-          JsonObject responseFail = new JsonObject();
           future.fail(e);
         }
       });
@@ -79,8 +80,8 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
           response.put(DataConstants.SUCCESS, true);
           response.put(DataConstants.MESSAGE, "Config updated successfully");
           response.put(DataConstants.ID, id);
-          future.complete(response);
           message.reply(response);
+          future.complete(response);
         } catch (Exception e) {
           log.error("Error while saving config", e);
           message.reply(e);
