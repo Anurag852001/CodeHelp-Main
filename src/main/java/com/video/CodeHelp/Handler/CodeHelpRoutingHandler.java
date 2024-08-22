@@ -76,6 +76,16 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
           }
         });
         break;
+      case CACHE_GET_API:
+        eventBus.request(CACHE_GET_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
     }
   }
 

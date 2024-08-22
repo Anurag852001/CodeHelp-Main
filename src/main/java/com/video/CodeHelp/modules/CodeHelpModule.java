@@ -1,10 +1,13 @@
 package com.video.CodeHelp.modules;
 
 
+import com.github.benmanes.caffeine.cache.Cache;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.video.CodeHelp.Caffine.CaffineCacheFactory;
 import com.video.CodeHelp.Config.CodeHelpConfig;
 import com.video.CodeHelp.Dao.ConfigDao;
+import com.video.CodeHelp.Enums.CacheTTLS;
 import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.Service.WelcomeService;
@@ -90,7 +93,11 @@ public class CodeHelpModule extends AbstractModule {
     return new ConfigService(configDao);
   }
 
-
+  @Singleton
+  @Provides
+  public Cache<String,Object> providedCaffineCacheInstance(){
+    return CaffineCacheFactory.getCacheInstance(CacheTTLS.ONE_DAY_CACHE);
+  }
 
 
 

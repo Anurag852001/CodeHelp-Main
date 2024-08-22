@@ -1,7 +1,10 @@
 package com.video.CodeHelp.Verticles;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.video.CodeHelp.Caffine.CaffineCacheFactory;
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApiEnums;
+import com.video.CodeHelp.Enums.CacheTTLS;
 import com.video.CodeHelp.Pojo.Config;
 import com.video.CodeHelp.Pojo.SaveOrUpdateConfigRequest;
 import com.video.CodeHelp.Service.ConfigService;
@@ -110,6 +113,23 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
         );
       }
     );
+
+    eventBus.consumer(ApiEnums.CACHE_GET_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          JsonObject response = new JsonObject();
+          Cache<String,Object> cache = CaffineCacheFactory.getCacheInstance(CacheTTLS.ONE_DAY_CACHE);
+          response.put(DataConstants.DATA, CaffineCacheFactory.getAllDataInCache(cache));
+          message.reply(response);
+          future.complete(response);
+        } catch (Exception e) {
+          log.error("Error while saving config", e);
+          message.reply(e);
+          future.fail(e);
+        }
+      });
+    });
+
 
   }
 }
