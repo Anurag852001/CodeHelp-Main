@@ -9,4 +9,6 @@ public class DataConstants {
   public static final String DATA = "data";
   public static final String CONFIG_KEY = "configKey";
   public static final String CONFIG_TYPE = "configType";
+  public static final String CACHE_TYPE = "cacheType";
+  public static final String Q_NO = "qNo";
 }

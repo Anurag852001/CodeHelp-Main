@@ -7,9 +7,12 @@ import com.google.inject.Provides;
 import com.video.CodeHelp.Caffine.CaffineCacheFactory;
 import com.video.CodeHelp.Config.CodeHelpConfig;
 import com.video.CodeHelp.Dao.ConfigDao;
+import com.video.CodeHelp.Dao.QuestionDao;
 import com.video.CodeHelp.Enums.CacheTTLS;
 import com.video.CodeHelp.Exception.CodeHelpException;
+import com.video.CodeHelp.Service.CachingService;
 import com.video.CodeHelp.Service.ConfigService;
+import com.video.CodeHelp.Service.QuestionService;
 import com.video.CodeHelp.Service.WelcomeService;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -85,6 +88,23 @@ public class CodeHelpModule extends AbstractModule {
       log.error("Error while initializing CodeHelpConfigDao",e);
       throw new CodeHelpException(ReplyFailure.ERROR,"Error while initializing CodeHelpConfigDao");
     }
+  }
+
+  @Provides
+  @Singleton
+  public QuestionDao providesQuestionDao(Jdbi jdbi){
+    try{
+      return jdbi.onDemand(QuestionDao.class);
+    } catch (Exception e){
+      log.error("Error while initializing CodeHelpConfigDao",e);
+      throw new CodeHelpException(ReplyFailure.ERROR,"Error while initializing CodeHelpConfigDao");
+    }
+  }
+
+  @Provides
+  @Singleton
+  public QuestionService providesQuestionService(CachingService cachingService, QuestionDao questionDao){
+    return new QuestionService(questionDao,cachingService);
   }
 
   @Singleton

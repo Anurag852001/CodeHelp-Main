@@ -16,7 +16,15 @@ public enum ApiEnums {
   CONFIG_UPDATE_API("/update/config", "updateConfig"),
 
   //cache get api
-  CACHE_GET_API("/get/cache", "cacheGet");
+  CACHE_GET_API("/get/cache", "cacheGet"),
+
+
+  //Question apis
+  QUESTION_LIST_API("/list/questions", "questionList"),
+  QUESTION_GET_API("/get/question", "questionGet"),
+  QUESTION_SAVE_API("/save/question", "questionSave"),
+  QUESTION_UPDATE_API("/update/question", "questionUpdate"),
+  QUESTION_DELETE_API("/delete/question", "questionDelete");
 
   String apiKey;
   String eventPath;

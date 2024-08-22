@@ -35,6 +35,7 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
     log.info("Recieved request for api :{}", routingContext.currentRoute().getPath());
     ApiEnums api = ApiEnums.fromValue(routingContext.currentRoute().getPath());
     JsonObject body = routingContext.getBodyAsJson();
+    attachHeaders(routingContext,body);
     switch (api) {
       case WELCOME_API:
         eventBus.request(WELCOME_API.getEventPath(), body, messageAsyncResult -> {
@@ -86,10 +87,24 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
           }
         });
         break;
+      case QUESTION_GET_API:s:
+        eventBus.request(QUESTION_GET_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
     }
   }
 
   private void handleSuccessResponse(RoutingContext routingContext, AsyncResult<io.vertx.core.eventbus.Message<Object>> res) {
     routingContext.response().setStatusCode(200).end(res.result().body().toString());
+  }
+
+  private void attachHeaders(RoutingContext routingContext,JsonObject jsonObject) {
+      JsonObject header = routingContext;
   }
 }
