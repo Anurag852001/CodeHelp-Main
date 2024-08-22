@@ -33,6 +33,12 @@ public class CodeHelpRouter extends AbstractVerticle {
       router.get(ApiEnums.WELCOME_API.getApiKey())
         .handler(codeHelpRoutingHandler);
 
+      router.get(ApiEnums.CACHE_GET_API.getApiKey())
+        .handler(codeHelpRoutingHandler);
+
+      router.get(ApiEnums.QUESTION_GET_API.getApiKey())
+        .handler(codeHelpRoutingHandler);
+
       router.post(ApiEnums.CONFIG_SAVE_API.getApiKey())
         .produces(DataConstants.APPLICATION_JSON)
         .consumes(DataConstants.APPLICATION_JSON)
