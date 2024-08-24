@@ -11,8 +11,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CompleteQuestionResponse {
-  private QuestionBodyResponse questionBodyResponse;
-  private QuestionsConstraintsResponse questionsConstraintsResponse;
-  private QuestionsExamplesResponse questionsExamplesResponse;
+public class QuestionExamples {
+  private String exampleName;
+  private String exampleInput;
+  private String exampleOutput;
+  private String explanation;
 }

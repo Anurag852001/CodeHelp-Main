@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class QuestionBodyResponse {
+public class QuestionBody {
   private String questionHeading;
   private String difficulty;
   private String description;

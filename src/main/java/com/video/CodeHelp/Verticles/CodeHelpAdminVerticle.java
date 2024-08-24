@@ -1,13 +1,12 @@
 package com.video.CodeHelp.Verticles;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import com.video.CodeHelp.Caffine.CaffineCacheFactory;
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApiEnums;
-import com.video.CodeHelp.Enums.CacheTTLS;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
-import com.video.CodeHelp.Pojo.CompleteQuestionResponse;
+import com.video.CodeHelp.Pojo.CompleteQuestion;
 import com.video.CodeHelp.Pojo.Config;
+import com.video.CodeHelp.Pojo.Responses.SaveQuestionResponse;
 import com.video.CodeHelp.Pojo.SaveOrUpdateConfigRequest;
 import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.Service.QuestionService;
@@ -140,12 +139,31 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
       vertx.executeBlocking(future -> {
         try {
           JsonObject body = new JsonObject(message.body().toString());
-          Long qNo = body.getLong(DataConstants.Q_NO);
-          CompleteQuestionResponse completeQuestionResponse = questionService.getQuestion(qNo);
+          Long qNo = Long.parseLong(body.getString(DataConstants.Q_NO));
+          CompleteQuestion completeQuestion = questionService.getQuestion(qNo);
           JsonObject response = new JsonObject();
           response.put(DataConstants.SUCCESS, true);
           response.put(DataConstants.MESSAGE, "Question fetched successfully");
-          response.put(DataConstants.DATA, JsonObject.mapFrom(completeQuestionResponse));
+          response.put(DataConstants.DATA, JsonObject.mapFrom(completeQuestion));
+          message.reply(response);
+          future.complete(response);
+        } catch (Exception e) {
+          log.error("Error while saving config", e);
+          message.reply(e);
+          future.fail(e);
+        }
+      });
+    });
+
+    eventBus.consumer(ApiEnums.QUESTION_SAVE_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          JsonObject body = new JsonObject(message.body().toString());
+          SaveQuestionResponse saveQuestionResponse = questionService.saveQuestion(body.mapTo(CompleteQuestion.class));
+          JsonObject response = new JsonObject();
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, "Question saved successfully");
+          response.put(DataConstants.DATA, JsonObject.mapFrom(saveQuestionResponse));
           message.reply(response);
           future.complete(response);
         } catch (Exception e) {

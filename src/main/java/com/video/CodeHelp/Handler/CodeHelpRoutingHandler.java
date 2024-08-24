@@ -35,7 +35,8 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
     log.info("Recieved request for api :{}", routingContext.currentRoute().getPath());
     ApiEnums api = ApiEnums.fromValue(routingContext.currentRoute().getPath());
     JsonObject body = routingContext.getBodyAsJson();
-    attachHeaders(routingContext,body);
+    if(body == null) body = new JsonObject();
+    attachHeadersAndParams(routingContext,body);
     switch (api) {
       case WELCOME_API:
         eventBus.request(WELCOME_API.getEventPath(), body, messageAsyncResult -> {
@@ -97,6 +98,17 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
           }
         });
         break;
+
+      case QUESTION_SAVE_API:_API:s:
+      eventBus.request(QUESTION_SAVE_API.getEventPath(), body, messageAsyncResult -> {
+        if (messageAsyncResult.succeeded()) {
+          handleSuccessResponse(routingContext, messageAsyncResult);
+          promise.complete(messageAsyncResult);
+        } else {
+          promise.fail(messageAsyncResult.cause());
+        }
+      });
+        break;
     }
   }
 
@@ -104,7 +116,11 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
     routingContext.response().setStatusCode(200).end(res.result().body().toString());
   }
 
-  private void attachHeaders(RoutingContext routingContext,JsonObject jsonObject) {
-      JsonObject header = routingContext;
+  private void attachHeadersAndParams(RoutingContext routingContext,JsonObject jsonObject) {
+    if(routingContext.request().params()!=null && !routingContext.request().params().isEmpty()) {
+      routingContext.request().params().forEach(param -> {
+        jsonObject.put(param.getKey(), param.getValue());
+      });
+    }
   }
 }
