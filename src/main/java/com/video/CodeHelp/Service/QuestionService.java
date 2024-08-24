@@ -16,6 +16,7 @@ import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -42,14 +43,14 @@ public class QuestionService {
         cachingService.populateInCache(questionBodyCacheKey, questionBody, CacheTypeEnums.ONE_DAY_COMMON_CACHE);
         log.info("fetched question body from db and cached with key:{}", questionBodyCacheKey);
       }
-      List<QuestionExamples> questionExamples = (List<QuestionExamples>) cachingService.getFromCache(CachingUtils.getCacheKeyForQuestionBody(qNo), CacheTypeEnums.ONE_DAY_COMMON_CACHE);
-      if (CollectionUtils.isNotEmpty(questionExamples)) {
+      List<QuestionExamples> questionExamples  = (List<QuestionExamples>) cachingService.getFromCache(CachingUtils.getCacheKeyForQuestionExamples(qNo), CacheTypeEnums.ONE_DAY_COMMON_CACHE);
+      if (CollectionUtils.isEmpty(questionExamples)) {
         questionExamples = questionDao.getQuestionExamplesResponse(qNo);
         cachingService.populateInCache(questionExamplesCacheKey, questionExamples, CacheTypeEnums.ONE_DAY_COMMON_CACHE);
         log.info("fetched questions examples from db and cached with key:{}", questionBodyCacheKey);
       }
-      List<QuestionConstraints> questionConstraints = (List<QuestionConstraints>) cachingService.getFromCache(CachingUtils.getCacheKeyForQuestionBody(qNo), CacheTypeEnums.ONE_DAY_COMMON_CACHE);
-      if (CollectionUtils.isNotEmpty(questionConstraints)) {
+      List<QuestionConstraints> questionConstraints = (List<QuestionConstraints>) cachingService.getFromCache(CachingUtils.getCacheKeyForQuestionConstraints(qNo), CacheTypeEnums.ONE_DAY_COMMON_CACHE);
+      if (CollectionUtils.isEmpty(questionConstraints)) {
         questionConstraints = questionDao.getQuestionConstraintsResponse(qNo);
         cachingService.populateInCache(questionConstraintsCacheKey, questionConstraints, CacheTypeEnums.ONE_DAY_COMMON_CACHE);
         log.info("fetched questions constraints from db and cached with key:{}", questionBodyCacheKey);

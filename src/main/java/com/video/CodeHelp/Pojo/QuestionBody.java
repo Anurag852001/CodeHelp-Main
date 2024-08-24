@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class QuestionBody {
+  private String id;
   private String questionHeading;
   private String difficulty;
   private String description;
