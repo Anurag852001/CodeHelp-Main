@@ -19,9 +19,8 @@ public class CompilerFactory {
   }
 
 
-  public ICompilerService getCompiler(String language) {
-    CompilerTypeEnums type = CompilerTypeEnums.getFromLanguage(language);
-    switch (type) {
+  public ICompilerService getCompiler(CompilerTypeEnums compilerType) {
+    switch (compilerType) {
       case CPP:
         return cppCompilerService;
       case JAVA:

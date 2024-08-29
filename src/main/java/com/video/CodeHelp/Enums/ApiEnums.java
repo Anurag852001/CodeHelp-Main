@@ -24,8 +24,11 @@ public enum ApiEnums {
   QUESTION_GET_API("/get/question", "questionGet"),
   QUESTION_SAVE_API("/save/question", "questionSave"),
   QUESTION_UPDATE_API("/update/question", "questionUpdate"),
-  QUESTION_DELETE_API("/delete/question", "questionDelete");
+  QUESTION_DELETE_API("/delete/question", "questionDelete"),
 
+
+  //Compiler apis
+  COMPILE_CODE_API("/compile/code","compileCode");
   String apiKey;
   String eventPath;
 
