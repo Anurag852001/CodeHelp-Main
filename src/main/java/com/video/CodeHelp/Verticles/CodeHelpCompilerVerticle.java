@@ -33,17 +33,24 @@ public class CodeHelpCompilerVerticle extends AbstractVerticle {
 
     eventBus.consumer(ApiEnums.COMPILE_CODE_API.getEventPath(),message->{
       vertx.executeBlocking(future->{
-        CodeCompilingRequest request = new ObjectMapper().convertValue(message.body(), CodeCompilingRequest.class);
-        log.info("Recevied request for code compiling:{}",request);
-         String result =  compilerFactory.getCompiler(request.getCompilerType()).compileCode(request.getCode());
-        JsonObject response = new JsonObject();
-        response.put(DataConstants.SUCCESS,true);
-        response.put(DataConstants.MESSAGE,DataConstants.SUCCESS);
-        response.put(DataConstants.DATA, result);
-        future.complete(response);
-        message.reply(response);
+        try {
+          CodeCompilingRequest request = new JsonObject(message.body().toString()).mapTo(CodeCompilingRequest.class);
+          log.info("Recevied request for code compiling:{}", request);
+          String result = compilerFactory.getCompiler(request.getCompilerType()).compileCode(request.getCode());
+          JsonObject response = new JsonObject();
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, DataConstants.SUCCESS);
+          response.put(DataConstants.DATA, result);
+          future.complete(response);
+          message.reply(response);
+        } catch (Exception e){
+          log.error("Error while compiling code", e);
+          message.reply(e);
+          future.fail(e);
+        }
       });
       }
+
     );
 
     log.info("CodeHelpCompilerVerticle Deployed Successfully");

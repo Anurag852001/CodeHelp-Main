@@ -99,7 +99,7 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
         });
         break;
 
-      case QUESTION_SAVE_API:_API:s:
+      case QUESTION_SAVE_API:
       eventBus.request(QUESTION_SAVE_API.getEventPath(), body, messageAsyncResult -> {
         if (messageAsyncResult.succeeded()) {
           handleSuccessResponse(routingContext, messageAsyncResult);
@@ -109,6 +109,19 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
         }
       });
         break;
+
+      case COMPILE_CODE_API:
+      eventBus.request(COMPILE_CODE_API.getEventPath(), body, messageAsyncResult -> {
+        if (messageAsyncResult.succeeded()) {
+          handleSuccessResponse(routingContext, messageAsyncResult);
+          promise.complete(messageAsyncResult);
+        } else {
+          promise.fail(messageAsyncResult.cause());
+        }
+      });
+        break;
+
+
     }
   }
 
