@@ -6,6 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.inject.Inject;
@@ -120,10 +121,22 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
         }
       });
         break;
+      case GET_DEFAULT_CODE:
+        eventBus.request(GET_DEFAULT_CODE.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
+
 
 
     }
   }
+
 
   private void handleSuccessResponse(RoutingContext routingContext, AsyncResult<io.vertx.core.eventbus.Message<Object>> res) {
     routingContext.response().setStatusCode(200).end(res.result().body().toString());

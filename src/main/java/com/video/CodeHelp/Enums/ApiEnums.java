@@ -28,7 +28,8 @@ public enum ApiEnums {
 
 
   //Compiler apis
-  COMPILE_CODE_API("/compile/code","compileCode");
+  COMPILE_CODE_API("/compile/code","compileCode"),
+  GET_DEFAULT_CODE("/get/default/code", "defaultCode");
   String apiKey;
   String eventPath;
 

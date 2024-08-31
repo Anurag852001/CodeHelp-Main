@@ -73,14 +73,24 @@ public class JavaCompilerService implements ICompilerService{
     }
   }
 
-  // Method to automatically wrap the code if it's just a snippet
+
   private String wrapCode(String code) {
+    // Check if the code already has a class declaration
     if (code.contains("class ")) {
       return code; // Return as-is if it seems to be a complete class
     }
 
+    // Common Java imports for the wrapped code
+    String imports = String.join("\n",
+      "import java.util.*;",      // Collections classes
+      "import java.io.*;",        // Input/Output classes
+      "import java.math.*;",      // Math-related classes
+      "import java.util.stream.*;" // Stream API classes
+    );
+
     // Wrap the code snippet in a class and a main method
-    return "public class Solution {\n" +
+    return imports + "\n\n" +
+      "public class Solution {\n" +
       "    public static void main(String[] args) {\n" +
       "        " + code + "\n" +
       "    }\n" +
