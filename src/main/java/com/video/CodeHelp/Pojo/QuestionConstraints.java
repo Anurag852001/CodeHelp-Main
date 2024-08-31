@@ -1,5 +1,6 @@
 package com.video.CodeHelp.Pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,10 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class QuestionBodyResponse {
-  private String questionHeading;
-  private String difficulty;
-  private String description;
-  private Long likes;
-  private Long dislikes;
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class QuestionConstraints {
+  private String constraintDescription;
 }

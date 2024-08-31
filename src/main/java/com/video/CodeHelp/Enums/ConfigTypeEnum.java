@@ -6,5 +6,5 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ConfigTypeEnum {
-  WELCOME_CONFIG;
+  WELCOME_CONFIG,WRAPPER_CONFIG;
 }

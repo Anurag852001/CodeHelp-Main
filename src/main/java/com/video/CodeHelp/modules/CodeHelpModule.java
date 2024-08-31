@@ -6,12 +6,14 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.video.CodeHelp.Caffine.CaffineCacheFactory;
 import com.video.CodeHelp.Config.CodeHelpConfig;
+import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Dao.ConfigDao;
 import com.video.CodeHelp.Dao.QuestionDao;
 import com.video.CodeHelp.Enums.CacheTTLS;
 import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Service.CachingService;
 import com.video.CodeHelp.Service.ConfigService;
+import com.video.CodeHelp.Service.Factory.CompilerFactory.*;
 import com.video.CodeHelp.Service.QuestionService;
 import com.video.CodeHelp.Service.WelcomeService;
 import io.vertx.core.Vertx;
@@ -19,7 +21,10 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.shareddata.SharedData;
+import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import jdk.jfr.Name;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.jdbi.v3.core.Jdbi;
@@ -119,6 +124,30 @@ public class CodeHelpModule extends AbstractModule {
     return CaffineCacheFactory.getCacheInstance(CacheTTLS.ONE_DAY_CACHE);
   }
 
+  @Singleton
+  @Provides
+  @Named(DataConstants.JAVA_COMPILER_SERVICE)
+  public ICompilerService providesJavaCompilerService(){
+    return new JavaCompilerService();
+  }
 
+  @Singleton
+  @Provides
+  @Named(DataConstants.CPP_COMPILER_SERVICE)
+  public ICompilerService providesCppCompilerService(){
+    return new CppCompilerService();
+  }
 
+  @Singleton
+  @Provides
+  @Named(DataConstants.PYTHON_COMPILER_SERVICE)
+  public ICompilerService providesPythonCompilerService(){
+    return new PythonCompilerService();
+  }
+
+  @Singleton
+  @Provides
+  public CompilerFactory providesCompilerFactory(@Named(DataConstants.JAVA_COMPILER_SERVICE) ICompilerService javaCompilerService,@Named(DataConstants.CPP_COMPILER_SERVICE) ICompilerService cppCompilerService, @Named(DataConstants.PYTHON_COMPILER_SERVICE) ICompilerService pythonCompilerService){
+    return new CompilerFactory(cppCompilerService,javaCompilerService, pythonCompilerService);
+  }
 }

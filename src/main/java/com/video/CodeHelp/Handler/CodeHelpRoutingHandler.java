@@ -6,6 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.inject.Inject;
@@ -35,7 +36,8 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
     log.info("Recieved request for api :{}", routingContext.currentRoute().getPath());
     ApiEnums api = ApiEnums.fromValue(routingContext.currentRoute().getPath());
     JsonObject body = routingContext.getBodyAsJson();
-    attachHeaders(routingContext,body);
+    if(body == null) body = new JsonObject();
+    attachHeadersAndParams(routingContext,body);
     switch (api) {
       case WELCOME_API:
         eventBus.request(WELCOME_API.getEventPath(), body, messageAsyncResult -> {
@@ -97,14 +99,54 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
           }
         });
         break;
+
+      case QUESTION_SAVE_API:
+      eventBus.request(QUESTION_SAVE_API.getEventPath(), body, messageAsyncResult -> {
+        if (messageAsyncResult.succeeded()) {
+          handleSuccessResponse(routingContext, messageAsyncResult);
+          promise.complete(messageAsyncResult);
+        } else {
+          promise.fail(messageAsyncResult.cause());
+        }
+      });
+        break;
+
+      case COMPILE_CODE_API:
+      eventBus.request(COMPILE_CODE_API.getEventPath(), body, messageAsyncResult -> {
+        if (messageAsyncResult.succeeded()) {
+          handleSuccessResponse(routingContext, messageAsyncResult);
+          promise.complete(messageAsyncResult);
+        } else {
+          promise.fail(messageAsyncResult.cause());
+        }
+      });
+        break;
+      case GET_DEFAULT_CODE:
+        eventBus.request(GET_DEFAULT_CODE.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
+
+
+
     }
   }
+
 
   private void handleSuccessResponse(RoutingContext routingContext, AsyncResult<io.vertx.core.eventbus.Message<Object>> res) {
     routingContext.response().setStatusCode(200).end(res.result().body().toString());
   }
 
-  private void attachHeaders(RoutingContext routingContext,JsonObject jsonObject) {
-      JsonObject header = routingContext;
+  private void attachHeadersAndParams(RoutingContext routingContext,JsonObject jsonObject) {
+    if(routingContext.request().params()!=null && !routingContext.request().params().isEmpty()) {
+      routingContext.request().params().forEach(param -> {
+        jsonObject.put(param.getKey(), param.getValue());
+      });
+    }
   }
 }

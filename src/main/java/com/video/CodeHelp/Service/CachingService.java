@@ -2,9 +2,9 @@ package com.video.CodeHelp.Service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.video.CodeHelp.Caffine.CaffineCacheFactory;
-import com.video.CodeHelp.Enums.CacheTTLS;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class CachingService {
@@ -24,6 +24,10 @@ public class CachingService {
   }
 
   public boolean populateInCache(String key, Object value, CacheTypeEnums cacheType) {
+    if(StringUtils.isEmpty(key) || value == null){
+      log.info("Key or value is null. Unable to populate cache.");
+      return false;
+    }
     try {
       switch (cacheType) {
         case ONE_DAY_COMMON_CACHE -> {

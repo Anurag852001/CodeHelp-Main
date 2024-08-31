@@ -7,10 +7,12 @@ import com.video.CodeHelp.Config.CodeHelpConfig;
 import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Guice.GuiceVerticleFactory;
 import com.video.CodeHelp.Verticles.CodeHelpAdminVerticle;
+import com.video.CodeHelp.Verticles.CodeHelpCompilerVerticle;
 import com.video.CodeHelp.Verticles.CodeHelpRouter;
 import com.video.CodeHelp.modules.CodeHelpModule;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.*;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
@@ -49,9 +51,11 @@ public class MainVerticle extends AbstractVerticle {
       log.info("Deploying verticles");
       DeploymentOptions codeHelpAdminDeploymentOptions = new DeploymentOptions().setWorker(true).setWorkerPoolSize(10);
       DeploymentOptions codeHelpRouterDeploymentOptions = new DeploymentOptions().setWorker(true).setWorkerPoolSize(10);
+      DeploymentOptions codeHelpCompilerDeploymentOptions = new DeploymentOptions().setWorker(false);
       CompletableFuture.runAsync(() -> {
         vertx.deployVerticle(injector.getInstance(CodeHelpAdminVerticle.class), codeHelpAdminDeploymentOptions);
         vertx.deployVerticle(injector.getInstance(CodeHelpRouter.class), codeHelpRouterDeploymentOptions);
+        vertx.deployVerticle(injector.getInstance(CodeHelpCompilerVerticle.class),codeHelpAdminDeploymentOptions);
       }).get();
       startPromise.complete();
     } catch (Exception e) {

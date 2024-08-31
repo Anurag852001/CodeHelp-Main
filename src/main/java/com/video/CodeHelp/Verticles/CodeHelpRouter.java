@@ -4,7 +4,6 @@ import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApiEnums;
 import com.video.CodeHelp.Handler.CodeHelpRoutingHandler;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -36,6 +35,9 @@ public class CodeHelpRouter extends AbstractVerticle {
       router.get(ApiEnums.CACHE_GET_API.getApiKey())
         .handler(codeHelpRoutingHandler);
 
+      router.get(ApiEnums.GET_DEFAULT_CODE.getApiKey())
+        .handler(codeHelpRoutingHandler);
+
       router.get(ApiEnums.QUESTION_GET_API.getApiKey())
         .handler(codeHelpRoutingHandler);
 
@@ -45,6 +47,14 @@ public class CodeHelpRouter extends AbstractVerticle {
         .handler(BodyHandler.create())
         .handler(codeHelpRoutingHandler);
 
+
+      router.post(ApiEnums.QUESTION_SAVE_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
+
       router.post(ApiEnums.CONFIG_UPDATE_API.getApiKey())
         .produces(DataConstants.APPLICATION_JSON)
         .consumes(DataConstants.APPLICATION_JSON)
@@ -53,6 +63,12 @@ public class CodeHelpRouter extends AbstractVerticle {
 
 
       router.post( ApiEnums.CONFIG_GET_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
+      router.post( ApiEnums.COMPILE_CODE_API.getApiKey())
         .produces(DataConstants.APPLICATION_JSON)
         .consumes(DataConstants.APPLICATION_JSON)
         .handler(BodyHandler.create())

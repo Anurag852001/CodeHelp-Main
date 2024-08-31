@@ -1,5 +1,6 @@
 {
   "PORT": 8000,
+  "environment": "dev",
   "mySqlConfig":{
     "username": "root",
     "password": "12345678",

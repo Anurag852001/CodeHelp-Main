@@ -11,4 +11,7 @@ public class DataConstants {
   public static final String CONFIG_TYPE = "configType";
   public static final String CACHE_TYPE = "cacheType";
   public static final String Q_NO = "qNo";
+  public static final String CPP_COMPILER_SERVICE = "cppCompilerService";
+  public static final String JAVA_COMPILER_SERVICE = "javaCompilerService";
+  public static final String PYTHON_COMPILER_SERVICE = "pythonCompilerService";
 }
