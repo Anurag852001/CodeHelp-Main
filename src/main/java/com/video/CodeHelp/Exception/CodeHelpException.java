@@ -1,5 +1,6 @@
 package com.video.CodeHelp.Exception;
 
+import com.video.CodeHelp.Enums.ApplicationErrorEnums;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.eventbus.ReplyFailure;
 
@@ -15,5 +16,9 @@ public class CodeHelpException extends ReplyException {
 
   public CodeHelpException(ReplyFailure failureType) {
     super(failureType);
+  }
+
+  public CodeHelpException(ApplicationErrorEnums applicationErrorEnum) {
+    super(ReplyFailure.ERROR,applicationErrorEnum.getErrorCode(),applicationErrorEnum.getMessage());
   }
 }

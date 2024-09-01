@@ -9,7 +9,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum CacheTypeEnums {
 
-  ONE_DAY_COMMON_CACHE(CacheTTLS.ONE_DAY_CACHE);
+  ONE_DAY_COMMON_CACHE(CacheTTLS.ONE_DAY_CACHE),
+  TWO_HUNDERED_CACHE(CacheTTLS.TWO_HUNDERED_DAYS_CAHCE);
 
 
   CacheTypeEnums(CacheTTLS cacheTTLS) {

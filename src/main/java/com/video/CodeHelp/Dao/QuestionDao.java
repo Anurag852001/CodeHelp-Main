@@ -1,9 +1,11 @@
 package com.video.CodeHelp.Dao;
 
+import com.video.CodeHelp.Enums.QuestionStatusEnums;
 import com.video.CodeHelp.Pojo.QuestionBody;
 import com.video.CodeHelp.Pojo.QuestionConstraints;
 import com.video.CodeHelp.Pojo.QuestionExamples;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
@@ -35,14 +37,19 @@ public interface QuestionDao {
   @GetGeneratedKeys("id")
   @SqlUpdate("Insert into questions_data(q_id,likes,dislikes,description)" +
     "values(:qId, :body.likes, :body.dislikes,:body.description)")
-  Long saveQuestionData(@Bind("qId") Long qId,@BindBean("body") QuestionBody body);
+  Long saveQuestionData(@Bind("qId") Long qId, @BindBean("body") QuestionBody body);
 
   @GetGeneratedKeys("id")
   @SqlUpdate("Insert into constraints(constraint_description,q_id) values(:constraint.constraintDescription, :qId)")
-  Long saveConstraints( @Bind("qId") Long qId,@BindBean("constraint") QuestionConstraints constraint);
+  Long saveConstraints(@Bind("qId") Long qId, @BindBean("constraint") QuestionConstraints constraint);
 
   @GetGeneratedKeys("id")
   @SqlUpdate("Insert into question_examples(q_id,example_name,example_input,example_output,explanation) values(:qId,:example.exampleName, :example.exampleInput,:example.exampleOutput,:example.explanation)")
   Long saveExamples(@Bind("qId") Long qId, @BindBean("example") QuestionExamples example);
+
+  @RegisterBeanMapper(List.class)
+  @SqlQuery("Select id from questions where status = :status")
+  List<Long> getQuestionIdsByStatus(@Bind("status") QuestionStatusEnums status);
+
 
 }
