@@ -13,6 +13,7 @@ import com.video.CodeHelp.Service.CachePopulationService.pojo.DefaultCodeCachePo
 import io.vertx.core.eventbus.ReplyFailure;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -33,11 +34,14 @@ public class DefaultCodeCachePopulationService extends ICachePopulationService {
     try {
       log.info("Populating Default Code Cache Started...");
       List<DefaultCodeCachePopulationPojo> defaultCodeCachePopulationPojos = defaultCodeDao.getDefaultCodeCachePojoByQIds(qIds);
-      for (DefaultCodeCachePopulationPojo defaultCodeCachePopulationPojo : defaultCodeCachePopulationPojos) {
-        String cacheKey = getCacheKey(defaultCodeCachePopulationPojo.getQId(), CachePopulationTypes.DEFAULT_CODE_CACHE);
-        twoHunderedDayCache.put(cacheKey, defaultCodeCachePopulationPojo);
-      }
-      log.info("Populating Default Code Cache Completed...");
+     if(CollectionUtils.isNotEmpty(defaultCodeCachePopulationPojos)) {
+       defaultCodeCachePopulationPojos.parallelStream()
+         .forEach(defaultCodeCachePopulationPojo -> {
+           String cacheKey = getCacheKey(defaultCodeCachePopulationPojo.getQId(), CachePopulationTypes.DEFAULT_CODE_CACHE);
+           twoHunderedDayCache.put(cacheKey, defaultCodeCachePopulationPojo);
+         });
+     }
+      log.info("Populating Default Code Cache Completed...with ids:{}",qIds);
     } catch (Exception e) {
       log.error("Error while populating Default Code Cache", e);
       throw new CodeHelpException(ApplicationErrorEnums.ERROR_IN_POPULATING_CACHE);

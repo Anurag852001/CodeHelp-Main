@@ -29,7 +29,16 @@ public enum ApiEnums {
 
   //Compiler apis
   COMPILE_CODE_API("/compile/code","compileCode"),
-  GET_DEFAULT_CODE("/get/default/code", "defaultCode");
+  GET_DEFAULT_CODE("/get/default/code", "defaultCode"),
+  SAVE_DEFAULT_CODE("/save/default/code", "defaultCode"),
+
+
+  //testcases api
+  TESTCASE_LIST_API("/list/testcases", "testCaseList"),
+  TESTCASE_GET_API("/get/testcase", "testCaseGet"),
+  TESTCASE_SAVE_API("/save/testcase", "testCaseSave"),
+  TESTCASE_UPDATE_API("/update/testcase", "testCaseUpdate");
+
   String apiKey;
   String eventPath;
 

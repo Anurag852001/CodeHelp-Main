@@ -17,4 +17,9 @@ public class DataConstants {
   public static final String UNDERSCORE = "_";
   public static final String DEFAULT_CODE_CACHE_POPULATION_SERVICE = "DEFAULT_CODE_CACHING_SERVICE";
   public static final String MAIN_CODE_CACHE_POPULATION_SERVICE = "MAIN_CODE_CACHING_SERVICE";
+  public static final String MAIN_CODE_WRAPPER_SERVICE = "MAIN_CODE_WRAPPER_SERVICE";
+  public static final String DEFAULT_CODE_WRAPPER_SERVICE = "DEFAULT_CODE_WRAPPER_SERVICE";
+  public static final String WRAPPER_CONFIG_JAVA_1 = "WRAPPER_CONFIG_JAVA_1";
+  public static final String WRAPPER_CONFIG_JAVA_2 = "WRAPPER_CONFIG_JAVA_2";
+  public static final String WRAPPER_CONFIG_JAVA_3 = "WRAPPER_CONFIG_JAVA_3";
 }

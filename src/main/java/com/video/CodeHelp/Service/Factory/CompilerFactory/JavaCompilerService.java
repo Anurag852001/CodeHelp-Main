@@ -1,99 +1,122 @@
 package com.video.CodeHelp.Service.Factory.CompilerFactory;
 
+import com.video.CodeHelp.Constants.DataConstants;
+import com.video.CodeHelp.Enums.ApplicationErrorEnums;
+import com.video.CodeHelp.Enums.ConfigTypeEnum;
+import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Pojo.JavaSourceFromString;
+import com.video.CodeHelp.Service.ConfigService;
+import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.WrapperFactory;
+import jakarta.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.tools.*;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.PrintStream;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 public class JavaCompilerService implements ICompilerService{
+
+  private WrapperFactory wrapperFactory;
+  private ConfigService configService;
+
+  @Inject
+  public JavaCompilerService(WrapperFactory wrapperFactory,ConfigService configService){
+    this.wrapperFactory = wrapperFactory;
+    this.configService = configService;
+  }
+
+
+
   @Override
   public String compileCode(String codeSnippet) {
     JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    PrintStream printStream = new PrintStream(outputStream);
+    ByteArrayOutputStream compileOutput = new ByteArrayOutputStream();
+    ByteArrayOutputStream executionOutput = new ByteArrayOutputStream();
 
-    // Redirect System.out and System.err to capture output and errors
-    PrintStream originalOut = System.out;
-    PrintStream originalErr = System.err;
-    System.setOut(printStream);
-    System.setErr(printStream);
 
-    // Create a temporary directory to store compiled classes
-    File tempDir = new File(System.getProperty("java.io.tmpdir"), "dynamic_classes");
-    tempDir.mkdirs();
+    Writer compileWriter = new OutputStreamWriter(compileOutput);
+    PrintStream executionPrintStream = new PrintStream(executionOutput);
 
-    // Wrap the code snippet inside a class
-    String wrappedCode = wrapCode(codeSnippet);
 
-    String className = "Solution"; // Class name used for the compiled code
+    String wrappedCode = wrapCode(codeSnippet, new ArrayList<>());
+    String className = "Solution";
     JavaFileObject javaFile = new JavaSourceFromString(className, wrappedCode);
 
-    // Set up the file manager to place compiled classes into the temporary directory
     try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null)) {
-      fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singletonList(tempDir));
+      // Set class output location to in-memory ByteArray instead of disk
+      fileManager.setLocation(StandardLocation.CLASS_OUTPUT, List.of(new File(System.getProperty("java.io.tmpdir"))));
 
-      // Compile the source code
-      boolean success = compiler.getTask(null, fileManager, null,
+      // Set up a diagnostic listener to capture compiler diagnostics directly
+      DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+      boolean success = compiler.getTask(compileWriter, fileManager, diagnostics,
         List.of("-proc:none", "-Xlint:-options"), // Suppress annotation processing warnings
-        null, Collections.singletonList(javaFile)).call();
+        null, List.of(javaFile)).call();
 
-      String result;
-      if (success) {
-        try {
-          // Load the compiled class using URLClassLoader from the temporary directory
-          URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{tempDir.toURI().toURL()});
-          Class<?> compiledClass = classLoader.loadClass(className);
+      compileWriter.flush(); // Flush the writer to capture compilation output
 
-          // Find and invoke the main method of the compiled class
-          Method mainMethod = compiledClass.getDeclaredMethod("main", String[].class);
-          mainMethod.invoke(null, (Object) new String[]{}); // Pass an empty array to main
-
-          result = outputStream.toString(); // Capture the output from System.out
-        } catch (Exception e) {
-          result = "Error executing code: " + e.toString();
-        }
-      } else {
-        result = "Compilation failed: \n" + outputStream.toString();
+      // Check compilation success and handle errors directly from diagnostics
+      if (!success) {
+        return "Compilation failed:\n" + diagnostics.getDiagnostics().stream()
+          .map(d -> d.getMessage(null))
+          .collect(Collectors.joining("\n"));
       }
 
-      // Reset System.out and System.err back to the original
-      System.setOut(originalOut);
-      System.setErr(originalErr);
+      // Load the compiled class and run its main method
+      try (URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{new File(System.getProperty("java.io.tmpdir")).toURI().toURL()})) {
+        // Redirect output streams to capture execution output separately
+        PrintStream originalOut = System.out;
+        PrintStream originalErr = System.err;
+        System.setOut(executionPrintStream);
+        System.setErr(executionPrintStream);
 
-      return result;
+        // Execute the main method
+        classLoader.loadClass(className).getDeclaredMethod("main", String[].class).invoke(null, (Object) new String[]{});
+
+        // Restore the original System.out and System.err
+        System.setOut(originalOut);
+        System.setErr(originalErr);
+
+        return executionOutput.toString(); // Return the execution output
+      } catch (Exception e) {
+        return "Error executing code: " + e.toString();
+      }
     } catch (Exception e) {
-      return "Error setting up file manager: " + e.toString();
+      log.error("Error executing code " ,e);
+      throw new CodeHelpException(ApplicationErrorEnums.CODE_COMPILING_ERROR);
     }
   }
 
 
-  private String wrapCode(String code) {
-    // Check if the code already has a class declaration
-    if (code.contains("class ")) {
-      return code; // Return as-is if it seems to be a complete class
+  private String wrapCode(String code,List<String> inputs) {
+    //firstly we will start with the basic code from config
+    Long startTime = System.currentTimeMillis();
+    String basicCode1 = configService.getCodeHelpConfig(DataConstants.WRAPPER_CONFIG_JAVA_1,ConfigTypeEnum.WRAPPER_CONFIG.name()).getConfigValue();
+    String basicCode2 = configService.getCodeHelpConfig(DataConstants.WRAPPER_CONFIG_JAVA_2,ConfigTypeEnum.WRAPPER_CONFIG.name()).getConfigValue();
+    String basicCode3 = configService.getCodeHelpConfig(DataConstants.WRAPPER_CONFIG_JAVA_3,ConfigTypeEnum.WRAPPER_CONFIG.name()).getConfigValue();
+
+    StringBuilder stringBuilder = new StringBuilder();
+    attachCode(stringBuilder,basicCode1);
+    attachCode(stringBuilder,basicCode2);
+    attachCode(stringBuilder,code);
+    attachCode(stringBuilder,basicCode3);
+    log.info("Time took to wrap code : {}",System.currentTimeMillis()-startTime);
+    return stringBuilder.toString();
+
+  }
+
+  public void attachCode(StringBuilder stringBuilder, String code) {
+
+    String[] lines = code.split("\n");
+    for (String line : lines) {
+      stringBuilder.append(line).append(System.lineSeparator());
     }
-
-    // Common Java imports for the wrapped code
-    String imports = String.join("\n",
-      "import java.util.*;",      // Collections classes
-      "import java.io.*;",        // Input/Output classes
-      "import java.math.*;",      // Math-related classes
-      "import java.util.stream.*;" // Stream API classes
-    );
-
-    // Wrap the code snippet in a class and a main method
-    return imports + "\n\n" +
-      "public class Solution {\n" +
-      "    public static void main(String[] args) {\n" +
-      "        " + code + "\n" +
-      "    }\n" +
-      "}";
   }
 }

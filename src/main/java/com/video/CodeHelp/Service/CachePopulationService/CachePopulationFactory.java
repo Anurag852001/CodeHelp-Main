@@ -7,12 +7,15 @@ import com.video.CodeHelp.Service.CachePopulationService.enums.CachePopulationTy
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jdk.jfr.Name;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import javax.xml.crypto.Data;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class CachePopulationFactory {
   QuestionDao questionDao;
   Map<CachePopulationTypes,ICachePopulationService> cachePopulationServiceMap = new HashMap<>();
@@ -29,6 +32,10 @@ public class CachePopulationFactory {
 
  public void populateAllCaches(List<CachePopulationTypes> cachePopulationTypesList){
       List<Long> qIds = questionDao.getQuestionIdsByStatus(QuestionStatusEnums.ACTIVE);
+      if(CollectionUtils.isEmpty(qIds)){
+        log.info("No ids to populate");
+        return;
+      }
       cachePopulationTypesList.parallelStream().forEach(type->cachePopulationServiceMap.get(type).populateCache(qIds));
   }
 

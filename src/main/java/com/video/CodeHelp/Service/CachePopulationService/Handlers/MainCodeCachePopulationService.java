@@ -38,6 +38,7 @@ public class MainCodeCachePopulationService extends ICachePopulationService {
           }
         );
       }
+      log.info("Populated main code cache successfully with qIds : {}", qIds);
     } catch (Exception e) {
       log.error("Error while populating main code cache", e);
       throw new CodeHelpException(ApplicationErrorEnums.ERROR_IN_POPULATING_CACHE);

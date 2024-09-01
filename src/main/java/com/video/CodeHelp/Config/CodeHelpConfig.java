@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CodeHelpConfig {
-  public Integer port;
+  public Long port;
   public String environment;
   public MySqlConfig mySqlConfig;
   public List<CachePopulationTypes> cachePopulationTypes;

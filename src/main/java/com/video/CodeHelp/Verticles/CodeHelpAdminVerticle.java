@@ -184,6 +184,25 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
       });
     });
 
+    eventBus.consumer(ApiEnums.GET_DEFAULT_CODE.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          JsonObject body = new JsonObject(message.body().toString());
+          SaveQuestionResponse saveQuestionResponse = questionService.saveQuestion(body.mapTo(CompleteQuestion.class));
+          JsonObject response = new JsonObject();
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, "Question saved successfully");
+          response.put(DataConstants.DATA, JsonObject.mapFrom(saveQuestionResponse));
+          message.reply(response);
+          future.complete(response);
+        } catch (Exception e) {
+          log.error("Error while saving config", e);
+          message.reply(e);
+          future.fail(e);
+        }
+      });
+    });
+
 
   }
 }

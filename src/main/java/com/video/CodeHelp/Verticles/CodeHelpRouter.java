@@ -78,7 +78,7 @@ public class CodeHelpRouter extends AbstractVerticle {
         .handler(codeHelpRoutingHandler);
 
 
-      server.requestHandler(router).listen(codeHelpConfig.getPort());
+      server.requestHandler(router).listen(codeHelpConfig.getPort().intValue());
     } catch (Exception e) {
       log.error("error occured while starting the server", e);
       throw e;
