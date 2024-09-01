@@ -15,5 +15,6 @@ public class DataConstants {
   public static final String JAVA_COMPILER_SERVICE = "javaCompilerService";
   public static final String PYTHON_COMPILER_SERVICE = "pythonCompilerService";
   public static final String UNDERSCORE = "_";
-  public static final String DEFAULT_CODE_CACHE = "DEFAULT_CODE_CACHE";
+  public static final String DEFAULT_CODE_CACHE_POPULATION_SERVICE = "DEFAULT_CODE_CACHING_SERVICE";
+  public static final String MAIN_CODE_CACHE_POPULATION_SERVICE = "MAIN_CODE_CACHING_SERVICE";
 }

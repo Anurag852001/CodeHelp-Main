@@ -3,6 +3,7 @@ package com.video.CodeHelp.Service.CachePopulationService.Handlers;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Dao.DefaultCodeDao;
+import com.video.CodeHelp.Enums.ApplicationErrorEnums;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
 import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Service.CachePopulationService.ICachePopulationService;
@@ -17,7 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 @Slf4j
-public class DefaultCodeCachePopulationService implements ICachePopulationService {
+public class DefaultCodeCachePopulationService extends ICachePopulationService {
 
   Cache<String,Object> twoHunderedDayCache = CacheTypeEnums.TWO_HUNDERED_CACHE.getCache();
   DefaultCodeDao defaultCodeDao;
@@ -39,7 +40,7 @@ public class DefaultCodeCachePopulationService implements ICachePopulationServic
       log.info("Populating Default Code Cache Completed...");
     } catch (Exception e) {
       log.error("Error while populating Default Code Cache", e);
-      throw new CodeHelpException(ReplyFailure.ERROR,"Error while populating Default Code Cache");
+      throw new CodeHelpException(ApplicationErrorEnums.ERROR_IN_POPULATING_CACHE);
     }
   }
 }
