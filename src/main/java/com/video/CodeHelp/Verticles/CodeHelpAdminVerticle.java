@@ -1,6 +1,7 @@
 package com.video.CodeHelp.Verticles;
 
 import com.video.CodeHelp.Caffine.CaffineCacheFactory;
+import com.video.CodeHelp.Config.CodeHelpConfig;
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApiEnums;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
@@ -8,6 +9,7 @@ import com.video.CodeHelp.Pojo.CompleteQuestion;
 import com.video.CodeHelp.Pojo.Config;
 import com.video.CodeHelp.Pojo.Responses.SaveQuestionResponse;
 import com.video.CodeHelp.Pojo.SaveOrUpdateConfigRequest;
+import com.video.CodeHelp.Service.CachePopulationService.CachePopulationFactory;
 import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.Service.QuestionService;
 import com.video.CodeHelp.Service.WelcomeService;
@@ -18,20 +20,27 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
+
+
 @Singleton
 @Slf4j
 public class CodeHelpAdminVerticle extends AbstractVerticle {
 
-  private WelcomeService welcomeService;
-  private ConfigService configService;
-  private QuestionService questionService;
+  private final WelcomeService welcomeService;
+  private final ConfigService configService;
+  private final QuestionService questionService;
+  private final CachePopulationFactory cachePopulationFactory;
+  private final CodeHelpConfig codeHelpCofig;
 
   @Inject
-  public CodeHelpAdminVerticle(WelcomeService welcomeService, ConfigService configService,QuestionService questionService) {
+  public CodeHelpAdminVerticle(WelcomeService welcomeService, ConfigService configService,QuestionService questionService
+                               , CachePopulationFactory cachePopulationFactory,CodeHelpConfig codeHelpConfig) {
     log.info("Intializing the codeHelpAdminVerticle");
     this.welcomeService = welcomeService;
     this.configService = configService;
     this.questionService = questionService;
+    this.cachePopulationFactory = cachePopulationFactory;
+    this.codeHelpCofig = codeHelpConfig;
   }
 
 
@@ -40,6 +49,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
 
     EventBus eventBus = vertx.eventBus();
     log.info("Starting the admin verticle");
+    cachePopulationFactory.populateAllCaches(codeHelpCofig.getCachePopulationTypes());
 
     eventBus.consumer(ApiEnums.WELCOME_API.getEventPath(), message -> {
       vertx.executeBlocking(future -> {
@@ -156,6 +166,25 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
     });
 
     eventBus.consumer(ApiEnums.QUESTION_SAVE_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          JsonObject body = new JsonObject(message.body().toString());
+          SaveQuestionResponse saveQuestionResponse = questionService.saveQuestion(body.mapTo(CompleteQuestion.class));
+          JsonObject response = new JsonObject();
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, "Question saved successfully");
+          response.put(DataConstants.DATA, JsonObject.mapFrom(saveQuestionResponse));
+          message.reply(response);
+          future.complete(response);
+        } catch (Exception e) {
+          log.error("Error while saving config", e);
+          message.reply(e);
+          future.fail(e);
+        }
+      });
+    });
+
+    eventBus.consumer(ApiEnums.GET_DEFAULT_CODE.getEventPath(), message -> {
       vertx.executeBlocking(future -> {
         try {
           JsonObject body = new JsonObject(message.body().toString());

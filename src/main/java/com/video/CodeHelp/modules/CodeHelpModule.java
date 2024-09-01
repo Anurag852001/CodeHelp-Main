@@ -8,12 +8,22 @@ import com.video.CodeHelp.Caffine.CaffineCacheFactory;
 import com.video.CodeHelp.Config.CodeHelpConfig;
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Dao.ConfigDao;
+import com.video.CodeHelp.Dao.DefaultCodeDao;
+import com.video.CodeHelp.Dao.MainCodeDao;
 import com.video.CodeHelp.Dao.QuestionDao;
 import com.video.CodeHelp.Enums.CacheTTLS;
 import com.video.CodeHelp.Exception.CodeHelpException;
+import com.video.CodeHelp.Service.CachePopulationService.CachePopulationFactory;
+import com.video.CodeHelp.Service.CachePopulationService.Handlers.DefaultCodeCachePopulationService;
+import com.video.CodeHelp.Service.CachePopulationService.Handlers.MainCodeCachePopulationService;
+import com.video.CodeHelp.Service.CachePopulationService.ICachePopulationService;
 import com.video.CodeHelp.Service.CachingService;
 import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.Service.Factory.CompilerFactory.*;
+import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.ICodeWrapperService;
+import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.WrapperFactory;
+import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.handlers.DefaultCodeWrapperService;
+import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.handlers.MainCodeWrapperService;
 import com.video.CodeHelp.Service.QuestionService;
 import com.video.CodeHelp.Service.WelcomeService;
 import io.vertx.core.Vertx;
@@ -49,6 +59,7 @@ public class CodeHelpModule extends AbstractModule {
     bind(EventBus.class).toInstance(this.vertx.eventBus());
     bind(FileSystem.class).toInstance(this.vertx.fileSystem());
     bind(SharedData.class).toInstance(this.vertx.sharedData());
+    bind(CodeHelpConfig.class).toInstance(config);
   }
 
   @Singleton
@@ -124,11 +135,13 @@ public class CodeHelpModule extends AbstractModule {
     return CaffineCacheFactory.getCacheInstance(CacheTTLS.ONE_DAY_CACHE);
   }
 
+
+
   @Singleton
   @Provides
   @Named(DataConstants.JAVA_COMPILER_SERVICE)
-  public ICompilerService providesJavaCompilerService(){
-    return new JavaCompilerService();
+  public ICompilerService providesJavaCompilerService(WrapperFactory wrapperFactory,ConfigService configService){
+    return new JavaCompilerService(wrapperFactory, configService);
   }
 
   @Singleton
@@ -150,4 +163,61 @@ public class CodeHelpModule extends AbstractModule {
   public CompilerFactory providesCompilerFactory(@Named(DataConstants.JAVA_COMPILER_SERVICE) ICompilerService javaCompilerService,@Named(DataConstants.CPP_COMPILER_SERVICE) ICompilerService cppCompilerService, @Named(DataConstants.PYTHON_COMPILER_SERVICE) ICompilerService pythonCompilerService){
     return new CompilerFactory(cppCompilerService,javaCompilerService, pythonCompilerService);
   }
+
+  @Singleton
+  @Provides
+  public MainCodeDao provideMainCodeDao(Jdbi jdbi){
+    try{
+      return jdbi.onDemand(MainCodeDao.class);
+    } catch (Exception e){
+      log.error("Error while initializing MainCodeDao",e);
+      throw new CodeHelpException(ReplyFailure.ERROR,"Error while initializing MainCodeDao");
+    }
+  }
+
+  @Provides
+  @Singleton
+  public DefaultCodeDao provideDefaultCodeDao(Jdbi jdbi){
+    try{
+      return jdbi.onDemand(DefaultCodeDao.class);
+    } catch (Exception e){
+      log.error("Error while initializing DefaultCodeDao",e);
+      throw new CodeHelpException(ReplyFailure.ERROR,"Error while initializing DefaultCodeDao");
+    }
+  }
+
+  @Provides
+  @Singleton
+  @Named(DataConstants.DEFAULT_CODE_CACHE_POPULATION_SERVICE)
+  public ICachePopulationService provideDefaultCachePopulationService(DefaultCodeDao dao){
+    return new DefaultCodeCachePopulationService(dao);
+  }
+
+  @Provides
+  @Singleton
+  @Named(DataConstants.MAIN_CODE_CACHE_POPULATION_SERVICE)
+  public ICachePopulationService providesMainCodeCachingService(MainCodeDao dao) {
+    return new MainCodeCachePopulationService(dao);
+  }
+
+  @Provides
+  @Singleton
+  @Named(DataConstants.MAIN_CODE_WRAPPER_SERVICE)
+  public ICodeWrapperService providesMainCodeWrapperService() {
+    return new MainCodeWrapperService();
+  }
+
+  @Provides
+  @Singleton
+  @Named(DataConstants.DEFAULT_CODE_WRAPPER_SERVICE)
+  public ICodeWrapperService providesDefaultCodeWrapperService() {
+    return new DefaultCodeWrapperService();
+  }
+
+  @Provides
+  @Singleton
+  public WrapperFactory providesWrapperFactory(@Named(DataConstants.DEFAULT_CODE_WRAPPER_SERVICE) ICodeWrapperService defaultCodeWrapperService, @Named(DataConstants.MAIN_CODE_WRAPPER_SERVICE) ICodeWrapperService mainCodeWrapperService) {
+    return new WrapperFactory(defaultCodeWrapperService,mainCodeWrapperService);
+  }
+
 }

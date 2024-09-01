@@ -1,5 +1,6 @@
 package com.video.CodeHelp.Verticles;
 
+import com.video.CodeHelp.Config.CodeHelpConfig;
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApiEnums;
 import com.video.CodeHelp.Handler.CodeHelpRoutingHandler;
@@ -16,11 +17,13 @@ public class CodeHelpRouter extends AbstractVerticle {
 
   private final Router router;
   private final CodeHelpRoutingHandler codeHelpRoutingHandler;
+  private final CodeHelpConfig codeHelpConfig;
 
   @Inject
-  public CodeHelpRouter(CodeHelpRoutingHandler codeHelpRoutingHandler) {
+  public CodeHelpRouter(CodeHelpRoutingHandler codeHelpRoutingHandler,CodeHelpConfig codeHelpConfig) {
     this.router = Router.router(vertx);
     this.codeHelpRoutingHandler = codeHelpRoutingHandler;
+    this.codeHelpConfig = codeHelpConfig;
   }
 
 
@@ -75,7 +78,7 @@ public class CodeHelpRouter extends AbstractVerticle {
         .handler(codeHelpRoutingHandler);
 
 
-      server.requestHandler(router).listen(8000);
+      server.requestHandler(router).listen(codeHelpConfig.getPort().intValue());
     } catch (Exception e) {
       log.error("error occured while starting the server", e);
       throw e;
