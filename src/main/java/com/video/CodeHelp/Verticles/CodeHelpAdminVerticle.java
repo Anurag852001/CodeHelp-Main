@@ -7,10 +7,13 @@ import com.video.CodeHelp.Enums.ApiEnums;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
 import com.video.CodeHelp.Pojo.CompleteQuestion;
 import com.video.CodeHelp.Pojo.Config;
+import com.video.CodeHelp.Pojo.GetWrapperCodeRequest;
+import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.pojos.IWrapperCodeResponse;
 import com.video.CodeHelp.Pojo.Responses.SaveQuestionResponse;
 import com.video.CodeHelp.Pojo.SaveOrUpdateConfigRequest;
 import com.video.CodeHelp.Service.CachePopulationService.CachePopulationFactory;
 import com.video.CodeHelp.Service.ConfigService;
+import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.WrapperFactory;
 import com.video.CodeHelp.Service.QuestionService;
 import com.video.CodeHelp.Service.WelcomeService;
 import io.vertx.core.AbstractVerticle;
@@ -31,16 +34,18 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
   private final QuestionService questionService;
   private final CachePopulationFactory cachePopulationFactory;
   private final CodeHelpConfig codeHelpCofig;
+  private final WrapperFactory wrapperFactory;
 
   @Inject
   public CodeHelpAdminVerticle(WelcomeService welcomeService, ConfigService configService,QuestionService questionService
-                               , CachePopulationFactory cachePopulationFactory,CodeHelpConfig codeHelpConfig) {
+                               , CachePopulationFactory cachePopulationFactory,CodeHelpConfig codeHelpConfig,WrapperFactory wrapperFactory) {
     log.info("Intializing the codeHelpAdminVerticle");
     this.welcomeService = welcomeService;
     this.configService = configService;
     this.questionService = questionService;
     this.cachePopulationFactory = cachePopulationFactory;
     this.codeHelpCofig = codeHelpConfig;
+    this.wrapperFactory = wrapperFactory;
   }
 
 
@@ -184,17 +189,18 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
       });
     });
 
-    eventBus.consumer(ApiEnums.GET_DEFAULT_CODE.getEventPath(), message -> {
+    eventBus.consumer(ApiEnums.GET_WRAPPER_CODE.getEventPath(), message -> {
       vertx.executeBlocking(future -> {
         try {
           JsonObject body = new JsonObject(message.body().toString());
-          SaveQuestionResponse saveQuestionResponse = questionService.saveQuestion(body.mapTo(CompleteQuestion.class));
-          JsonObject response = new JsonObject();
-          response.put(DataConstants.SUCCESS, true);
-          response.put(DataConstants.MESSAGE, "Question saved successfully");
-          response.put(DataConstants.DATA, JsonObject.mapFrom(saveQuestionResponse));
-          message.reply(response);
-          future.complete(response);
+          GetWrapperCodeRequest request = body.mapTo(GetWrapperCodeRequest.class);
+          IWrapperCodeResponse response = wrapperFactory.getWrapperService(request.getType()).getWrapperCode(request.getQId());
+          JsonObject responseJ = new JsonObject();
+          responseJ.put(DataConstants.SUCCESS, true);
+          responseJ.put(DataConstants.MESSAGE, "Wrapper code fetched successfully");
+          responseJ.put(DataConstants.DATA, JsonObject.mapFrom(response));
+          message.reply(responseJ);
+          future.complete(responseJ);
         } catch (Exception e) {
           log.error("Error while saving config", e);
           message.reply(e);

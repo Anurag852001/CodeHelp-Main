@@ -13,7 +13,6 @@ import com.video.CodeHelp.Dao.MainCodeDao;
 import com.video.CodeHelp.Dao.QuestionDao;
 import com.video.CodeHelp.Enums.CacheTTLS;
 import com.video.CodeHelp.Exception.CodeHelpException;
-import com.video.CodeHelp.Service.CachePopulationService.CachePopulationFactory;
 import com.video.CodeHelp.Service.CachePopulationService.Handlers.DefaultCodeCachePopulationService;
 import com.video.CodeHelp.Service.CachePopulationService.Handlers.MainCodeCachePopulationService;
 import com.video.CodeHelp.Service.CachePopulationService.ICachePopulationService;
@@ -22,8 +21,8 @@ import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.Service.Factory.CompilerFactory.*;
 import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.ICodeWrapperService;
 import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.WrapperFactory;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.handlers.DefaultCodeWrapperService;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.handlers.MainCodeWrapperService;
+import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.handlers.DefaultWrapperCodeService;
+import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.handlers.MainWrapperCodeService;
 import com.video.CodeHelp.Service.QuestionService;
 import com.video.CodeHelp.Service.WelcomeService;
 import io.vertx.core.Vertx;
@@ -33,8 +32,6 @@ import io.vertx.core.file.FileSystem;
 import io.vertx.core.shareddata.SharedData;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
-import jdk.jfr.Name;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.jdbi.v3.core.Jdbi;
@@ -204,14 +201,14 @@ public class CodeHelpModule extends AbstractModule {
   @Singleton
   @Named(DataConstants.MAIN_CODE_WRAPPER_SERVICE)
   public ICodeWrapperService providesMainCodeWrapperService() {
-    return new MainCodeWrapperService();
+    return new MainWrapperCodeService();
   }
 
   @Provides
   @Singleton
   @Named(DataConstants.DEFAULT_CODE_WRAPPER_SERVICE)
   public ICodeWrapperService providesDefaultCodeWrapperService() {
-    return new DefaultCodeWrapperService();
+    return new DefaultWrapperCodeService();
   }
 
   @Provides

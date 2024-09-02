@@ -131,10 +131,18 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
           }
         });
         break;
-
-
-
+      case SAVE_DEFAULT_CODE:
+        eventBus.request(SAVE_DEFAULT_CODE.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
     }
+
   }
 
 
