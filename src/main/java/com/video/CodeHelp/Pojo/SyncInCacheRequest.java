@@ -1,7 +1,7 @@
-package com.video.CodeHelp.Service.CachePopulationService.pojo;
+package com.video.CodeHelp.Pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.video.CodeHelp.Enums.CompilerTypeEnums;
+import com.video.CodeHelp.Enums.CacheTypeEnums;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,9 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DefaultCodeCachePopulationPojo {
-  private Long qId;
-  private String defaultCode;
-  private CompilerTypeEnums compilerType;
-
+public class SyncInCacheRequest {
+  private String cacheKey;
+  private Object value;
+  private CacheTypeEnums cacheTypeEnums;
 }

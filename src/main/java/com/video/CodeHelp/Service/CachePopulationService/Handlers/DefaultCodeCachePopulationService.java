@@ -10,6 +10,8 @@ import com.video.CodeHelp.Service.CachePopulationService.ICachePopulationService
 import com.video.CodeHelp.Service.CachePopulationService.enums.CachePopulationTypes;
 import com.video.CodeHelp.Service.CachePopulationService.pojo.CachePopulationPojo;
 import com.video.CodeHelp.Service.CachePopulationService.pojo.DefaultCodeCachePopulationPojo;
+import com.video.CodeHelp.utils.CachingUtils;
+import com.video.CodeHelp.utils.CommonUtils;
 import io.vertx.core.eventbus.ReplyFailure;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +39,7 @@ public class DefaultCodeCachePopulationService extends ICachePopulationService {
      if(CollectionUtils.isNotEmpty(defaultCodeCachePopulationPojos)) {
        defaultCodeCachePopulationPojos.parallelStream()
          .forEach(defaultCodeCachePopulationPojo -> {
-           String cacheKey = getCacheKey(defaultCodeCachePopulationPojo.getQId(), CachePopulationTypes.DEFAULT_CODE_CACHE);
+           String cacheKey = CachingUtils.getCacheKeyForDefaultWrapperCode(defaultCodeCachePopulationPojo.getQId(),defaultCodeCachePopulationPojo.getCompilerType());
            twoHunderedDayCache.put(cacheKey, defaultCodeCachePopulationPojo);
          });
      }

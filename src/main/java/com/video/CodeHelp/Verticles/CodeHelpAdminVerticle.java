@@ -5,12 +5,10 @@ import com.video.CodeHelp.Config.CodeHelpConfig;
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApiEnums;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
-import com.video.CodeHelp.Pojo.CompleteQuestion;
-import com.video.CodeHelp.Pojo.Config;
-import com.video.CodeHelp.Pojo.GetWrapperCodeRequest;
+import com.video.CodeHelp.Pojo.*;
+import com.video.CodeHelp.Service.CachingService;
 import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.pojos.IWrapperCodeResponse;
 import com.video.CodeHelp.Pojo.Responses.SaveQuestionResponse;
-import com.video.CodeHelp.Pojo.SaveOrUpdateConfigRequest;
 import com.video.CodeHelp.Service.CachePopulationService.CachePopulationFactory;
 import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.WrapperFactory;
@@ -35,10 +33,12 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
   private final CachePopulationFactory cachePopulationFactory;
   private final CodeHelpConfig codeHelpCofig;
   private final WrapperFactory wrapperFactory;
+  private final CachingService cachingService;
 
   @Inject
   public CodeHelpAdminVerticle(WelcomeService welcomeService, ConfigService configService,QuestionService questionService
-                               , CachePopulationFactory cachePopulationFactory,CodeHelpConfig codeHelpConfig,WrapperFactory wrapperFactory) {
+                               , CachePopulationFactory cachePopulationFactory,CodeHelpConfig codeHelpConfig,WrapperFactory wrapperFactory
+                              , CachingService cachingService) {
     log.info("Intializing the codeHelpAdminVerticle");
     this.welcomeService = welcomeService;
     this.configService = configService;
@@ -204,6 +204,22 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
         } catch (Exception e) {
           log.error("Error while saving config", e);
           message.reply(e);
+          future.fail(e);
+        }
+      });
+    });
+
+    eventBus.consumer(DataConstants.SYNC_IN_CACHE,message->{
+      vertx.executeBlocking(future->{
+        try{
+          JsonObject body = JsonObject.mapFrom(message.body());
+          SyncInCacheRequest request = body.mapTo(SyncInCacheRequest.class);
+          log.info("Request received to sync in cache:{}",request);
+          cachingService.populateInCache(request.getCacheKey(),request.getValue(),request.getCacheTypeEnums());
+          message.reply(true);
+          future.complete(true);
+        } catch (Exception e){
+          log.error("Error while syncing data in cache", e);
           future.fail(e);
         }
       });

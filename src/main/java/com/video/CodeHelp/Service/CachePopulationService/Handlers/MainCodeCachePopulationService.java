@@ -5,10 +5,12 @@ import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Dao.MainCodeDao;
 import com.video.CodeHelp.Enums.ApplicationErrorEnums;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
+import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Service.CachePopulationService.ICachePopulationService;
 import com.video.CodeHelp.Service.CachePopulationService.enums.CachePopulationTypes;
 import com.video.CodeHelp.Service.CachePopulationService.pojo.MainCodeCachePopulationPojo;
+import com.video.CodeHelp.utils.CachingUtils;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -34,22 +36,13 @@ public class MainCodeCachePopulationService extends ICachePopulationService {
       if (CollectionUtils.isNotEmpty(mainCodeCachePopulationPojos)) {
         mainCodeCachePopulationPojos.parallelStream().forEach(
           mainCodeCachePopulationPojo -> {
-            cache.put(getCacheKey(mainCodeCachePopulationPojo.getQId(), CachePopulationTypes.MAIN_CODE_CACHE, mainCodeCachePopulationPojo.getLineNumber()), mainCodeCachePopulationPojo);
+            cache.put(CachingUtils.getCacheKeyForMainWrapperCode(mainCodeCachePopulationPojo.getQId(), CachePopulationTypes.MAIN_CODE_CACHE, mainCodeCachePopulationPojo.getLineNumber(),mainCodeCachePopulationPojo.getCompilerType()), mainCodeCachePopulationPojo);
           }
         );
       }
       log.info("Populated main code cache successfully with qIds : {}", qIds);
     } catch (Exception e) {
       log.error("Error while populating main code cache", e);
-      throw new CodeHelpException(ApplicationErrorEnums.ERROR_IN_POPULATING_CACHE);
-    }
-  }
-
-
-  public String getCacheKey(Long qId, CachePopulationTypes cachePopulationTypes,Long lineNumber) {
-    if(qId!=null && cachePopulationTypes!=null && lineNumber!=null) {
-      return String.join(DataConstants.UNDERSCORE, qId.toString(), cachePopulationTypes.name(), lineNumber.toString());
-    } else{
       throw new CodeHelpException(ApplicationErrorEnums.ERROR_IN_POPULATING_CACHE);
     }
   }
