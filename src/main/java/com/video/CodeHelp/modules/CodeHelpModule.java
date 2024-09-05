@@ -207,8 +207,8 @@ public class CodeHelpModule extends AbstractModule {
   @Provides
   @Singleton
   @Named(DataConstants.DEFAULT_CODE_WRAPPER_SERVICE)
-  public ICodeWrapperService providesDefaultCodeWrapperService(EventBus eventBus,DefaultCodeDao defaultCodeDao) {
-    return new DefaultWrapperCodeService(eventBus,defaultCodeDao);
+  public ICodeWrapperService providesDefaultCodeWrapperService(DefaultCodeDao defaultCodeDao,CachingService cachingService) {
+    return new DefaultWrapperCodeService(defaultCodeDao,cachingService);
   }
 
   @Provides

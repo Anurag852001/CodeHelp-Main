@@ -29,8 +29,8 @@ public enum ApiEnums {
 
   //Compiler apis
   COMPILE_CODE_API("/compile/code","compileCode"),
-  GET_WRAPPER_CODE("/get/wrapper/code", "defaultCode"),
-  SAVE_WRAPPER_CODE("/save/wrapper/code", "defaultCode"),
+  GET_WRAPPER_CODE("/get/wrapper/code", "getWrapperCode"),
+  SAVE_WRAPPER_CODE("/save/wrapper/code", "saveWrapperCode"),
 
 
   //testcases api

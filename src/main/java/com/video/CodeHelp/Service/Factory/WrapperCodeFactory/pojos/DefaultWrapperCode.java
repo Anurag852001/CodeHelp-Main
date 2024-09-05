@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DefaultWrapperCodeSaveRequest implements ISaveWrapperCodeRequest {
+public class DefaultWrapperCode implements IWrapperCodeResponse{
   private String defaultCode;
   private CompilerTypeEnums compilerType;
-  private Long qNo;
+  private Long qid;
 }
 

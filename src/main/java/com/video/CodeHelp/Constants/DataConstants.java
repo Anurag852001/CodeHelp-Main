@@ -23,4 +23,5 @@ public class DataConstants {
   public static final String WRAPPER_CONFIG_JAVA_2 = "WRAPPER_CONFIG_JAVA_2";
   public static final String WRAPPER_CONFIG_JAVA_3 = "WRAPPER_CONFIG_JAVA_3";
   public static final String SYNC_IN_CACHE = "SYNC_IN_CACHE";
+  public static final String WRAPPER_CODE_ENUM = "wrapperCodeEnum";
 }

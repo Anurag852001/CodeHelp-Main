@@ -7,7 +7,10 @@ import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Pojo.SyncInCacheRequest;
 import com.video.CodeHelp.Service.CachePopulationService.enums.CachePopulationTypes;
+import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.enums.WrapperCodeEnums;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.function.BiConsumer;
 
 public class CachingUtils {
 
@@ -37,7 +40,8 @@ public class CachingUtils {
   }
 
   public static String getCacheKeyForDefaultWrapperCode(Long id, CompilerTypeEnums compilerType){
-    return StringUtils.join(DataConstants.UNDERSCORE,id,CachePopulationTypes.DEFAULT_CODE_CACHE,compilerType.name());
+    StringBuilder stringBuilder = new StringBuilder();
+    return stringBuilder.append(id).append(DataConstants.UNDERSCORE).append(compilerType).append(DataConstants.UNDERSCORE).append(WrapperCodeEnums.DEFAULT_CODE).toString();
   }
 
   public static SyncInCacheRequest getTwoHundredCacheSyncRequest(String cacheKey,Object cacheValue){

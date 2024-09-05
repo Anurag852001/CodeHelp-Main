@@ -110,7 +110,6 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
         }
       });
         break;
-
       case COMPILE_CODE_API:
       eventBus.request(COMPILE_CODE_API.getEventPath(), body, messageAsyncResult -> {
         if (messageAsyncResult.succeeded()) {
@@ -121,8 +120,8 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
         }
       });
         break;
-      case GET_DEFAULT_CODE:
-        eventBus.request(GET_DEFAULT_CODE.getEventPath(), body, messageAsyncResult -> {
+      case GET_WRAPPER_CODE:
+        eventBus.request(GET_WRAPPER_CODE.getEventPath(), body, messageAsyncResult -> {
           if (messageAsyncResult.succeeded()) {
             handleSuccessResponse(routingContext, messageAsyncResult);
             promise.complete(messageAsyncResult);
@@ -131,8 +130,8 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
           }
         });
         break;
-      case SAVE_DEFAULT_CODE:
-        eventBus.request(SAVE_DEFAULT_CODE.getEventPath(), body, messageAsyncResult -> {
+      case SAVE_WRAPPER_CODE:
+        eventBus.request(SAVE_WRAPPER_CODE.getEventPath(), body, messageAsyncResult -> {
           if (messageAsyncResult.succeeded()) {
             handleSuccessResponse(routingContext, messageAsyncResult);
             promise.complete(messageAsyncResult);

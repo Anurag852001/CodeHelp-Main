@@ -7,6 +7,8 @@ import com.video.CodeHelp.Enums.ApiEnums;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
 import com.video.CodeHelp.Pojo.*;
 import com.video.CodeHelp.Service.CachingService;
+import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.enums.WrapperCodeEnums;
+import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.pojos.ISaveWrapperCodeRequest;
 import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.pojos.IWrapperCodeResponse;
 import com.video.CodeHelp.Pojo.Responses.SaveQuestionResponse;
 import com.video.CodeHelp.Service.CachePopulationService.CachePopulationFactory;
@@ -46,6 +48,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
     this.cachePopulationFactory = cachePopulationFactory;
     this.codeHelpCofig = codeHelpConfig;
     this.wrapperFactory = wrapperFactory;
+    this.cachingService = cachingService;
   }
 
 
@@ -194,7 +197,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
         try {
           JsonObject body = new JsonObject(message.body().toString());
           GetWrapperCodeRequest request = body.mapTo(GetWrapperCodeRequest.class);
-          IWrapperCodeResponse response = wrapperFactory.getWrapperService(request.getType()).getWrapperCode(request.getQId());
+          IWrapperCodeResponse response = wrapperFactory.getWrapperService(request.getWrapperCodeType()).getWrapperCode(request);
           JsonObject responseJ = new JsonObject();
           responseJ.put(DataConstants.SUCCESS, true);
           responseJ.put(DataConstants.MESSAGE, "Wrapper code fetched successfully");
@@ -220,6 +223,25 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
           future.complete(true);
         } catch (Exception e){
           log.error("Error while syncing data in cache", e);
+          future.fail(e);
+        }
+      });
+    });
+
+    eventBus.consumer(ApiEnums.SAVE_WRAPPER_CODE.getEventPath(),message->{
+      vertx.executeBlocking(future->{
+        try{
+          JsonObject body = JsonObject.mapFrom(message.body());
+          Long id = wrapperFactory.getWrapperService(WrapperCodeEnums.valueOf(body.getString(DataConstants.WRAPPER_CODE_ENUM))).saveWrapperCode(body);
+          JsonObject response = new JsonObject();
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, DataConstants.SUCCESS);
+          response.put(DataConstants.DATA, id);
+          message.reply(response);
+          future.complete(true);
+        } catch (Exception e){
+          log.error("Error while syncing data in cache", e);
+          message.reply(e);
           future.fail(e);
         }
       });
