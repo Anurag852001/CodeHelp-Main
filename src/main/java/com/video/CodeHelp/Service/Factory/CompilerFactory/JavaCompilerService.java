@@ -2,11 +2,13 @@ package com.video.CodeHelp.Service.Factory.CompilerFactory;
 
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApplicationErrorEnums;
+import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Enums.ConfigTypeEnum;
 import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Pojo.JavaSourceFromString;
 import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.WrapperFactory;
+import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.enums.WrapperCodeEnums;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,7 +38,7 @@ public class JavaCompilerService implements ICompilerService{
 
 
   @Override
-  public String compileCode(String codeSnippet) {
+  public String compileCode(String codeSnippet,Long qid) {
     JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
     ByteArrayOutputStream compileOutput = new ByteArrayOutputStream();
     ByteArrayOutputStream executionOutput = new ByteArrayOutputStream();
@@ -46,7 +48,7 @@ public class JavaCompilerService implements ICompilerService{
     PrintStream executionPrintStream = new PrintStream(executionOutput);
 
 
-    String wrappedCode = wrapCode(codeSnippet, new ArrayList<>());
+    String wrappedCode = wrapCode(codeSnippet, new ArrayList<>(),qid);
     String className = "Solution";
     JavaFileObject javaFile = new JavaSourceFromString(className, wrappedCode);
 
@@ -95,20 +97,23 @@ public class JavaCompilerService implements ICompilerService{
   }
 
 
-  private String wrapCode(String code,List<String> inputs) {
+  private String wrapCode(String code,List<String> inputs,Long qid) {
     //firstly we will start with the basic code from config
     Long startTime = System.currentTimeMillis();
     String basicCode1 = configService.getCodeHelpConfig(DataConstants.WRAPPER_CONFIG_JAVA_1,ConfigTypeEnum.WRAPPER_CONFIG.name()).getConfigValue();
     String basicCode2 = configService.getCodeHelpConfig(DataConstants.WRAPPER_CONFIG_JAVA_2,ConfigTypeEnum.WRAPPER_CONFIG.name()).getConfigValue();
     String basicCode3 = configService.getCodeHelpConfig(DataConstants.WRAPPER_CONFIG_JAVA_3,ConfigTypeEnum.WRAPPER_CONFIG.name()).getConfigValue();
 
-    StringBuilder stringBuilder = new StringBuilder();
-    attachCode(stringBuilder,basicCode1);
-    attachCode(stringBuilder,basicCode2);
-    attachCode(stringBuilder,code);
-    attachCode(stringBuilder,basicCode3);
+    StringBuilder stringBuilder1 = new StringBuilder();
+    attachCode(stringBuilder1,basicCode1);
+    attachCode(stringBuilder1,basicCode2);
+    attachCode(stringBuilder1,code);
+    String codeToBeWrappedWithMainCode = stringBuilder1.toString();
+    String newCode  = wrapperFactory.getWrapperService(WrapperCodeEnums.MAIN_CODE).wrapCode(code,qid,CompilerTypeEnums.JAVA,inputs);
+    StringBuilder stringBuilder2 = new StringBuilder().append(newCode);
+    attachCode(stringBuilder2,basicCode3);
     log.info("Time took to wrap code : {}",System.currentTimeMillis()-startTime);
-    return stringBuilder.toString();
+    return stringBuilder2.toString();
 
   }
 

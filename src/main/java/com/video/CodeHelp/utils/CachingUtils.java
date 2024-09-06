@@ -31,17 +31,17 @@ public class CachingUtils {
     return sb.toString();
   }
 
-  public static String getCacheKeyForMainWrapperCode(Long qId, CachePopulationTypes cachePopulationTypes, Long lineNumber, CompilerTypeEnums compilerType) {
-    if(qId!=null && cachePopulationTypes!=null && lineNumber!=null) {
-      return String.join(DataConstants.UNDERSCORE, qId.toString(), cachePopulationTypes.name(), lineNumber.toString(),compilerType.name());
+  public static String getCacheKeyForMainWrapperCode(Long qid, CompilerTypeEnums compilerType) {
+    if(qid!=null && compilerType!=null ) {
+      return new StringBuilder().append(qid).append(DataConstants.UNDERSCORE).append(compilerType).append(DataConstants.UNDERSCORE).append(WrapperCodeEnums.MAIN_CODE).toString();
     } else{
       throw new CodeHelpException(ApplicationErrorEnums.ERROR_IN_POPULATING_CACHE);
     }
   }
 
-  public static String getCacheKeyForDefaultWrapperCode(Long id, CompilerTypeEnums compilerType){
+  public static String getCacheKeyForDefaultWrapperCode(Long qid, CompilerTypeEnums compilerType){
     StringBuilder stringBuilder = new StringBuilder();
-    return stringBuilder.append(id).append(DataConstants.UNDERSCORE).append(compilerType).append(DataConstants.UNDERSCORE).append(WrapperCodeEnums.DEFAULT_CODE).toString();
+    return stringBuilder.append(qid).append(DataConstants.UNDERSCORE).append(compilerType).append(DataConstants.UNDERSCORE).append(WrapperCodeEnums.DEFAULT_CODE).toString();
   }
 
   public static SyncInCacheRequest getTwoHundredCacheSyncRequest(String cacheKey,Object cacheValue){

@@ -14,5 +14,6 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CodeCompilingRequest {
   private String code;
+  private Long qid;
   private CompilerTypeEnums compilerType;
 }

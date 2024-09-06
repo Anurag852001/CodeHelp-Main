@@ -36,7 +36,7 @@ public class CodeHelpCompilerVerticle extends AbstractVerticle {
         try {
           CodeCompilingRequest request = new JsonObject(message.body().toString()).mapTo(CodeCompilingRequest.class);
           log.info("Recevied request for code compiling:{}", request);
-          String result = compilerFactory.getCompiler(request.getCompilerType()).compileCode(request.getCode());
+          String result = compilerFactory.getCompiler(request.getCompilerType()).compileCode(request.getCode(),request.getQid());
           JsonObject response = new JsonObject();
           response.put(DataConstants.SUCCESS, true);
           response.put(DataConstants.MESSAGE, DataConstants.SUCCESS);
