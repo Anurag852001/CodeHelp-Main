@@ -6,11 +6,7 @@ import com.video.CodeHelp.Enums.CacheTypeEnums;
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Pojo.SyncInCacheRequest;
-import com.video.CodeHelp.Service.CachePopulationService.enums.CachePopulationTypes;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.enums.WrapperCodeEnums;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.function.BiConsumer;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.enums.WrapperCodeEnums;
 
 public class CachingUtils {
 
@@ -46,5 +42,9 @@ public class CachingUtils {
 
   public static SyncInCacheRequest getTwoHundredCacheSyncRequest(String cacheKey,Object cacheValue){
     return SyncInCacheRequest.builder().cacheKey(cacheKey).value(cacheValue).cacheTypeEnums(CacheTypeEnums.TWO_HUNDERED_CACHE).build();
+  }
+
+  public static String getCacheKeyForMainCodeVariables(Long qid,CompilerTypeEnums compilerTypeEnums){
+    return new StringBuilder().append(DataConstants.MAIN_CODE_VARIABLES).append(DataConstants.UNDERSCORE).append(qid).append(DataConstants.UNDERSCORE).append(compilerTypeEnums).toString();
   }
 }

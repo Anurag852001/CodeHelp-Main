@@ -4,6 +4,7 @@ import com.video.CodeHelp.Enums.QuestionStatusEnums;
 import com.video.CodeHelp.Pojo.QuestionBody;
 import com.video.CodeHelp.Pojo.QuestionConstraints;
 import com.video.CodeHelp.Pojo.QuestionExamples;
+import com.video.CodeHelp.Service.ListingService.pojo.QuestionListingPojo;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -51,5 +52,10 @@ public interface QuestionDao {
   @SqlQuery("Select id from questions where status = :status")
   List<Long> getQuestionIdsByStatus(@Bind("status") QuestionStatusEnums status);
 
+  @RegisterBeanMapper(QuestionListingPojo.class)
+  @SqlQuery("Select * from questions limit :limit offset :offset")
+  List<QuestionListingPojo> getAllQuestions(@Bind("limit") Integer limit, @Bind("offset") Integer offset);
 
+  @SqlQuery("Select count(*) from questions")
+  Long getTotalQuestionsCount();
 }

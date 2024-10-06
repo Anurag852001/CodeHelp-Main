@@ -1,28 +1,32 @@
 package com.video.CodeHelp.Verticles;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.video.CodeHelp.Caffine.CaffineCacheFactory;
 import com.video.CodeHelp.Config.CodeHelpConfig;
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApiEnums;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
+import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Pojo.*;
-import com.video.CodeHelp.Service.CachingService;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.enums.WrapperCodeEnums;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.pojos.ISaveWrapperCodeRequest;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.pojos.IWrapperCodeResponse;
 import com.video.CodeHelp.Pojo.Responses.SaveQuestionResponse;
 import com.video.CodeHelp.Service.CachePopulationService.CachePopulationFactory;
-import com.video.CodeHelp.Service.ConfigService;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.WrapperFactory;
-import com.video.CodeHelp.Service.QuestionService;
-import com.video.CodeHelp.Service.WelcomeService;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.WrapperFactory;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.enums.WrapperCodeEnums;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.pojos.IWrapperCodeResponse;
+import com.video.CodeHelp.Service.*;
+import com.video.CodeHelp.Service.ListingService.ListingFactory;
+import com.video.CodeHelp.Service.ListingService.pojo.GetListingRequest;
+import com.video.CodeHelp.Service.ListingService.pojo.IListingResponse;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Singleton
@@ -36,11 +40,14 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
   private final CodeHelpConfig codeHelpCofig;
   private final WrapperFactory wrapperFactory;
   private final CachingService cachingService;
+  private final ListingFactory listingFactory;
+  private final MainCodeVariableService mainCodeVariableService;
 
   @Inject
-  public CodeHelpAdminVerticle(WelcomeService welcomeService, ConfigService configService,QuestionService questionService
-                               , CachePopulationFactory cachePopulationFactory,CodeHelpConfig codeHelpConfig,WrapperFactory wrapperFactory
-                              , CachingService cachingService) {
+  public CodeHelpAdminVerticle(WelcomeService welcomeService, ConfigService configService, QuestionService questionService
+    , CachePopulationFactory cachePopulationFactory, CodeHelpConfig codeHelpConfig, WrapperFactory wrapperFactory
+    , CachingService cachingService, ListingFactory listingFactory, MainCodeVariableService mainCodeVariableService) {
+    this.mainCodeVariableService = mainCodeVariableService;
     log.info("Intializing the codeHelpAdminVerticle");
     this.welcomeService = welcomeService;
     this.configService = configService;
@@ -49,6 +56,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
     this.codeHelpCofig = codeHelpConfig;
     this.wrapperFactory = wrapperFactory;
     this.cachingService = cachingService;
+    this.listingFactory = listingFactory;
   }
 
 
@@ -59,7 +67,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
     log.info("Starting the admin verticle");
     cachePopulationFactory.populateAllCaches(codeHelpCofig.getCachePopulationTypes());
 
-    eventBus.consumer(ApiEnums.WELCOME_API.getEventPath(), message -> {
+    eventBus.consumer(ApiEnums.WELCOME_API.getEventPath(), message ->
       vertx.executeBlocking(future -> {
         try {
           JsonObject response = new JsonObject();
@@ -72,8 +80,8 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
           log.error("Error while welcome api", e);
           future.fail(e);
         }
-      });
-    });
+      })
+    );
 
     eventBus.consumer(ApiEnums.CONFIG_SAVE_API.getEventPath(), message -> {
       vertx.executeBlocking(future -> {
@@ -212,25 +220,25 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
       });
     });
 
-    eventBus.consumer(DataConstants.SYNC_IN_CACHE,message->{
-      vertx.executeBlocking(future->{
-        try{
+    eventBus.consumer(DataConstants.SYNC_IN_CACHE, message -> {
+      vertx.executeBlocking(future -> {
+        try {
           JsonObject body = JsonObject.mapFrom(message.body());
           SyncInCacheRequest request = body.mapTo(SyncInCacheRequest.class);
-          log.info("Request received to sync in cache:{}",request);
-          cachingService.populateInCache(request.getCacheKey(),request.getValue(),request.getCacheTypeEnums());
+          log.info("Request received to sync in cache:{}", request);
+          cachingService.populateInCache(request.getCacheKey(), request.getValue(), request.getCacheTypeEnums());
           message.reply(true);
           future.complete(true);
-        } catch (Exception e){
+        } catch (Exception e) {
           log.error("Error while syncing data in cache", e);
           future.fail(e);
         }
       });
     });
 
-    eventBus.consumer(ApiEnums.SAVE_WRAPPER_CODE.getEventPath(),message->{
-      vertx.executeBlocking(future->{
-        try{
+    eventBus.consumer(ApiEnums.SAVE_WRAPPER_CODE.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
           JsonObject body = JsonObject.mapFrom(message.body());
           Long id = wrapperFactory.getWrapperService(WrapperCodeEnums.valueOf(body.getString(DataConstants.WRAPPER_CODE_ENUM))).saveWrapperCode(body);
           JsonObject response = new JsonObject();
@@ -239,7 +247,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
           response.put(DataConstants.DATA, id);
           message.reply(response);
           future.complete(true);
-        } catch (Exception e){
+        } catch (Exception e) {
           log.error("Error while syncing data in cache", e);
           message.reply(e);
           future.fail(e);
@@ -247,6 +255,78 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
       });
     });
 
+
+    eventBus.consumer(ApiEnums.SAVE_MAIN_CODE_VARIABLES_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          List<MainCodeVariable> variables = JsonObject.mapFrom(message.body())
+            .getJsonArray(DataConstants.VARIABLES)
+            .stream().map(object -> JsonObject.mapFrom(object).mapTo(MainCodeVariable.class))
+            .collect(Collectors.toList());
+          mainCodeVariableService.saveVariables(variables);
+          JsonObject response = new JsonObject();
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, DataConstants.SUCCESS);
+          message.reply(response);
+          future.complete(response);
+        } catch (Exception e) {
+          log.error("Error while saving main code variables", e);
+          message.reply(e);
+          future.fail(e);
+        }
+      });
+    });
+
+    eventBus.consumer(ApiEnums.GET_MAIN_CODE_VARIABLES_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          JsonObject body = JsonObject.mapFrom(message.body());
+          Long qid = body.getLong(DataConstants.QID);
+          String language = body.getString(DataConstants.LANGUAGE);
+          List<MainCodeVariable> variables = mainCodeVariableService.getVariables(qid, CompilerTypeEnums.getFromLanguage(language));
+          JsonObject response = new JsonObject();
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, DataConstants.SUCCESS);
+          response.put(DataConstants.VARIABLES, new JsonArray(variables));
+          message.reply(response);
+          future.complete(response);
+        } catch (Exception e) {
+          log.error("Error while syncing data in cache", e);
+          message.reply(e);
+          future.fail(e);
+        }
+      });
+    });
+
+    eventBus.consumer(ApiEnums.GENERIC_LIST_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          JsonObject body = JsonObject.mapFrom(message.body());
+          GetListingRequest request = body.mapTo(GetListingRequest.class);
+          List<IListingResponse> listingResponseList = listingFactory.getListingService(request.getListingEnum())
+            .getListing(request.getCount(), (request.getPage() - 1) * request.getCount());
+
+          Long totalCount = listingFactory
+            .getListingService(request.getListingEnum()).getTotalCount();
+
+          JsonObject response = new JsonObject();
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, DataConstants.SUCCESS);
+          response.put(DataConstants.DATA, new JsonObject()
+            .put(DataConstants.LISTING,
+              new JsonArray(listingResponseList.stream()
+                .map(pojo -> JsonObject.mapFrom(pojo))
+                .collect(Collectors.toList()))).put(DataConstants.TOTAL_COUNT, totalCount));
+
+          message.reply(response);
+          future.complete(true);
+        } catch (Exception e) {
+          log.error("Error while getting main code variables", e);
+          message.reply(e);
+          future.fail(e);
+        }
+      });
+    });
 
   }
 }

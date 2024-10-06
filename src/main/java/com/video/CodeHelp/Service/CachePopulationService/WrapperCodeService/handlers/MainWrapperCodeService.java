@@ -1,4 +1,4 @@
-package com.video.CodeHelp.Service.Factory.WrapperCodeFactory.handlers;
+package com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -7,10 +7,9 @@ import com.video.CodeHelp.Enums.CacheTypeEnums;
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Pojo.GetWrapperCodeRequest;
 import com.video.CodeHelp.Service.CachingService;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.ICodeWrapperService;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.pojos.DefaultWrapperCode;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.pojos.IWrapperCodeResponse;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.pojos.MainWrapperCode;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.ICodeWrapperService;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.pojos.IWrapperCodeResponse;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.pojos.MainWrapperCode;
 import com.video.CodeHelp.utils.CachingUtils;
 import com.video.CodeHelp.utils.CommonUtils;
 import io.vertx.core.eventbus.EventBus;
@@ -37,7 +36,7 @@ public class MainWrapperCodeService implements ICodeWrapperService {
   @Override
   public String wrapCode(String code, Long qid, CompilerTypeEnums compilerType, List<String> inputs) {
     MainWrapperCode wrapperCode =  (MainWrapperCode) getWrapperCode(GetWrapperCodeRequest.builder().qid(qid).compilerType(compilerType).build());
-    return new StringBuilder().append(code).append(System.lineSeparator()).append(wrapperCode).append(System.lineSeparator()).toString();
+    return new StringBuilder().append(code).append(System.lineSeparator()).append(wrapperCode.getMainCode()).append(System.lineSeparator()).toString();
   }
 
   @Override
@@ -53,6 +52,7 @@ public class MainWrapperCodeService implements ICodeWrapperService {
       cachingService.populateInCache(cacheKey, result, CacheTypeEnums.TWO_HUNDERED_CACHE);
       log.info("fetched default wrapper code from db and cached with key:{}", cacheKey);
     }
+
     String defaultCode =  CommonUtils.splitAndSeparateByLine(result.getMainCode());
     result.setMainCode(defaultCode);
     return result;

@@ -1,7 +1,6 @@
-package com.video.CodeHelp.Pojo;
+package com.video.CodeHelp.Service.ListingService.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,10 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CodeCompilingRequest {
-  private String code;
-  private Long qid;
-  private CompilerTypeEnums compilerType;
-  private Boolean runOnAll;
-  private String testCase;
+public class QuestionListingPojo implements IListingResponse {
+  private String id;
+  private String questionHeading;
+  private String difficulty;
 }

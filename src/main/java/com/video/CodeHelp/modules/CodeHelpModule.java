@@ -7,24 +7,21 @@ import com.google.inject.Provides;
 import com.video.CodeHelp.Caffine.CaffineCacheFactory;
 import com.video.CodeHelp.Config.CodeHelpConfig;
 import com.video.CodeHelp.Constants.DataConstants;
-import com.video.CodeHelp.Dao.ConfigDao;
-import com.video.CodeHelp.Dao.DefaultCodeDao;
-import com.video.CodeHelp.Dao.MainCodeDao;
-import com.video.CodeHelp.Dao.QuestionDao;
+import com.video.CodeHelp.Dao.*;
 import com.video.CodeHelp.Enums.CacheTTLS;
 import com.video.CodeHelp.Exception.CodeHelpException;
+import com.video.CodeHelp.Service.*;
 import com.video.CodeHelp.Service.CachePopulationService.Handlers.DefaultCodeCachePopulationService;
 import com.video.CodeHelp.Service.CachePopulationService.Handlers.MainCodeCachePopulationService;
 import com.video.CodeHelp.Service.CachePopulationService.ICachePopulationService;
-import com.video.CodeHelp.Service.CachingService;
-import com.video.CodeHelp.Service.ConfigService;
-import com.video.CodeHelp.Service.Factory.CompilerFactory.*;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.ICodeWrapperService;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.WrapperFactory;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.handlers.DefaultWrapperCodeService;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.handlers.MainWrapperCodeService;
-import com.video.CodeHelp.Service.QuestionService;
-import com.video.CodeHelp.Service.WelcomeService;
+import com.video.CodeHelp.Service.CompilerService.*;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.ICodeWrapperService;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.WrapperFactory;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.handlers.DefaultWrapperCodeService;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.handlers.MainWrapperCodeService;
+import com.video.CodeHelp.Service.ListingService.IListingService;
+import com.video.CodeHelp.Service.ListingService.ListingFactory;
+import com.video.CodeHelp.Service.ListingService.handlers.QuestionsListingService;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.ReplyFailure;
@@ -137,7 +134,7 @@ public class CodeHelpModule extends AbstractModule {
   @Singleton
   @Provides
   @Named(DataConstants.JAVA_COMPILER_SERVICE)
-  public ICompilerService providesJavaCompilerService(WrapperFactory wrapperFactory,ConfigService configService){
+  public ICompilerService providesJavaCompilerService(WrapperFactory wrapperFactory, ConfigService configService){
     return new JavaCompilerService(wrapperFactory, configService);
   }
 
@@ -157,7 +154,7 @@ public class CodeHelpModule extends AbstractModule {
 
   @Singleton
   @Provides
-  public CompilerFactory providesCompilerFactory(@Named(DataConstants.JAVA_COMPILER_SERVICE) ICompilerService javaCompilerService,@Named(DataConstants.CPP_COMPILER_SERVICE) ICompilerService cppCompilerService, @Named(DataConstants.PYTHON_COMPILER_SERVICE) ICompilerService pythonCompilerService){
+  public CompilerFactory providesCompilerFactory(@Named(DataConstants.JAVA_COMPILER_SERVICE) ICompilerService javaCompilerService, @Named(DataConstants.CPP_COMPILER_SERVICE) ICompilerService cppCompilerService, @Named(DataConstants.PYTHON_COMPILER_SERVICE) ICompilerService pythonCompilerService){
     return new CompilerFactory(cppCompilerService,javaCompilerService, pythonCompilerService);
   }
 
@@ -215,6 +212,36 @@ public class CodeHelpModule extends AbstractModule {
   @Singleton
   public WrapperFactory providesWrapperFactory(@Named(DataConstants.DEFAULT_CODE_WRAPPER_SERVICE) ICodeWrapperService defaultCodeWrapperService, @Named(DataConstants.MAIN_CODE_WRAPPER_SERVICE) ICodeWrapperService mainCodeWrapperService) {
     return new WrapperFactory(defaultCodeWrapperService,mainCodeWrapperService);
+  }
+
+  @Provides
+  @Singleton
+  @Named(DataConstants.QUESTIONS_LISTING_SERVICE)
+  public IListingService providesQuestionsListingService(QuestionDao dao) {
+    return new QuestionsListingService(dao);
+  }
+
+  @Provides
+  @Singleton
+  public ListingFactory providesListingFactory(@Named(DataConstants.QUESTIONS_LISTING_SERVICE) IListingService questionsListingService){
+    return new ListingFactory(questionsListingService);
+  }
+
+  @Provides
+  @Singleton
+  public MainCodeVariableService provideMainCodeVariableService(MainCodeVariablesDao dao,CachingService cachingService){
+    return new MainCodeVariableService(dao,cachingService);
+  }
+
+  @Provides
+  @Singleton
+  public MainCodeVariablesDao provideMainCodeVariablesDao(Jdbi jdbi){
+    try{
+      return jdbi.onDemand(MainCodeVariablesDao.class);
+    } catch (Exception e){
+      log.error("Error while initializing MainCodeVariablesDao",e);
+      throw new CodeHelpException(ReplyFailure.ERROR,"Error while initializing MainCodeVariablesDao");
+    }
   }
 
 }

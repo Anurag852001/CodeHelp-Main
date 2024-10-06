@@ -37,7 +37,15 @@ public enum ApiEnums {
   TESTCASE_LIST_API("/list/testcases", "testCaseList"),
   TESTCASE_GET_API("/get/testcase", "testCaseGet"),
   TESTCASE_SAVE_API("/save/testcase", "testCaseSave"),
-  TESTCASE_UPDATE_API("/update/testcase", "testCaseUpdate");
+  TESTCASE_UPDATE_API("/update/testcase", "testCaseUpdate"),
+
+
+  //generic listing api
+  GENERIC_LIST_API("/list/generic", "genericList"),
+
+  //variables save api
+  SAVE_MAIN_CODE_VARIABLES_API("/save/mainCode/variables", "saveVariables"),
+  GET_MAIN_CODE_VARIABLES_API("/get/mainCode/variables", "getMainCodeVariables");
 
   String apiKey;
   String eventPath;

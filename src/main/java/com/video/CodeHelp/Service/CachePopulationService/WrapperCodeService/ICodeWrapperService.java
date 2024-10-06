@@ -1,8 +1,8 @@
-package com.video.CodeHelp.Service.Factory.WrapperCodeFactory;
+package com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService;
 
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Pojo.GetWrapperCodeRequest;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.pojos.IWrapperCodeResponse;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.pojos.IWrapperCodeResponse;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;

@@ -140,6 +140,39 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
           }
         });
         break;
+
+      case GENERIC_LIST_API:
+        eventBus.request(GENERIC_LIST_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
+
+      case SAVE_MAIN_CODE_VARIABLES_API:
+        eventBus.request(SAVE_MAIN_CODE_VARIABLES_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
+
+      case GET_MAIN_CODE_VARIABLES_API:
+        eventBus.request(GET_MAIN_CODE_VARIABLES_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
     }
 
   }

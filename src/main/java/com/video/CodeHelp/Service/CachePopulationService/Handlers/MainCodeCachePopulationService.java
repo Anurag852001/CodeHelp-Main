@@ -36,7 +36,7 @@ public class MainCodeCachePopulationService extends ICachePopulationService {
       if (CollectionUtils.isNotEmpty(mainCodeCachePopulationPojos)) {
         mainCodeCachePopulationPojos.parallelStream().forEach(
           mainCodeCachePopulationPojo -> {
-            cache.put(CachingUtils.getCacheKeyForMainWrapperCode(mainCodeCachePopulationPojo.getQId(),mainCodeCachePopulationPojo.getCompilerType()), mainCodeCachePopulationPojo);
+            cache.put(CachingUtils.getCacheKeyForMainWrapperCode(mainCodeCachePopulationPojo.getQid(),mainCodeCachePopulationPojo.getCompilerType()), mainCodeCachePopulationPojo);
           }
         );
       }

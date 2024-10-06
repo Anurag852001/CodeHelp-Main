@@ -1,8 +1,7 @@
-package com.video.CodeHelp.Service.Factory.WrapperCodeFactory.pojos;
+package com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.pojos;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.video.CodeHelp.Enums.CompilerTypeEnums;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.enums.WrapperCodeEnums;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.enums.WrapperCodeEnums;
 import lombok.*;
 
 @Data

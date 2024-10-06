@@ -1,16 +1,14 @@
 package com.video.CodeHelp.Verticles;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApiEnums;
 import com.video.CodeHelp.Pojo.CodeCompilingRequest;
-import com.video.CodeHelp.Service.Factory.CompilerFactory.CompilerFactory;
+import com.video.CodeHelp.Service.CompilerService.CompilerFactory;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -36,7 +34,7 @@ public class CodeHelpCompilerVerticle extends AbstractVerticle {
         try {
           CodeCompilingRequest request = new JsonObject(message.body().toString()).mapTo(CodeCompilingRequest.class);
           log.info("Recevied request for code compiling:{}", request);
-          String result = compilerFactory.getCompiler(request.getCompilerType()).compileCode(request.getCode(),request.getQid());
+          String result = compilerFactory.getCompiler(request.getCompilerType()).compileCode(request);
           JsonObject response = new JsonObject();
           response.put(DataConstants.SUCCESS, true);
           response.put(DataConstants.MESSAGE, DataConstants.SUCCESS);

@@ -2,7 +2,7 @@ package com.video.CodeHelp.Dao;
 
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Service.CachePopulationService.pojo.DefaultCodeCachePopulationPojo;
-import com.video.CodeHelp.Service.Factory.WrapperCodeFactory.pojos.DefaultWrapperCode;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.pojos.DefaultWrapperCode;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
