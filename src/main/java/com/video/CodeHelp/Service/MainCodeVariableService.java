@@ -8,7 +8,9 @@ import com.video.CodeHelp.utils.CachingUtils;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -37,6 +39,52 @@ public class MainCodeVariableService {
 
   public void updateVariable(MainCodeVariable variables) {
     mainCodeVariablesDao.updateMainCodeVariables(variables);
+  }
+
+  public List<String> getFormattedVariables(Long qid,CompilerTypeEnums compilerTypeEnums){
+    List<MainCodeVariable> variables = getVariables(qid,compilerTypeEnums);
+    switch(compilerTypeEnums){
+      case JAVA:
+        return formatJavaMainCodeVariables(variables);
+      case PYTHON:
+        return formatPythonMainCodeVariables(variables);
+      case CPP:
+        return formatCppMainCodeVariables(variables);
+      default:
+        log.error("This language is not supported yet");
+        return null;
+    }
+  }
+
+
+  public List<String> formatJavaMainCodeVariables(List<MainCodeVariable> variables){
+    //first lets sort them
+    variables.sort(Comparator.comparing(MainCodeVariable::getVariableNumber));
+    return variables.stream().map(variable->{
+      switch (variable.getType()){
+        case INTEGER_ARRAY:
+          return "int[] "+ variable.getName();
+        case STRING:
+          return "string " + variable.getName() + " ";
+        case INTEGER:
+          return "int " + variable.getName() + " ";
+        case BOOLEAN:
+          return "boolean " + variable.getName() + " ";
+        case FLOAT:
+          return "float " + variable.getName() + " ";
+        default:
+          log.error("This data type is not supported yet");
+          return null;
+      }
+    }).collect(Collectors.toList());
+  }
+
+  public List<String> formatPythonMainCodeVariables(List<MainCodeVariable> variables){
+   return null;
+  }
+
+  public List<String> formatCppMainCodeVariables(List<MainCodeVariable> variables){
+    return null;
   }
 
 }

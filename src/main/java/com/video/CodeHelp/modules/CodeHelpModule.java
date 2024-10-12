@@ -22,6 +22,8 @@ import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.hand
 import com.video.CodeHelp.Service.ListingService.IListingService;
 import com.video.CodeHelp.Service.ListingService.ListingFactory;
 import com.video.CodeHelp.Service.ListingService.handlers.QuestionsListingService;
+import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
+import com.video.CodeHelp.Service.TestCaseService.impl.TestCaseService;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.ReplyFailure;
@@ -134,8 +136,9 @@ public class CodeHelpModule extends AbstractModule {
   @Singleton
   @Provides
   @Named(DataConstants.JAVA_COMPILER_SERVICE)
-  public ICompilerService providesJavaCompilerService(WrapperFactory wrapperFactory, ConfigService configService){
-    return new JavaCompilerService(wrapperFactory, configService);
+  public ICompilerService providesJavaCompilerService(WrapperFactory wrapperFactory, ConfigService configService,MainCodeVariableService mainCodeVariableService,
+                                                    ITestCaseService testCaseService){
+    return new JavaCompilerService(wrapperFactory, configService,mainCodeVariableService,testCaseService);
   }
 
   @Singleton
@@ -197,8 +200,8 @@ public class CodeHelpModule extends AbstractModule {
   @Provides
   @Singleton
   @Named(DataConstants.MAIN_CODE_WRAPPER_SERVICE)
-  public ICodeWrapperService providesMainCodeWrapperService(EventBus eventBus,MainCodeDao mainCodeDao,CachingService cachingService) {
-    return new MainWrapperCodeService(eventBus,mainCodeDao,cachingService);
+  public ICodeWrapperService providesMainCodeWrapperService(EventBus eventBus,MainCodeDao mainCodeDao,CachingService cachingService,ConfigService configService) {
+    return new MainWrapperCodeService(eventBus,mainCodeDao,cachingService,configService);
   }
 
   @Provides
@@ -242,6 +245,12 @@ public class CodeHelpModule extends AbstractModule {
       log.error("Error while initializing MainCodeVariablesDao",e);
       throw new CodeHelpException(ReplyFailure.ERROR,"Error while initializing MainCodeVariablesDao");
     }
+  }
+
+  @Provides
+  @Singleton
+  public ITestCaseService providesTestCaseService(){
+    return  new TestCaseService();
   }
 
 }

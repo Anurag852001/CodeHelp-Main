@@ -287,7 +287,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
           JsonObject response = new JsonObject();
           response.put(DataConstants.SUCCESS, true);
           response.put(DataConstants.MESSAGE, DataConstants.SUCCESS);
-          response.put(DataConstants.VARIABLES, new JsonArray(variables));
+          response.put(DataConstants.VARIABLES, new JsonArray(variables.stream().map(obj->JsonObject.mapFrom(obj)).collect(Collectors.toList())));
           message.reply(response);
           future.complete(response);
         } catch (Exception e) {

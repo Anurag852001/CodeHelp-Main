@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
+
 @Slf4j
 public class CodeHelpCompilerVerticle extends AbstractVerticle {
 

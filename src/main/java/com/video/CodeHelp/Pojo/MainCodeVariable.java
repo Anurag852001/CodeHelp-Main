@@ -3,6 +3,7 @@ package com.video.CodeHelp.Pojo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
+import com.video.CodeHelp.Enums.DataTypeEnums;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 public class MainCodeVariable {
   private Integer id;
   private String name;
-  private String type;
+  private DataTypeEnums type;
   private Integer questionNumber;
   private CompilerTypeEnums language;
   private Integer variableNumber;

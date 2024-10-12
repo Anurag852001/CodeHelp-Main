@@ -2,14 +2,17 @@ package com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.han
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Dao.MainCodeDao;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
+import com.video.CodeHelp.Enums.ConfigTypeEnum;
 import com.video.CodeHelp.Pojo.GetWrapperCodeRequest;
 import com.video.CodeHelp.Service.CachingService;
 import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.ICodeWrapperService;
 import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.pojos.IWrapperCodeResponse;
 import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.pojos.MainWrapperCode;
+import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.utils.CachingUtils;
 import com.video.CodeHelp.utils.CommonUtils;
 import io.vertx.core.eventbus.EventBus;
@@ -24,19 +27,23 @@ public class MainWrapperCodeService implements ICodeWrapperService {
   EventBus eventBus;
   MainCodeDao mainCodeDao;
   CachingService cachingService;
+  ConfigService configService;
 
   @Inject
-  public MainWrapperCodeService(EventBus eventBus,MainCodeDao mainCodeDao,CachingService cachingService) {
+  public MainWrapperCodeService(EventBus eventBus,MainCodeDao mainCodeDao,CachingService cachingService,ConfigService configService) {
     this.eventBus = eventBus;
     this.mainCodeDao = mainCodeDao;
     this.cachingService = cachingService;
-
+    this.configService = configService;
   }
 
   @Override
   public String wrapCode(String code, Long qid, CompilerTypeEnums compilerType, List<String> inputs) {
     MainWrapperCode wrapperCode =  (MainWrapperCode) getWrapperCode(GetWrapperCodeRequest.builder().qid(qid).compilerType(compilerType).build());
-    return new StringBuilder().append(code).append(System.lineSeparator()).append(wrapperCode.getMainCode()).append(System.lineSeparator()).toString();
+    String printCode = configService.getCodeHelpConfig(wrapperCode.getReturnType().getJavaPrintingConfig(), ConfigTypeEnum.WRAPPER_CONFIG.name()).getConfigValue();
+    return new StringBuilder().append(code)
+      .append(System.lineSeparator()).append(wrapperCode.getMainCode()).append(System.lineSeparator()).append("}")
+      .append(System.lineSeparator()).append(printCode).append(System.lineSeparator()).toString();
   }
 
   @Override

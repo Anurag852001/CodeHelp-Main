@@ -10,6 +10,8 @@ import com.video.CodeHelp.Pojo.JavaSourceFromString;
 import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.WrapperFactory;
 import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.enums.WrapperCodeEnums;
+import com.video.CodeHelp.Service.MainCodeVariableService;
+import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,11 +28,16 @@ public class JavaCompilerService implements ICompilerService{
 
   private WrapperFactory wrapperFactory;
   private ConfigService configService;
+  private MainCodeVariableService mainCodeVariableService;
+  private ITestCaseService testCaseService;
 
   @Inject
-  public JavaCompilerService(WrapperFactory wrapperFactory,ConfigService configService){
+  public JavaCompilerService(WrapperFactory wrapperFactory,ConfigService configService,MainCodeVariableService mainCodeVariableService,
+                             ITestCaseService testCaseService){
     this.wrapperFactory = wrapperFactory;
     this.configService = configService;
+    this.mainCodeVariableService = mainCodeVariableService;
+    this.testCaseService = testCaseService;
   }
 
 
@@ -129,10 +136,10 @@ public class JavaCompilerService implements ICompilerService{
 
   public void attachTestCase(StringBuilder stringBuilder,CodeCompilingRequest request){
     stringBuilder.append(System.lineSeparator());
-    String [] variables = new String[]{"int[] nums","int target"};
-    String[] testCases  = new String[]{"{1,2,3,4};", "6;"};
-    for(int i = 0 ; i <variables.length;i++){
-      stringBuilder.append(variables[i]).append(" = ").append(testCases[i]).append(System.lineSeparator());
+    List<String>variables = mainCodeVariableService.getFormattedVariables(request.getQid(),CompilerTypeEnums.JAVA);
+    List<String> testCases = testCaseService.getFormattedTestCase(request.getTestCase(),CompilerTypeEnums.JAVA);
+    for(int i = 0 ; i <variables.size();i++){
+      stringBuilder.append(variables.get(i)).append(" = ").append(testCases.get(i)).append(System.lineSeparator());
     }
     stringBuilder.append(System.lineSeparator());
   }

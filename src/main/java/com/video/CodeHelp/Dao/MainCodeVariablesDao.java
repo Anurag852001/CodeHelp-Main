@@ -23,7 +23,7 @@ public interface MainCodeVariablesDao {
   void updateMainCodeVariables(@BindBean("variable") MainCodeVariable variables);
 
   @RegisterBeanMapper(MainCodeVariable.class)
-  @SqlQuery("Select * from main_code_variables where languate = :language,q_id = :qid")
+  @SqlQuery("Select * from main_code_variables where language = :language and question_number = :qid")
   List<MainCodeVariable> getMainCodeVariablesByLanguageAndQId(@Bind("language") CompilerTypeEnums language, @Bind("qid") Long qId);
 
 }

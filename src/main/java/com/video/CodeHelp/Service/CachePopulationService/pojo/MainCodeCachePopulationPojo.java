@@ -18,4 +18,5 @@ public class MainCodeCachePopulationPojo {
   private String mainCode;
   private CompilerTypeEnums compilerType;
   private Long qid;
+  private DataTypeEnums returnType;
 }
