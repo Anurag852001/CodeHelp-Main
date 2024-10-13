@@ -32,4 +32,7 @@ public class DataConstants {
   public static final String QID = "qid";
   public static final String LANGUAGE = "language";
   public static final String VARIABLES = "variables";
+  public static final String CORRECT_CODE = "CORRECT_CODE";
+  public static final String CORRECT_CODE_CAMEL = "correctCode";
+  public static final String TEST_CASE = "TEST_CASE";
 }

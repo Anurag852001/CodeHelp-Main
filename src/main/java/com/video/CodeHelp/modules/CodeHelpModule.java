@@ -249,8 +249,37 @@ public class CodeHelpModule extends AbstractModule {
 
   @Provides
   @Singleton
-  public ITestCaseService providesTestCaseService(){
-    return  new TestCaseService();
+  public ITestCaseService providesTestCaseService(TestCaseDao testCaseDao,CachingService cachingService){
+    return  new TestCaseService(testCaseDao,cachingService);
   }
 
+  @Provides
+  @Singleton
+  public TestCaseDao providesTestCaseDao(Jdbi jdbi){
+    try{
+      return jdbi.onDemand(TestCaseDao.class);
+    } catch (Exception e){
+      log.error("Error while initializing TestCaseDao",e);
+      throw new CodeHelpException(ReplyFailure.ERROR,"Error while initializing TestCaseDao");
+    }
+  }
+
+
+  @Provides
+  @Singleton
+  public CorrectCodeDao providesCorrectCodeDao(Jdbi jdbi){
+    try{
+       return jdbi.onDemand(CorrectCodeDao.class);
+    } catch (Exception e){
+      log.error("Error while initializing CorrectCodeDao",e);
+      throw new CodeHelpException(ReplyFailure.ERROR,"Error while initializing CorrectCodeDao");
+    }
+  }
+
+  @Provides
+  @Singleton
+  public CorrectCodeService providesCorrectCodeService(CorrectCodeDao correctCodeDao,CachingService cachingService,CompilerFactory compilerFactory
+                                                      ,ITestCaseService testCaseService){
+    return new CorrectCodeService(correctCodeDao,cachingService,compilerFactory,testCaseService);
+  }
 }

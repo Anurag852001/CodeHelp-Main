@@ -1,6 +1,5 @@
 package com.video.CodeHelp.Verticles;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.video.CodeHelp.Caffine.CaffineCacheFactory;
 import com.video.CodeHelp.Config.CodeHelpConfig;
 import com.video.CodeHelp.Constants.DataConstants;
@@ -17,6 +16,7 @@ import com.video.CodeHelp.Service.*;
 import com.video.CodeHelp.Service.ListingService.ListingFactory;
 import com.video.CodeHelp.Service.ListingService.pojo.GetListingRequest;
 import com.video.CodeHelp.Service.ListingService.pojo.IListingResponse;
+import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
@@ -42,12 +42,17 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
   private final CachingService cachingService;
   private final ListingFactory listingFactory;
   private final MainCodeVariableService mainCodeVariableService;
+  private final CorrectCodeService correctCodeService;
+  private final ITestCaseService testCaseService;
 
   @Inject
   public CodeHelpAdminVerticle(WelcomeService welcomeService, ConfigService configService, QuestionService questionService
     , CachePopulationFactory cachePopulationFactory, CodeHelpConfig codeHelpConfig, WrapperFactory wrapperFactory
-    , CachingService cachingService, ListingFactory listingFactory, MainCodeVariableService mainCodeVariableService) {
+    , CachingService cachingService, ListingFactory listingFactory, MainCodeVariableService mainCodeVariableService,
+                               CorrectCodeService correctCodeService, ITestCaseService testCaseService) {
     this.mainCodeVariableService = mainCodeVariableService;
+    this.correctCodeService = correctCodeService;
+    this.testCaseService = testCaseService;
     log.info("Intializing the codeHelpAdminVerticle");
     this.welcomeService = welcomeService;
     this.configService = configService;
@@ -298,6 +303,89 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
       });
     });
 
+    eventBus.consumer(ApiEnums.SAVE_CORRECT_CODE_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          JsonObject body = JsonObject.mapFrom(message.body());
+          CorrectCodePojo correctCodePojo = body.mapTo(CorrectCodePojo.class);
+          log.info("Received correct code save request with body:{}", correctCodePojo);
+          Long id = correctCodeService.saveCorrectCode(correctCodePojo);
+          JsonObject response = new JsonObject();
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, DataConstants.SUCCESS);
+          response.put(DataConstants.ID, id);
+          message.reply(response);
+          future.complete(response);
+        } catch (Exception e) {
+          log.error("Error while saving correct code", e);
+          message.reply(processResponse(e.getMessage()));
+          future.fail(e);
+        }
+      });
+    });
+
+    eventBus.consumer(ApiEnums.UPDATE_CORRECT_CODE_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          JsonObject body = JsonObject.mapFrom(message.body());
+          CorrectCodePojo correctCodePojo = body.mapTo(CorrectCodePojo.class);
+          log.info("Received correct code update request with body:{}", correctCodePojo);
+           correctCodeService.updateCorrectCode(correctCodePojo);
+          JsonObject response = new JsonObject();
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, DataConstants.SUCCESS);
+          message.reply(response);
+          future.complete(response);
+        } catch (Exception e) {
+          log.error("Error while saving correct code", e);
+          message.reply(processResponse(e.getMessage()));
+          future.fail(e);
+        }
+      });
+    });
+
+    eventBus.consumer(ApiEnums.TESTCASE_SAVE_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          JsonObject body = JsonObject.mapFrom(message.body());
+          TestCaseSaveRequest testCaseSaveRequest = body.mapTo(TestCaseSaveRequest.class);
+          log.info("Received test case save request:{}", testCaseSaveRequest);
+          testCaseService.saveTestCases(testCaseSaveRequest);
+          JsonObject response = new JsonObject();
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, DataConstants.SUCCESS);
+          message.reply(response);
+          future.complete(response);
+        } catch (Exception e) {
+          log.error("Error while saving correct code", e);
+          message.reply(processResponse(e.getMessage()));
+          future.fail(e);
+        }
+      });
+    });
+
+
+    eventBus.consumer(ApiEnums.GET_CORRECT_CODE_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          JsonObject body = JsonObject.mapFrom(message.body());
+          CorrectCodePojo correctCodePojo = body.mapTo(CorrectCodePojo.class);
+          log.info("Received correct code get request with body:{}", correctCodePojo);
+          CorrectCodePojo responsePojo =  correctCodeService.getCorrectCode(correctCodePojo);
+          JsonObject response = new JsonObject();
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.MESSAGE, DataConstants.SUCCESS);
+          response.put(DataConstants.CORRECT_CODE_CAMEL,JsonObject.mapFrom(responsePojo));
+          message.reply(response);
+          future.complete(response);
+        } catch (Exception e) {
+          log.error("Error while saving correct code", e);
+          message.reply(e);
+          future.fail(e);
+        }
+      });
+    });
+
     eventBus.consumer(ApiEnums.GENERIC_LIST_API.getEventPath(), message -> {
       vertx.executeBlocking(future -> {
         try {
@@ -328,5 +416,10 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
       });
     });
 
+
+  }
+
+  private JsonObject processResponse(String str){
+    return new JsonObject().put(DataConstants.SUCCESS,false).put(DataConstants.MESSAGE,str);
   }
 }

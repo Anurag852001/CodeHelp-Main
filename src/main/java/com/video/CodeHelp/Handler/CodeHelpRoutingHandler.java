@@ -6,7 +6,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.inject.Inject;
@@ -165,6 +164,50 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
 
       case GET_MAIN_CODE_VARIABLES_API:
         eventBus.request(GET_MAIN_CODE_VARIABLES_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
+
+      case SAVE_CORRECT_CODE_API:
+        eventBus.request(SAVE_CORRECT_CODE_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
+
+      case GET_CORRECT_CODE_API:
+        eventBus.request(GET_CORRECT_CODE_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
+
+      case UPDATE_CORRECT_CODE_API:
+        eventBus.request(UPDATE_CORRECT_CODE_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
+
+      case TESTCASE_SAVE_API:
+        eventBus.request(TESTCASE_SAVE_API.getEventPath(), body, messageAsyncResult -> {
           if (messageAsyncResult.succeeded()) {
             handleSuccessResponse(routingContext, messageAsyncResult);
             promise.complete(messageAsyncResult);

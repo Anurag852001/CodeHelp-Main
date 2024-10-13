@@ -7,4 +7,9 @@ public class PythonCompilerService implements ICompilerService{
   public String compileCode(CodeCompilingRequest request) {
     return "";
   }
+
+  @Override
+  public String runSimpleCode(String code) {
+    return "";
+  }
 }

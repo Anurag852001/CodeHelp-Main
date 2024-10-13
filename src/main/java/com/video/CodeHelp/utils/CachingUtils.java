@@ -47,4 +47,12 @@ public class CachingUtils {
   public static String getCacheKeyForMainCodeVariables(Long qid,CompilerTypeEnums compilerTypeEnums){
     return new StringBuilder().append(DataConstants.MAIN_CODE_VARIABLES).append(DataConstants.UNDERSCORE).append(qid).append(DataConstants.UNDERSCORE).append(compilerTypeEnums).toString();
   }
+
+  public static String getCacheKeyForCorrectCode(Long qNo,CompilerTypeEnums compilerType){
+    return new StringBuilder().append(DataConstants.CORRECT_CODE).append(DataConstants.UNDERSCORE).append(qNo).append(DataConstants.UNDERSCORE).append(compilerType).toString();
+  }
+
+  public static String getCacheKeyForTestCase(CompilerTypeEnums compilerType,Long qNo){
+    return new StringBuilder().append(DataConstants.TEST_CASE).append(DataConstants.UNDERSCORE).append(compilerType).append(DataConstants.UNDERSCORE).append(qNo).toString();
+  }
 }

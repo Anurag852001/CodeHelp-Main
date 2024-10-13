@@ -17,6 +17,9 @@ public class CodeHelpException extends ReplyException {
   public CodeHelpException(ReplyFailure failureType) {
     super(failureType);
   }
+  public CodeHelpException(String message){
+    super(ReplyFailure.ERROR, message);
+  }
 
   public CodeHelpException(ApplicationErrorEnums applicationErrorEnum) {
     super(ReplyFailure.ERROR,applicationErrorEnum.getErrorCode(),applicationErrorEnum.getMessage());

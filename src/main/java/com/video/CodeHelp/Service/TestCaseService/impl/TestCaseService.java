@@ -1,10 +1,18 @@
 package com.video.CodeHelp.Service.TestCaseService.impl;
 
+import com.google.inject.Inject;
+import com.video.CodeHelp.Dao.TestCaseDao;
+import com.video.CodeHelp.Enums.CacheTypeEnums;
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
+import com.video.CodeHelp.Enums.TestCaseType;
 import com.video.CodeHelp.Pojo.TestCase;
+import com.video.CodeHelp.Pojo.TestCaseSaveRequest;
+import com.video.CodeHelp.Service.CachingService;
 import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
+import com.video.CodeHelp.utils.CachingUtils;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Comparator;
 import java.util.List;
@@ -14,6 +22,16 @@ import java.util.stream.Collectors;
 @Slf4j
 @Singleton
 public class TestCaseService implements ITestCaseService {
+
+  private final TestCaseDao dao;
+  private final CachingService cachingService;
+
+  @Inject
+  public TestCaseService(TestCaseDao dao, CachingService cachingService) {
+    this.dao = dao;
+    this.cachingService = cachingService;
+  }
+
   @Override
   public List<String> getFormattedTestCase(List<TestCase> testCases, CompilerTypeEnums language) {
     switch (language) {
@@ -25,12 +43,30 @@ public class TestCaseService implements ITestCaseService {
     }
   }
 
+  @Override
+  public List<TestCase> getTestCases(Long qNo, CompilerTypeEnums language, TestCaseType testCaseType) {
+    List<TestCase> testCases = (List<TestCase>) cachingService.getFromCache(CachingUtils.getCacheKeyForTestCase(language, qNo), CacheTypeEnums.TWO_HUNDERED_CACHE);
+    if (CollectionUtils.isEmpty(testCases)) {
+      testCases = dao.getTestCases(qNo, language, testCaseType);
+      cachingService.populateInCache(CachingUtils.getCacheKeyForTestCase(language, qNo), testCases, CacheTypeEnums.TWO_HUNDERED_CACHE);
+      return testCases;
+    }
+    return null;
+  }
+
+  @Override
+  public void saveTestCases(TestCaseSaveRequest request) {
+    dao.saveTestCase(request.getQNo(),request.getLanguage(),request.getTestCases());
+    dao.saveTestCaseSolution(request.getTestCases().get(0).getTestCaseId(),request.getSolution());
+  }
+
+
   public List<String> getFormattedTestCaseForJava(List<TestCase> testCases) {
     //lets sort first
     testCases.sort(Comparator.comparing(TestCase::getVariableNumber));
     return testCases.stream().map(testCase -> {
       String testCaseValue = testCase.getValue();
-      switch (testCase.getType()) {
+      switch (testCase.getDataType()) {
         case INTEGER_ARRAY:
           return "{" + testCaseValue.substring(1, testCaseValue.length() - 1) +"};";
         default:
@@ -38,4 +74,6 @@ public class TestCaseService implements ITestCaseService {
       }
     }).collect(Collectors.toList());
   }
+
+
 }

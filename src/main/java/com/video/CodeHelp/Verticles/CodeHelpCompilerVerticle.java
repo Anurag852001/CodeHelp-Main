@@ -44,8 +44,9 @@ public class CodeHelpCompilerVerticle extends AbstractVerticle {
           message.reply(response);
         } catch (Exception e){
           log.error("Error while compiling code", e);
-          message.reply(e);
-          future.fail(e);
+          JsonObject response = new JsonObject().put(DataConstants.SUCCESS,false).put(DataConstants.DATA,e.getMessage());
+          message.reply(response);
+          future.complete(response);
         }
       });
       }

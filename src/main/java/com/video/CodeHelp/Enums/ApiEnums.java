@@ -45,7 +45,12 @@ public enum ApiEnums {
 
   //variables save api
   SAVE_MAIN_CODE_VARIABLES_API("/save/mainCode/variables", "saveVariables"),
-  GET_MAIN_CODE_VARIABLES_API("/get/mainCode/variables", "getMainCodeVariables");
+  GET_MAIN_CODE_VARIABLES_API("/get/mainCode/variables", "getMainCodeVariables"),
+
+  //correct code apis
+  SAVE_CORRECT_CODE_API("/save/correctCode","saveCorrectCode"),
+  GET_CORRECT_CODE_API("/get/correctCode","getCorrectCode"),
+  UPDATE_CORRECT_CODE_API("/update/correctCode","updateCorrectCode");
 
   String apiKey;
   String eventPath;

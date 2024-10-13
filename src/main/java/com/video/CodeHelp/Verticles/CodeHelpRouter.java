@@ -98,6 +98,28 @@ public class CodeHelpRouter extends AbstractVerticle {
         .handler(BodyHandler.create())
         .handler(codeHelpRoutingHandler);
 
+      router.post(ApiEnums.SAVE_CORRECT_CODE_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
+      router.post(ApiEnums.UPDATE_CORRECT_CODE_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
+      router.post(ApiEnums.TESTCASE_SAVE_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
+      router.get(ApiEnums.GET_CORRECT_CODE_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .handler(codeHelpRoutingHandler);
+
 
       server.requestHandler(router).listen(codeHelpConfig.getPort().intValue());
     } catch (Exception e) {
