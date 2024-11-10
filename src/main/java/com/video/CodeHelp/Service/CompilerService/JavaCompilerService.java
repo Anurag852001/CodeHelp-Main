@@ -4,14 +4,16 @@ import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApplicationErrorEnums;
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Enums.ConfigTypeEnum;
+import com.video.CodeHelp.Enums.TestCaseType;
 import com.video.CodeHelp.Exception.CodeHelpException;
-import com.video.CodeHelp.Pojo.CodeCompilingRequest;
-import com.video.CodeHelp.Pojo.JavaSourceFromString;
+import com.video.CodeHelp.Pojo.*;
+import com.video.CodeHelp.Pojo.Responses.SubmitCodeResponse;
 import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.WrapperFactory;
 import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.enums.WrapperCodeEnums;
 import com.video.CodeHelp.Service.MainCodeVariableService;
 import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
+import com.video.CodeHelp.utils.CommonUtils;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,8 +21,10 @@ import javax.tools.*;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -43,7 +47,7 @@ public class JavaCompilerService implements ICompilerService {
 
   @Override
   public String compileCode(CodeCompilingRequest request) {
-    String wrappedCode = wrapCode(request.getCode(), new ArrayList<>(), request.getQid(), request);
+    String wrappedCode = wrapCode(request);
     log.info("final wrappedCode:{} ", wrappedCode);
     return runSimpleCode(wrappedCode);
   }
@@ -74,7 +78,7 @@ public class JavaCompilerService implements ICompilerService {
 
         // Check compilation success and handle errors directly from diagnostics
         if (!success) {
-          throw new CodeHelpException( "Compilation failed:\n" + diagnostics.getDiagnostics().stream()
+          throw new CodeHelpException("Compilation failed:\n" + diagnostics.getDiagnostics().stream()
             .map(d -> d.getMessage(null))
             .collect(Collectors.joining("\n")));
         }
@@ -95,17 +99,53 @@ public class JavaCompilerService implements ICompilerService {
 
         return executionOutput.toString();
       }
-    } catch (CodeHelpException e){
+    } catch (CodeHelpException e) {
       log.error(e.getMessage(), e);
       throw new CodeHelpException(e.getMessage());
     } catch (Exception e) {
       log.error("Error executing code ", e);
-      throw new CodeHelpException(ApplicationErrorEnums.CODE_COMPILING_ERROR+e.getMessage());
+      throw new CodeHelpException(ApplicationErrorEnums.CODE_COMPILING_ERROR + e.getMessage());
     }
   }
 
+  @Override
+  public SubmitCodeResponse submitCode(SubmitCodeRequest request) {
+    AtomicReference<Integer> count = new AtomicReference<>(0);
+    AtomicReference<String> lastTestCaseResultBeforeFailure = new AtomicReference<>();
+    AtomicReference<String> lastExpectedResult = new AtomicReference<>();
+    SubmitCodeResponse.SubmitCodeResponseBuilder submitCodeResponse = SubmitCodeResponse.builder();
+    Integer totalCount = 0;
+    try {
+      Long startTime = System.currentTimeMillis();
+      List<TestCase> testCasesUngrouped = testCaseService.getTestCases(request.getQid(), request.getCompilerType(), TestCaseType.MAIN_TESTCASE);
+      Map<Long, List<TestCase>> groupedTestCases = testCasesUngrouped.stream().collect(Collectors.groupingBy(TestCase::getTestCaseId));
 
-  private String wrapCode(String code, List<String> inputs, Long qid, CodeCompilingRequest request) {
+      Map<Long, TestCaseResult> testCaseResultMap = testCaseService.getTestCaseResults(request.getQid(), request.getCompilerType())
+        .stream().collect(Collectors.toMap(TestCaseResult::getTestCaseId, Function.identity()));
+
+      totalCount = groupedTestCases.size();
+      groupedTestCases.entrySet().stream().forEach(testCase -> {
+        List<TestCase> testCases = testCase.getValue();
+        String wrappedCode = wrapCode(CommonUtils.getCodeCompilingRequest(request.getCode(), request.getCompilerType(), testCases, request.getQid()));
+        lastTestCaseResultBeforeFailure.set(runSimpleCode(wrappedCode));
+        TestCaseResult testCaseResult = testCaseResultMap.get(testCases.get(0).getTestCaseId());
+        lastExpectedResult.set(testCaseResult.getOutput());
+        if (!testCaseResult.getOutput().equalsIgnoreCase(lastTestCaseResultBeforeFailure.get())) {
+          throw new CodeHelpException(ApplicationErrorEnums.TEST_CASE_FAILED);
+        }
+        count.getAndSet(count.get() + 1);
+      });
+      Long timeTaken = System.currentTimeMillis() - startTime;
+      submitCodeResponse.timeTake(timeTaken).totalTestCases(totalCount).testCasesPassed(count.get());
+    } catch (Exception e) {
+      log.warn(e.getMessage());
+      submitCodeResponse.testCasesPassed(totalCount).testCasesPassed(count.get()).totalTestCases(totalCount).failed(true);
+    }
+    return submitCodeResponse.build();
+  }
+
+
+  private String wrapCode(CodeCompilingRequest request) {
     //firstly we will start with the basic code from config
     Long startTime = System.currentTimeMillis();
     String basicCode1 = configService.getCodeHelpConfig(DataConstants.WRAPPER_CONFIG_JAVA_1, ConfigTypeEnum.WRAPPER_CONFIG.name()).getConfigValue();
@@ -115,12 +155,12 @@ public class JavaCompilerService implements ICompilerService {
 
     StringBuilder stringBuilder1 = new StringBuilder();
     attachCode(stringBuilder1, basicCode1);
-    attachCode(stringBuilder1, code);
+    attachCode(stringBuilder1, request.getCode());
     attachCode(stringBuilder1, basicCode2);
     attachCode(stringBuilder1, basicCode3);
     attachTestCase(stringBuilder1, request);
     String codeToBeWrappedWithMainCode = stringBuilder1.toString();
-    String newCode = wrapperFactory.getWrapperService(WrapperCodeEnums.MAIN_CODE).wrapCode(codeToBeWrappedWithMainCode, qid, CompilerTypeEnums.JAVA, inputs);
+    String newCode = wrapperFactory.getWrapperService(WrapperCodeEnums.MAIN_CODE).wrapCode(codeToBeWrappedWithMainCode, request.getQid(), CompilerTypeEnums.JAVA);
     StringBuilder stringBuilder2 = new StringBuilder().append(newCode);
     attachCode(stringBuilder2, basicCode4);
     log.info("Time took to wrap code : {}", System.currentTimeMillis() - startTime);

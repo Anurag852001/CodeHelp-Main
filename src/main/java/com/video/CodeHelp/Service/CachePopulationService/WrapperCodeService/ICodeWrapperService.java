@@ -8,7 +8,7 @@ import io.vertx.core.json.JsonObject;
 import java.util.List;
 
 public interface ICodeWrapperService {
-   String wrapCode(String code, Long qid, CompilerTypeEnums compilerType, List<String> inputs);
+   String wrapCode(String code, Long qid, CompilerTypeEnums compilerType);
    IWrapperCodeResponse getWrapperCode(GetWrapperCodeRequest request);
    Long saveWrapperCode(JsonObject request);
 }

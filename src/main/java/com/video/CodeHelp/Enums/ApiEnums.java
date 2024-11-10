@@ -29,6 +29,7 @@ public enum ApiEnums {
 
   //Compiler apis
   COMPILE_CODE_API("/compile/code","compileCode"),
+  SUBMIT_CODE_API("/submit/code","submitCode"),
   GET_WRAPPER_CODE("/get/wrapper/code", "getWrapperCode"),
   SAVE_WRAPPER_CODE("/save/wrapper/code", "saveWrapperCode"),
 

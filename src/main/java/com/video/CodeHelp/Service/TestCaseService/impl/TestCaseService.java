@@ -6,6 +6,7 @@ import com.video.CodeHelp.Enums.CacheTypeEnums;
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Enums.TestCaseType;
 import com.video.CodeHelp.Pojo.TestCase;
+import com.video.CodeHelp.Pojo.TestCaseResult;
 import com.video.CodeHelp.Pojo.TestCaseSaveRequest;
 import com.video.CodeHelp.Service.CachingService;
 import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
@@ -58,6 +59,18 @@ public class TestCaseService implements ITestCaseService {
   public void saveTestCases(TestCaseSaveRequest request) {
     dao.saveTestCase(request.getQNo(),request.getLanguage(),request.getTestCases());
     dao.saveTestCaseSolution(request.getTestCases().get(0).getTestCaseId(),request.getSolution());
+  }
+
+  @Override
+  public List<TestCaseResult> getTestCaseResults(Long qid, CompilerTypeEnums language) {
+   List<TestCaseResult> testCasesResults = (List<TestCaseResult>) cachingService.getFromCache(CachingUtils.getCacheKeyForTestCaseResults(language,qid),CacheTypeEnums.TWO_HUNDERED_CACHE);
+   if(testCasesResults == null){
+     List<TestCaseResult> testCaseResultsFromDao = dao.getTestCaseResults(language,qid);
+     cachingService.populateInCache(CachingUtils.getCacheKeyForTestCaseResults(language,qid),testCaseResultsFromDao,CacheTypeEnums.TWO_HUNDERED_CACHE);
+     return testCaseResultsFromDao;
+   }
+   return testCasesResults;
+
   }
 
 

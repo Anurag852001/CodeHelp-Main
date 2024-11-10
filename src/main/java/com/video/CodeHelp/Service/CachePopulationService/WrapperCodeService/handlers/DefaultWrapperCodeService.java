@@ -31,7 +31,7 @@ public class DefaultWrapperCodeService implements ICodeWrapperService {
   }
 
   @Override
-  public String wrapCode(String code, Long qid, CompilerTypeEnums compilerType, List<String> inputs) {
+  public String wrapCode(String code, Long qid, CompilerTypeEnums compilerType) {
       DefaultWrapperCode wrapperCode =  (DefaultWrapperCode) getWrapperCode(GetWrapperCodeRequest.builder().qid(qid).compilerType(compilerType).build());
       return wrapperCode.getDefaultCode()+System.lineSeparator()+code+System.lineSeparator();
   }

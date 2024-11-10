@@ -38,7 +38,7 @@ public class MainWrapperCodeService implements ICodeWrapperService {
   }
 
   @Override
-  public String wrapCode(String code, Long qid, CompilerTypeEnums compilerType, List<String> inputs) {
+  public String wrapCode(String code, Long qid, CompilerTypeEnums compilerType) {
     MainWrapperCode wrapperCode =  (MainWrapperCode) getWrapperCode(GetWrapperCodeRequest.builder().qid(qid).compilerType(compilerType).build());
     String printCode = configService.getCodeHelpConfig(wrapperCode.getReturnType().getJavaPrintingConfig(), ConfigTypeEnum.WRAPPER_CONFIG.name()).getConfigValue();
     return new StringBuilder().append(code)

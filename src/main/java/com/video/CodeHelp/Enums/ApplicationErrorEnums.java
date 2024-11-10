@@ -12,7 +12,8 @@ public enum ApplicationErrorEnums {
   NOT_SUPPORTED("Not supported",5),
   CODE_COMPILING_ERROR("Error in compiling code ",5),
   ERROR_WHILE_SAVING_CORRECT_CODE("Error while saving correct code: ",6),
-  ERROR_WHILE_UPDATING_CORRECT_CODE("Error while updating correct code ",7);
+  ERROR_WHILE_UPDATING_CORRECT_CODE("Error while updating correct code ",7),
+  TEST_CASE_FAILED("Test case failed",8);
 
   String message;
   Integer errorCode;

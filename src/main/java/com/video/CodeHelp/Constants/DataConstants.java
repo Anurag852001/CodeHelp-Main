@@ -35,4 +35,5 @@ public class DataConstants {
   public static final String CORRECT_CODE = "CORRECT_CODE";
   public static final String CORRECT_CODE_CAMEL = "correctCode";
   public static final String TEST_CASE = "TEST_CASE";
+  public static final String TEST_CASE_RESULTS = "TEST_CASE_RESULTS";
 }

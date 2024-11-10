@@ -3,6 +3,7 @@ package com.video.CodeHelp.Dao;
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Enums.TestCaseType;
 import com.video.CodeHelp.Pojo.TestCase;
+import com.video.CodeHelp.Pojo.TestCaseResult;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindList;
@@ -22,4 +23,9 @@ public interface TestCaseDao {
 
   @SqlUpdate("Insert into test_case_solution(test_case_id,solution) values(:testCaseId,:solution)")
   public void saveTestCaseSolution(@Bind("testCaseId") Long testCaseId,@Bind("solution") String solution);
+
+  @RegisterBeanMapper(TestCaseResult.class)
+  @SqlQuery("Select * from test_case_results where q_id = :qid,language =:language")
+  public List<TestCaseResult>getTestCaseResults(@Bind("language") CompilerTypeEnums compilerTypeEnums,@Bind("qid") Long qid);
+
 }
