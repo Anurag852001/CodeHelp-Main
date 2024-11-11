@@ -45,11 +45,11 @@ public class TestCaseService implements ITestCaseService {
   }
 
   @Override
-  public List<TestCase> getTestCases(Long qNo, CompilerTypeEnums language, TestCaseType testCaseType) {
-    List<TestCase> testCases = (List<TestCase>) cachingService.getFromCache(CachingUtils.getCacheKeyForTestCase(language, qNo), CacheTypeEnums.TWO_HUNDERED_CACHE);
+  public List<TestCase> getTestCases(Long qId, CompilerTypeEnums language, TestCaseType testCaseType) {
+    List<TestCase> testCases = (List<TestCase>) cachingService.getFromCache(CachingUtils.getCacheKeyForTestCase(language, qId), CacheTypeEnums.TWO_HUNDERED_CACHE);
     if (CollectionUtils.isEmpty(testCases)) {
-      testCases = dao.getTestCases(qNo, language, testCaseType);
-      cachingService.populateInCache(CachingUtils.getCacheKeyForTestCase(language, qNo), testCases, CacheTypeEnums.TWO_HUNDERED_CACHE);
+      testCases = dao.getTestCases(qId, testCaseType);
+      cachingService.populateInCache(CachingUtils.getCacheKeyForTestCase(language, qId), testCases, CacheTypeEnums.TWO_HUNDERED_CACHE);
       return testCases;
     }
     return null;

@@ -119,6 +119,16 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
         }
       });
         break;
+      case SUBMIT_CODE_API:
+        eventBus.request(SUBMIT_CODE_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
       case GET_WRAPPER_CODE:
         eventBus.request(GET_WRAPPER_CODE.getEventPath(), body, messageAsyncResult -> {
           if (messageAsyncResult.succeeded()) {

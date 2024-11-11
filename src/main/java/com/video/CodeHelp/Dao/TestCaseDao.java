@@ -15,8 +15,8 @@ import java.util.List;
 public interface TestCaseDao {
 
   @RegisterBeanMapper(TestCase.class)
-  @SqlQuery("Select * from test_cases where q_no =:qNo and language =:language and testCaseType =:testCaseType")
-  public List<TestCase> getTestCases(@Bind("qNo") Long qNo, @Bind("language") CompilerTypeEnums language, @Bind("testCaseType")TestCaseType testCaseType);
+  @SqlQuery("Select * from test_cases where q_id =:qId  and test_case_type =:testCaseType")
+  public List<TestCase> getTestCases(@Bind("qId") Long qId, @Bind("testCaseType")TestCaseType testCaseType);
 
   @SqlUpdate("Insert into test_cases (q_id,test_case_id,value,test_case_type,variable_number,data_type) values (:qNo, :language, :testCase.value,:testCase.testCaseType,:testCase.variableNumber,:testCase.dataType)")
   public void saveTestCase(@Bind("qNo") Long qNo, @Bind("language") CompilerTypeEnums language, @BindList("testCase") List<TestCase> testCase);

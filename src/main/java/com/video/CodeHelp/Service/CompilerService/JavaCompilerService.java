@@ -180,7 +180,8 @@ public class JavaCompilerService implements ICompilerService {
     stringBuilder.append(System.lineSeparator());
     List<String> variables = mainCodeVariableService.getFormattedVariables(request.getQid(), CompilerTypeEnums.JAVA);
     List<String> testCases = testCaseService.getFormattedTestCase(request.getTestCase(), CompilerTypeEnums.JAVA);
-    for (int i = 0; i < variables.size(); i++) {
+
+    for (int i = 0; i < testCases.size(); i++) {
       stringBuilder.append(variables.get(i)).append(" = ").append(testCases.get(i)).append(System.lineSeparator());
     }
     stringBuilder.append(System.lineSeparator());

@@ -14,6 +14,6 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CorrectCodePojo {
   private String code;
-  private Long qNo;
+  private Long qid;
   private CompilerTypeEnums language;
 }

@@ -53,7 +53,7 @@ public class CachingUtils {
   }
 
   public static String getCacheKeyForTestCase(CompilerTypeEnums compilerType,Long qNo){
-    return new StringBuilder().append(DataConstants.TEST_CASE).append(DataConstants.UNDERSCORE).append(compilerType).append(DataConstants.UNDERSCORE).append(qNo).toString();
+    return new StringBuilder().append(DataConstants.TEST_CASE).append(DataConstants.UNDERSCORE).append(qNo).toString();
   }
   public static String getCacheKeyForTestCaseResults(CompilerTypeEnums compilerType,Long qid){
     return new StringBuilder().append(DataConstants.TEST_CASE_RESULTS).append(DataConstants.UNDERSCORE).append(compilerType).append(DataConstants.UNDERSCORE).append(qid).toString();

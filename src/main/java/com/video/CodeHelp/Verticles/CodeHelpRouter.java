@@ -80,6 +80,12 @@ public class CodeHelpRouter extends AbstractVerticle {
         .handler(BodyHandler.create())
         .handler(codeHelpRoutingHandler);
 
+      router.post( ApiEnums.SUBMIT_CODE_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
       router.post(ApiEnums.SAVE_WRAPPER_CODE.getApiKey())
         .produces(DataConstants.APPLICATION_JSON)
         .consumes(DataConstants.APPLICATION_JSON)
