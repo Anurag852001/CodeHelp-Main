@@ -1,5 +1,6 @@
 package com.video.CodeHelp.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.video.CodeHelp.Dao.CorrectCodeDao;
 import com.video.CodeHelp.Enums.ApplicationErrorEnums;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
@@ -51,7 +52,7 @@ public class CorrectCodeService {
   }
 
   public CorrectCodePojo getCorrectCode(CorrectCodePojo correctCodePojo) {
-    CorrectCodePojo correctCodeFromCache = (CorrectCodePojo)cachingService.getFromCache(CachingUtils.getCacheKeyForCorrectCode(correctCodePojo.getQid(),correctCodePojo.getLanguage()), CacheTypeEnums.TWO_HUNDERED_CACHE);
+    CorrectCodePojo correctCodeFromCache = new ObjectMapper().convertValue(cachingService.getFromCache(CachingUtils.getCacheKeyForCorrectCode(correctCodePojo.getQid(),correctCodePojo.getLanguage()), CacheTypeEnums.TWO_HUNDERED_CACHE),CorrectCodePojo.class);
     if(correctCodeFromCache == null){
       //reviving it from the database
       CorrectCodePojo correctCode = dao.getCorrectCodeByQNoAndLanguage(correctCodePojo.getQid(), correctCodePojo.getLanguage());
@@ -60,7 +61,7 @@ public class CorrectCodeService {
       }
       return correctCode;
     }
-    return null;
+    return correctCodeFromCache;
   }
 
   public void updateCorrectCode(CorrectCodePojo correctCodePojo) {

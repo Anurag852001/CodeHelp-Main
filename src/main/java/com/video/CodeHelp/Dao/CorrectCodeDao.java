@@ -19,6 +19,6 @@ public interface CorrectCodeDao {
   void updateCorrectCode(@Bind("code") String code, @Bind("qid") Long qid, @Bind("language") CompilerTypeEnums language);
 
   @RegisterBeanMapper(CorrectCodePojo.class)
-  @SqlQuery("SELECT * FROM correct_code WHERE q_no = :q_no AND language = :language")
-  CorrectCodePojo getCorrectCodeByQNoAndLanguage(@Bind("q_no") Long qNo, @Bind("language") CompilerTypeEnums language);
+  @SqlQuery("SELECT * FROM correct_code WHERE q_id = :qid AND language = :language")
+  CorrectCodePojo getCorrectCodeByQNoAndLanguage(@Bind("qid") Long qid, @Bind("language") CompilerTypeEnums language);
 }

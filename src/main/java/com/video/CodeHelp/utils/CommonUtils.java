@@ -1,8 +1,10 @@
 package com.video.CodeHelp.utils;
 
+import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Pojo.CodeCompilingRequest;
 import com.video.CodeHelp.Pojo.TestCase;
+import io.vertx.core.json.JsonObject;
 
 import java.util.List;
 
@@ -26,4 +28,10 @@ public class CommonUtils {
       .build();
   }
 
+  public static JsonObject prepareResponseForCompileCodeApi(String result,String expectedResult,Long timeTaken){
+    return new JsonObject().put(DataConstants.RESULT,result)
+      .put(DataConstants.EXPECTED_RESULT,expectedResult)
+      .put(DataConstants.TIME_TAKEN,timeTaken)
+      .put(DataConstants.SUCCESS,result == expectedResult);
+  }
 }

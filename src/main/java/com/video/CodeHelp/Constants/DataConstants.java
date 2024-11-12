@@ -36,4 +36,7 @@ public class DataConstants {
   public static final String CORRECT_CODE_CAMEL = "correctCode";
   public static final String TEST_CASE = "TEST_CASE";
   public static final String TEST_CASE_RESULTS = "TEST_CASE_RESULTS";
+  public static final String RESULT = "result";
+  public static final String EXPECTED_RESULT = "expectedResult";
+  public static final String TIME_TAKEN = "timeTaken";
 }
