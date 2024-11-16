@@ -31,6 +31,6 @@ public interface TestCaseDao {
 
   @RegisterBeanMapper(TestCaseRuleInfo.class)
   @SqlQuery("Select * from test_case_generator_rules where qid = :qid,variable_number =:variableNumber")
-  public List<TestCaseRuleInfo> getTestCaseGeneratorRules(@Bind("qid") Integer qid,@Bind("variableNumber") Integer variableNumber);
+  public List<TestCaseRuleInfo> getTestCaseGeneratorRules(@Bind("qid") Long qid,@Bind("variableNumber") Long variableNumber);
 
 }

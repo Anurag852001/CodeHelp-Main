@@ -75,6 +75,7 @@ public class TestCaseService implements ITestCaseService {
   }
 
 
+
   public List<String> getFormattedTestCaseForJava(List<TestCase> testCases) {
     //lets sort first
     testCases.sort(Comparator.comparing(TestCase::getVariableNumber));
@@ -89,7 +90,7 @@ public class TestCaseService implements ITestCaseService {
     }).collect(Collectors.toList());
   }
 
-  public List<TestCaseRuleInfo> getTestCaseRuleInfo(Integer qid,Integer variableNumber){
+  public List<TestCaseRuleInfo> getTestCaseRuleInfo(Long qid,Long variableNumber){
     return dao.getTestCaseGeneratorRules(qid, variableNumber);
   }
 

@@ -23,13 +23,15 @@ public class TestCaseGeneratorService {
   private final ITestCaseService testCaseService;
   private final CompilerFactory compilerFactory;
   private final CorrectCodeService correctCodeService;
+  private final RuleEngineFactory ruleEngineFactory;
 
   @Inject
-  public TestCaseGeneratorService(MainCodeVariableService mainCodeVariableService, ITestCaseService testCaseService, CompilerFactory compilerFactory, CorrectCodeService correctCodeService){
+  public TestCaseGeneratorService(MainCodeVariableService mainCodeVariableService, ITestCaseService testCaseService, CompilerFactory compilerFactory, CorrectCodeService correctCodeService, RuleEngineFactory ruleEngineFactory){
     this.mainCodeVariableService = mainCodeVariableService;
     this.testCaseService = testCaseService;
     this.compilerFactory = compilerFactory;
     this.correctCodeService = correctCodeService;
+    this.ruleEngineFactory = ruleEngineFactory;
   }
 
   public TestCaseGeneratorResponse generateTestCase(Long qid,CompilerTypeEnums language, Long numberOfTestCases){
@@ -53,7 +55,7 @@ public class TestCaseGeneratorService {
     List<TestCase> testCase = new ArrayList<>();
     mainCodeVariables.sort(Comparator.comparingLong(mainCodeVariable -> mainCodeVariable.getVariableNumber()));
     mainCodeVariables.forEach(mainCodeVariable -> {
-      RuleEngineService ruleEngineService = mainCodeVariable.getType().getRuleEngineService();
+      IRuleEngineService ruleEngineService = ruleEngineFactory.getRuleEngineService(mainCodeVariable.getType());
       List<TestCaseRuleInfo> testCaseRuleInfo = variableVsTestCaseRuleInfo.get(mainCodeVariable.getVariableNumber());
       String generatedValue = testCaseRuleInfo.forEach(tcR->
         ruleEngineService.applyRule(tcR.getRule(), tcR.getParams())

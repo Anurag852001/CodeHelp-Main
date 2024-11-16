@@ -39,4 +39,6 @@ public class DataConstants {
   public static final String RESULT = "result";
   public static final String EXPECTED_RESULT = "expectedResult";
   public static final String TIME_TAKEN = "timeTaken";
+  public static final String INTEGER_RULE_ENGINE_SERVICE = "integerRuleEngineService";
+  public static final String INTEGER_ARRAY_RULE_ENGINE_SERVICE = "integerArrayRuleEngineService";
 }

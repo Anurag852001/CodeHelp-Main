@@ -1,6 +1,6 @@
 package com.video.CodeHelp.Service.TestCaseService.TestCaseGeneratorRules;
 
-import lombok.AllArgsConstructor;
+import com.video.CodeHelp.Service.TestCaseService.impl.IntegerRulesImpl;
 import lombok.Getter;
 
 import java.util.function.BiFunction;

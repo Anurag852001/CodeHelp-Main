@@ -1,8 +1,12 @@
-package com.video.CodeHelp.Service.TestCaseService.TestCaseGeneratorRules;
+package com.video.CodeHelp.Service.TestCaseService.impl;
+
+import com.video.CodeHelp.Pojo.Responses.RuleEngineResponse;
+import com.video.CodeHelp.Service.TestCaseService.IRuleEngineService;
 
 import java.util.Arrays;
+import java.util.List;
 
-public class IntegerRulesImpl {
+public class IntegerRulesImpl implements IRuleEngineService {
   public static Integer generateRandomInteger(Integer size,Integer input){
     int randomSize = (int) (Math.random() * size+1);
     return  (int) (Math.random() * Math.pow(10, randomSize));
@@ -20,4 +24,8 @@ public class IntegerRulesImpl {
     return Integer.parseInt(new StringBuilder().append(new String(digits)).reverse().toString());
   }
 
+  @Override
+  public RuleEngineResponse applyRule(String rule, List<String>params) {
+    return null;
+  }
 }
