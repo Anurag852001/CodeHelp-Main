@@ -7,6 +7,7 @@ import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Enums.TestCaseType;
 import com.video.CodeHelp.Pojo.TestCase;
 import com.video.CodeHelp.Pojo.TestCaseResult;
+import com.video.CodeHelp.Pojo.TestCaseRuleInfo;
 import com.video.CodeHelp.Pojo.TestCaseSaveRequest;
 import com.video.CodeHelp.Service.CachingService;
 import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
@@ -88,5 +89,8 @@ public class TestCaseService implements ITestCaseService {
     }).collect(Collectors.toList());
   }
 
+  public List<TestCaseRuleInfo> getTestCaseRuleInfo(Integer qid,Integer variableNumber){
+    return dao.getTestCaseGeneratorRules(qid, variableNumber);
+  }
 
 }

@@ -4,6 +4,7 @@ import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Enums.TestCaseType;
 import com.video.CodeHelp.Pojo.TestCase;
 import com.video.CodeHelp.Pojo.TestCaseResult;
+import com.video.CodeHelp.Pojo.TestCaseRuleInfo;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindList;
@@ -27,5 +28,9 @@ public interface TestCaseDao {
   @RegisterBeanMapper(TestCaseResult.class)
   @SqlQuery("Select * from test_case_results where q_id = :qid,language =:language")
   public List<TestCaseResult>getTestCaseResults(@Bind("language") CompilerTypeEnums compilerTypeEnums,@Bind("qid") Long qid);
+
+  @RegisterBeanMapper(TestCaseRuleInfo.class)
+  @SqlQuery("Select * from test_case_generator_rules where qid = :qid,variable_number =:variableNumber")
+  public List<TestCaseRuleInfo> getTestCaseGeneratorRules(@Bind("qid") Integer qid,@Bind("variableNumber") Integer variableNumber);
 
 }

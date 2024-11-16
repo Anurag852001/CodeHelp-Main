@@ -15,11 +15,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MainCodeVariable {
-  private Integer id;
+  private Long id;
   private String name;
   private DataTypeEnums type;
   private Integer questionNumber;
   private CompilerTypeEnums language;
-  private Integer variableNumber;
+  private Long variableNumber;
 
 }

@@ -2,8 +2,10 @@ package com.video.CodeHelp.utils;
 
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
+import com.video.CodeHelp.Enums.TestCaseType;
 import com.video.CodeHelp.Pojo.CodeCompilingRequest;
 import com.video.CodeHelp.Pojo.TestCase;
+import com.video.CodeHelp.Pojo.TestCaseSaveRequest;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
@@ -32,6 +34,16 @@ public class CommonUtils {
     return new JsonObject().put(DataConstants.RESULT,result)
       .put(DataConstants.EXPECTED_RESULT,expectedResult)
       .put(DataConstants.TIME_TAKEN,timeTaken)
-      .put(DataConstants.SUCCESS,result == expectedResult);
+      .put(DataConstants.SUCCESS,result.equalsIgnoreCase(expectedResult));
+  }
+
+  public static TestCaseSaveRequest getTestCaseSaveRequest(List<TestCase> testCases, Long qid, String solution, CompilerTypeEnums language) {
+    return TestCaseSaveRequest.builder()
+      .testCases(testCases)
+      .qNo(qid)
+      .solution(solution)
+      .language(language)
+      .testCaseType(TestCaseType.MAIN_TESTCASE)
+      .build();
   }
 }
