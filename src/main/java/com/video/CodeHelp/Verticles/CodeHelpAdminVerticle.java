@@ -128,43 +128,39 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
       });
     });
 
-    eventBus.consumer(ApiEnums.CONFIG_GET_API.getEventPath(), message -> {
-        vertx.executeBlocking(future -> {
-            try {
-              JsonObject request = new JsonObject(message.body().toString());
-              Config config = configService.getCodeHelpConfig(request.getString(DataConstants.CONFIG_KEY), request.getString(DataConstants.CONFIG_TYPE));
-              JsonObject configJ = JsonObject.mapFrom(config);
-              JsonObject response = new JsonObject().put(DataConstants.MESSAGE, DataConstants.SUCCESS);
-              response.put(DataConstants.SUCCESS, true);
-              response.put(DataConstants.DATA, configJ);
-              message.reply(response);
-              future.complete(response);
-            } catch (Exception e) {
-              log.error("Error while getting config", e);
-              message.reply(e);
-              future.fail(e);
-            }
-          }
-        );
-      }
-    );
-
-    eventBus.consumer(ApiEnums.CACHE_GET_API.getEventPath(), message -> {
-      vertx.executeBlocking(future -> {
+    eventBus.consumer(ApiEnums.CONFIG_GET_API.getEventPath(), message -> vertx.executeBlocking(future -> {
         try {
-          JsonObject body = new JsonObject(message.body().toString());
-          CacheTypeEnums cacheTypeEnum = CacheTypeEnums.valueOf(body.getString(DataConstants.CACHE_TYPE));
-          JsonObject response = new JsonObject();
-          response.put(DataConstants.DATA, CaffineCacheFactory.getAllDataInCache(cacheTypeEnum.getCache()));
+          JsonObject request = new JsonObject(message.body().toString());
+          Config config = configService.getCodeHelpConfig(request.getString(DataConstants.CONFIG_KEY), request.getString(DataConstants.CONFIG_TYPE));
+          JsonObject configJ = JsonObject.mapFrom(config);
+          JsonObject response = new JsonObject().put(DataConstants.MESSAGE, DataConstants.SUCCESS);
+          response.put(DataConstants.SUCCESS, true);
+          response.put(DataConstants.DATA, configJ);
           message.reply(response);
           future.complete(response);
         } catch (Exception e) {
-          log.error("Error while saving config", e);
+          log.error("Error while getting config", e);
           message.reply(e);
           future.fail(e);
         }
-      });
-    });
+      }
+    )
+    );
+
+    eventBus.consumer(ApiEnums.CACHE_GET_API.getEventPath(), message -> vertx.executeBlocking(future -> {
+      try {
+        JsonObject body = new JsonObject(message.body().toString());
+        CacheTypeEnums cacheTypeEnum = CacheTypeEnums.valueOf(body.getString(DataConstants.CACHE_TYPE));
+        JsonObject response = new JsonObject();
+        response.put(DataConstants.DATA, CaffineCacheFactory.getAllDataInCache(cacheTypeEnum.getCache()));
+        message.reply(response);
+        future.complete(response);
+      } catch (Exception e) {
+        log.error("Error while saving config", e);
+        message.reply(e);
+        future.fail(e);
+      }
+    }));
 
     eventBus.consumer(ApiEnums.QUESTION_GET_API.getEventPath(), message -> {
       vertx.executeBlocking(future -> {

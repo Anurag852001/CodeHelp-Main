@@ -4,10 +4,8 @@ import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Enums.TestCaseType;
 import com.video.CodeHelp.Pojo.*;
 import com.video.CodeHelp.Service.CompilerService.CompilerFactory;
-import com.video.CodeHelp.Service.CompilerService.ICompilerService;
 import com.video.CodeHelp.Service.CorrectCodeService;
 import com.video.CodeHelp.Service.MainCodeVariableService;
-import com.video.CodeHelp.Service.TestCaseService.impl.TestCaseService;
 import com.video.CodeHelp.utils.CommonUtils;
 import jakarta.inject.Inject;
 
@@ -36,30 +34,28 @@ public class TestCaseGeneratorService {
 
   public TestCaseGeneratorResponse generateTestCase(Long qid,CompilerTypeEnums language, Long numberOfTestCases){
     List<MainCodeVariable> mainCodeVariables = mainCodeVariableService.getVariables(qid,language);
-    Map<Long,List<TestCaseRuleInfo>> variableVstestCaseRuleInfo = mainCodeVariables.stream()
-      .collect(Collectors.toMap(m->m.getVariableNumber(),m->testCaseService.getTestCaseRuleInfo(qid,m.getVariableNumber())));
+    Map<Long,List<TestCaseRuleInfo>> variableVsTestCaseRuleInfo = mainCodeVariables.stream()
+      .collect(Collectors.toMap(MainCodeVariable::getVariableNumber, m->testCaseService.getTestCaseRuleInfo(qid,m.getVariableNumber())));
 
     for(int i =0;i<numberOfTestCases;i++){
-        mainCodeVariables.stream().forEach(mcv->{
-          List<TestCase> testCases = generateTestCaseForEachVariable(mainCodeVariables,variableVstestCaseRuleInfo);
+        mainCodeVariables.forEach(mcv->{
+          List<TestCase> testCases = generateTestCaseForEachVariable(mainCodeVariables,variableVsTestCaseRuleInfo);
           String correctCode = correctCodeService.getCorrectCode(CorrectCodePojo.builder().qid(qid).language(language).build()).getCode();
           String solution = compilerFactory.getCompiler(language).compileCode(CommonUtils.getCodeCompilingRequest(correctCode,language,testCases,qid));
           TestCaseSaveRequest testCaseSaveRequest = CommonUtils.getTestCaseSaveRequest(testCases,qid,solution,language);
           testCaseService.saveTestCases(testCaseSaveRequest);
        } );
     }
-
+  return TestCaseGeneratorResponse.builder().build();
   }
 
   private List<TestCase> generateTestCaseForEachVariable(List<MainCodeVariable> mainCodeVariables,Map<Long,List<TestCaseRuleInfo>> variableVsTestCaseRuleInfo){
     List<TestCase> testCase = new ArrayList<>();
-    mainCodeVariables.sort(Comparator.comparingLong(mainCodeVariable -> mainCodeVariable.getVariableNumber()));
+    mainCodeVariables.sort(Comparator.comparingLong(MainCodeVariable::getVariableNumber));
     mainCodeVariables.forEach(mainCodeVariable -> {
       IRuleEngineService ruleEngineService = ruleEngineFactory.getRuleEngineService(mainCodeVariable.getType());
       List<TestCaseRuleInfo> testCaseRuleInfo = variableVsTestCaseRuleInfo.get(mainCodeVariable.getVariableNumber());
-      String generatedValue = testCaseRuleInfo.forEach(tcR->
-        ruleEngineService.applyRule(tcR.getRule(), tcR.getParams())
-        );
+      String generatedValue = ruleEngineService.applyRule(testCaseRuleInfo).getValue();
       testCase.add(TestCase.builder()
         .testCaseType(TestCaseType.MAIN_TESTCASE)
         .testCaseId(mainCodeVariable.getVariableNumber())
