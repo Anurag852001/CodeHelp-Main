@@ -176,7 +176,7 @@ public class JavaCompilerService implements ICompilerService {
     }
   }
 
-  public void attachTestCase(StringBuilder stringBuilder, CodeCompilingRequest request) {
+  public void attachTestCase(@org.jetbrains.annotations.NotNull StringBuilder stringBuilder, CodeCompilingRequest request) {
     stringBuilder.append(System.lineSeparator());
     List<String> variables = mainCodeVariableService.getFormattedVariables(request.getQid(), CompilerTypeEnums.JAVA);
     List<String> testCases = testCaseService.getFormattedTestCase(request.getTestCase(), CompilerTypeEnums.JAVA);

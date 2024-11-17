@@ -13,6 +13,10 @@ public class IntegerRulesImpl implements IRuleEngineService {
     return  (int) (Math.random() * Math.pow(10, randomSize));
   }
 
+  public static Integer generateNegativeOrPositiveRandomInteger(Integer size,Integer input){
+    return (int) (Math.random() * Math.pow(10, size)) * (Math.random() < 0.5? -1 : 1);
+  }
+
   public static Integer sortIntegerDigitsInAsc(Integer number,Integer input){
     char[] digits = number.toString().toCharArray();
     Arrays.sort(digits);
