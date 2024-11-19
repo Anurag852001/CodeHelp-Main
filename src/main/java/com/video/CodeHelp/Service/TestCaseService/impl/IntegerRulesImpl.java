@@ -41,5 +41,6 @@ public class IntegerRulesImpl implements IRuleEngineService {
             .getInteger(DataConstants.SIZE),
           info.getParams().getInteger(DataConstants.MAXIMUM_VALUE));
     }
+    return null;
   }
 }
