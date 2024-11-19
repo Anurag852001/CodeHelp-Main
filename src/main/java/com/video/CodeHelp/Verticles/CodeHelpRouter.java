@@ -38,10 +38,13 @@ public class CodeHelpRouter extends AbstractVerticle {
       router.get(ApiEnums.CACHE_GET_API.getApiKey())
         .handler(codeHelpRoutingHandler);
 
-      router.get(ApiEnums.GET_DEFAULT_CODE.getApiKey())
+      router.get(ApiEnums.GET_WRAPPER_CODE.getApiKey())
         .handler(codeHelpRoutingHandler);
 
       router.get(ApiEnums.QUESTION_GET_API.getApiKey())
+        .handler(codeHelpRoutingHandler);
+
+      router.get(ApiEnums.GENERIC_LIST_API.getApiKey())
         .handler(codeHelpRoutingHandler);
 
       router.post(ApiEnums.CONFIG_SAVE_API.getApiKey())
@@ -75,6 +78,52 @@ public class CodeHelpRouter extends AbstractVerticle {
         .produces(DataConstants.APPLICATION_JSON)
         .consumes(DataConstants.APPLICATION_JSON)
         .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
+      router.post( ApiEnums.SUBMIT_CODE_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
+      router.post(ApiEnums.SAVE_WRAPPER_CODE.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
+      router.post(ApiEnums.SAVE_MAIN_CODE_VARIABLES_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
+      router.post(ApiEnums.GET_MAIN_CODE_VARIABLES_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
+      router.post(ApiEnums.SAVE_CORRECT_CODE_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
+      router.post(ApiEnums.UPDATE_CORRECT_CODE_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
+      router.post(ApiEnums.TESTCASE_SAVE_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
+        .consumes(DataConstants.APPLICATION_JSON)
+        .handler(BodyHandler.create())
+        .handler(codeHelpRoutingHandler);
+
+      router.get(ApiEnums.GET_CORRECT_CODE_API.getApiKey())
+        .produces(DataConstants.APPLICATION_JSON)
         .handler(codeHelpRoutingHandler);
 
 

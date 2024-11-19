@@ -1,10 +1,11 @@
 {
-  "PORT": 8000,
+  "port": 8000,
   "environment": "dev",
   "mySqlConfig":{
     "username": "root",
     "password": "12345678",
     "testStatement": "SELECT 1",
     "database": "codehelp"
-  }
+  },
+  "cachePopulationTypes" : ["DEFAULT_CODE_CACHE","MAIN_CODE_CACHE"]
 }

@@ -1,0 +1,20 @@
+package com.video.CodeHelp.Pojo;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.video.CodeHelp.Enums.CompilerTypeEnums;
+import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.enums.WrapperCodeEnums;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class GetWrapperCodeRequest {
+  private WrapperCodeEnums wrapperCodeType;
+  private Long qid;
+  private CompilerTypeEnums compilerType;
+}

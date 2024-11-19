@@ -10,11 +10,15 @@ import org.apache.commons.lang3.StringUtils;
 public class CachingService {
 
   Cache<String, Object> oneDayCommonCacheCache = CacheTypeEnums.ONE_DAY_COMMON_CACHE.getCache();
+  Cache<String, Object> twoHunderedDayCache = CacheTypeEnums.TWO_HUNDERED_CACHE.getCache();
 
   public Object getFromCache(String key, CacheTypeEnums cacheType) {
     switch (cacheType) {
       case ONE_DAY_COMMON_CACHE -> {
         return oneDayCommonCacheCache.getIfPresent(key);
+      }
+      case TWO_HUNDERED_CACHE -> {
+        return twoHunderedDayCache.getIfPresent(key);
       }
       default -> {
         log.info("Unknown cache type");
@@ -25,7 +29,7 @@ public class CachingService {
 
   public boolean populateInCache(String key, Object value, CacheTypeEnums cacheType) {
     if(StringUtils.isEmpty(key) || value == null){
-      log.info("Key or value is null. Unable to populate cache.");
+      log.error("Key or value is null. Unable to populate cache.");
       return false;
     }
     try {
@@ -33,11 +37,15 @@ public class CachingService {
         case ONE_DAY_COMMON_CACHE -> {
           CaffineCacheFactory.saveInCache(key, value, oneDayCommonCacheCache);
         }
+        case TWO_HUNDERED_CACHE -> {
+          CaffineCacheFactory.saveInCache(key, value,twoHunderedDayCache );
+        }
         default -> {
           log.info("Cache type not supported");
           return false;
         }
       }
+      log.info("Saved data to cache for key:{},value:{}",key,value);
       return true;
     } catch (Exception e) {
       log.error("Exception occurred while saving data in cache");

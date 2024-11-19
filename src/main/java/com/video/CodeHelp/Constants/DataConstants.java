@@ -22,4 +22,25 @@ public class DataConstants {
   public static final String WRAPPER_CONFIG_JAVA_1 = "WRAPPER_CONFIG_JAVA_1";
   public static final String WRAPPER_CONFIG_JAVA_2 = "WRAPPER_CONFIG_JAVA_2";
   public static final String WRAPPER_CONFIG_JAVA_3 = "WRAPPER_CONFIG_JAVA_3";
+  public static final String WRAPPER_CONFIG_JAVA_4 = "WRAPPER_CONFIG_JAVA_4";
+  public static final String SYNC_IN_CACHE = "SYNC_IN_CACHE";
+  public static final String WRAPPER_CODE_ENUM = "wrapperCodeEnum";
+  public static final String LISTING = "listing";
+  public static final String TOTAL_COUNT = "totalCount";
+  public static final String QUESTIONS_LISTING_SERVICE = "questionsListingService";
+  public static final String MAIN_CODE_VARIABLES ="MAIN_CODE_VARIABLES";
+  public static final String QID = "qid";
+  public static final String LANGUAGE = "language";
+  public static final String VARIABLES = "variables";
+  public static final String CORRECT_CODE = "CORRECT_CODE";
+  public static final String CORRECT_CODE_CAMEL = "correctCode";
+  public static final String TEST_CASE = "TEST_CASE";
+  public static final String TEST_CASE_RESULTS = "TEST_CASE_RESULTS";
+  public static final String RESULT = "result";
+  public static final String EXPECTED_RESULT = "expectedResult";
+  public static final String TIME_TAKEN = "timeTaken";
+  public static final String INTEGER_RULE_ENGINE_SERVICE = "integerRuleEngineService";
+  public static final String INTEGER_ARRAY_RULE_ENGINE_SERVICE = "integerArrayRuleEngineService";
+  public static final String SIZE = "size";
+  public static final String MAXIMUM_VALUE = "maximumValue";
 }

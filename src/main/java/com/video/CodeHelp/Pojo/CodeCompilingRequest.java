@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -14,5 +16,8 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CodeCompilingRequest {
   private String code;
+  private Long qid;
   private CompilerTypeEnums compilerType;
+  private Boolean runOnAll;
+  private List<TestCase> testCase;
 }
