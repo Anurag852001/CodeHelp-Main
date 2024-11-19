@@ -41,4 +41,6 @@ public class DataConstants {
   public static final String TIME_TAKEN = "timeTaken";
   public static final String INTEGER_RULE_ENGINE_SERVICE = "integerRuleEngineService";
   public static final String INTEGER_ARRAY_RULE_ENGINE_SERVICE = "integerArrayRuleEngineService";
+  public static final String SIZE = "size";
+  public static final String MAXIMUM_VALUE = "maximumValue";
 }

@@ -13,7 +13,8 @@ public enum ApplicationErrorEnums {
   CODE_COMPILING_ERROR("Error in compiling code ",5),
   ERROR_WHILE_SAVING_CORRECT_CODE("Error while saving correct code: ",6),
   ERROR_WHILE_UPDATING_CORRECT_CODE("Error while updating correct code ",7),
-  TEST_CASE_FAILED("Test case failed",8);
+  TEST_CASE_FAILED("Test case failed",8),
+  SIZE_SHOULD_BE_LESS_THAN_MAX("Size should be less than maximum value",9);
 
   String message;
   Integer errorCode;

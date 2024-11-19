@@ -1,11 +1,12 @@
 package com.video.CodeHelp.Service.TestCaseService.impl;
 
+import com.video.CodeHelp.Enums.ApplicationErrorEnums;
+import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Pojo.Responses.RuleEngineResponse;
 import com.video.CodeHelp.Pojo.TestCaseRuleInfo;
 import com.video.CodeHelp.Service.TestCaseService.IRuleEngineService;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static com.video.CodeHelp.Service.TestCaseService.impl.IntegerRulesImpl.generateRandomInteger;
 
@@ -33,13 +34,39 @@ public class IntegerArrayRuleEngineService implements IRuleEngineService {
   }
 
   public static Integer[] generateUniqueIntegerArray(Integer size,Integer maximumValue){
-    //code to generate unique integer
-    return null;
+    if(size>maximumValue){
+      throw new CodeHelpException(ApplicationErrorEnums.SIZE_SHOULD_BE_LESS_THAN_MAX);
+    }
+    Random random = new Random();
+    HashSet<Integer> set = new HashSet<Integer>();
+    while(set.size()<size){
+      set.add(random.nextInt(maximumValue+1));
+    }
+    List<Integer> list = new ArrayList<Integer>(set);
+    Collections.shuffle(list);
+    return list.toArray(new Integer[0]);
   }
 
+
   public static Integer[] generateNegativePositiveUniqueIntegerArray(Integer size,Integer maximumValue){
-    return null;
+    if(size>maximumValue){
+      throw new CodeHelpException(ApplicationErrorEnums.SIZE_SHOULD_BE_LESS_THAN_MAX);
+    }
+    Random random = new Random();
+    HashSet<Integer> set = new HashSet<Integer>();
+    while(set.size()<size){
+      Integer val = random.nextInt(maximumValue+1);
+      if(set.size()%2 == 0){
+        set.add(-val);
+      } else{
+        set.add(val);
+      }
+    }
+    List<Integer> list = new ArrayList<Integer>(set);
+    Collections.shuffle(list);
+    return list.toArray(new Integer[0]);
   }
+
 
   @Override
   public RuleEngineResponse applyRule(List<TestCaseRuleInfo> testCaseRuleInfo) {
