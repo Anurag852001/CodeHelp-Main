@@ -7,6 +7,7 @@ import com.video.CodeHelp.Pojo.TestCaseResult;
 import com.video.CodeHelp.Pojo.TestCaseRuleInfo;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
@@ -20,7 +21,7 @@ public interface TestCaseDao {
   public List<TestCase> getTestCases(@Bind("qId") Long qId, @Bind("testCaseType")TestCaseType testCaseType);
 
   @SqlUpdate("Insert into test_cases (q_id,test_case_id,value,test_case_type,variable_number,data_type) values (:qNo, :language, :testCase.value,:testCase.testCaseType,:testCase.variableNumber,:testCase.dataType)")
-  public void saveTestCase(@Bind("qNo") Long qNo, @Bind("language") CompilerTypeEnums language, @BindList("testCase") List<TestCase> testCase);
+  public void saveTestCase(@Bind("qNo") Long qNo, @Bind("language") CompilerTypeEnums language, @BindBean("testCase") TestCase testCase);
 
   @SqlUpdate("Insert into test_case_solution(test_case_id,solution) values(:testCaseId,:solution)")
   public void saveTestCaseSolution(@Bind("testCaseId") Long testCaseId,@Bind("solution") String solution);

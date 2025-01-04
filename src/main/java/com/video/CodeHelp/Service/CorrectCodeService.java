@@ -39,8 +39,8 @@ public class CorrectCodeService {
   public Long saveCorrectCode(CorrectCodePojo correctCodePojo){
     //let's first try to compile it
     try {
-      List<TestCase> defaultTestCase = testCaseService.getTestCases(correctCodePojo.getQid(),correctCodePojo.getLanguage(), TestCaseType.DEFAULT_TESTCASE);
-      compilerFactory.getCompiler(correctCodePojo.getLanguage()).compileCode(CommonUtils.getCodeCompilingRequest(correctCodePojo.getCode(),correctCodePojo.getLanguage(),defaultTestCase,correctCodePojo.getQid()));
+      //List<TestCase> defaultTestCase = testCaseService.getTestCases(correctCodePojo.getQid(),correctCodePojo.getLanguage(), TestCaseType.DEFAULT_TESTCASE);
+      //compilerFactory.getCompiler(correctCodePojo.getLanguage()).compileCode(CommonUtils.getCodeCompilingRequest(correctCodePojo.getCode(),correctCodePojo.getLanguage(),defaultTestCase,correctCodePojo.getQid()));
       return dao.saveCorrectCode(correctCodePojo.getCode(), correctCodePojo.getLanguage(), correctCodePojo.getQid());
     } catch (CodeHelpException e) {
       log.error("Error while compiling code for request: {}",correctCodePojo,e);

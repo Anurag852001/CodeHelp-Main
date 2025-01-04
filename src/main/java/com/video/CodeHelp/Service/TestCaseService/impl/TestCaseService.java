@@ -58,7 +58,9 @@ public class TestCaseService implements ITestCaseService {
 
   @Override
   public void saveTestCases(TestCaseSaveRequest request) {
-    dao.saveTestCase(request.getQNo(),request.getLanguage(),request.getTestCases());
+    request.getTestCases().forEach(testCase -> {
+              dao.saveTestCase(request.getQid(), request.getLanguage(), testCase);
+            });
     dao.saveTestCaseSolution(request.getTestCases().get(0).getTestCaseId(),request.getSolution());
   }
 

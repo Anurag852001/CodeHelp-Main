@@ -21,5 +21,5 @@ public class TestCaseSaveRequest {
   private String solution;
   private CompilerTypeEnums language;
   private TestCaseType testCaseType;
-  private Long qNo;
+  private Long qid;
 }

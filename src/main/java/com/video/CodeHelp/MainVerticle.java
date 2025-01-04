@@ -49,13 +49,13 @@ public class MainVerticle extends AbstractVerticle {
   public void deployVerticles(Promise<Void> startPromise, Injector injector) {
     try {
       log.info("Deploying verticles");
-      DeploymentOptions codeHelpAdminDeploymentOptions = new DeploymentOptions().setWorker(true).setWorkerPoolSize(10);
-      DeploymentOptions codeHelpRouterDeploymentOptions = new DeploymentOptions().setWorker(true).setWorkerPoolSize(10);
+      DeploymentOptions codeHelpAdminDeploymentOptions = new DeploymentOptions().setWorker(true).setWorkerPoolSize(50);
+      DeploymentOptions codeHelpRouterDeploymentOptions = new DeploymentOptions().setWorker(true).setWorkerPoolSize(50);
       DeploymentOptions codeHelpCompilerDeploymentOptions = new DeploymentOptions().setWorker(false);
       CompletableFuture.runAsync(() -> {
         vertx.deployVerticle(injector.getInstance(CodeHelpAdminVerticle.class), codeHelpAdminDeploymentOptions);
         vertx.deployVerticle(injector.getInstance(CodeHelpRouter.class), codeHelpRouterDeploymentOptions);
-        vertx.deployVerticle(injector.getInstance(CodeHelpCompilerVerticle.class),codeHelpAdminDeploymentOptions);
+        vertx.deployVerticle(injector.getInstance(CodeHelpCompilerVerticle.class),codeHelpCompilerDeploymentOptions);
       }).get();
       startPromise.complete();
     } catch (Exception e) {

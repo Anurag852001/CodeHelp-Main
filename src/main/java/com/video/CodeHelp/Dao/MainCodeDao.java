@@ -24,7 +24,7 @@ public interface MainCodeDao {
   MainCodeCachePopulationPojo getMainCodeCachePojoByQId(@Bind("qId") Long qId);
 
   @GetGeneratedKeys("id")
-  @SqlUpdate("INSERT INTO main_code(q_id, main_code,compiler_type) VALUES (:request.qid, :request.mainCode,:request.compilerType)")
+  @SqlUpdate("INSERT INTO main_code(q_id, main_code,compiler_type,return_type) VALUES (:request.qid, :request.mainCode,:request.compilerType,:request.returnType)")
   Long saveMainCode(@BindBean("request") MainWrapperCode request);
 
   @RegisterBeanMapper(MainWrapperCode.class)

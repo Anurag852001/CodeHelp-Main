@@ -23,6 +23,10 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -55,60 +59,71 @@ public class JavaCompilerService implements ICompilerService {
   @Override
   public String runSimpleCode(String code) {
     try {
-      JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-      ByteArrayOutputStream compileOutput = new ByteArrayOutputStream();
-      ByteArrayOutputStream executionOutput = new ByteArrayOutputStream();
-      Writer compileWriter = new OutputStreamWriter(compileOutput);
-      PrintStream executionPrintStream = new PrintStream(executionOutput);
-      log.info("code to be run:{} ", code);
-      String className = "Solution";
-      JavaFileObject javaFile = new JavaSourceFromString(className, code);
+     return CompletableFuture.supplyAsync(() -> {
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        ByteArrayOutputStream compileOutput = new ByteArrayOutputStream();
+        ByteArrayOutputStream executionOutput = new ByteArrayOutputStream();
+        Writer compileWriter = new OutputStreamWriter(compileOutput);
+        PrintStream executionPrintStream = new PrintStream(executionOutput);
+        log.info("code to be run:{} ", code);
+        String className = "Solution";
+        JavaFileObject javaFile = new JavaSourceFromString(className, code);
 
-      try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null)) {
-        // Set class output location to in-memory ByteArray instead of disk
-        fileManager.setLocation(StandardLocation.CLASS_OUTPUT, List.of(new File(System.getProperty("java.io.tmpdir"))));
+        try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null)) {
+          // Set class output location to in-memory ByteArray instead of disk
+          fileManager.setLocation(StandardLocation.CLASS_OUTPUT, List.of(new File(System.getProperty("java.io.tmpdir"))));
 
-        // Set up a diagnostic listener to capture compiler diagnostics directly
-        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-        boolean success = compiler.getTask(compileWriter, fileManager, diagnostics,
-          List.of("-proc:none", "-Xlint:-options"), // Suppress annotation processing warnings
-          null, List.of(javaFile)).call();
+          // Set up a diagnostic listener to capture compiler diagnostics directly
+          DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+          boolean success = compiler.getTask(compileWriter, fileManager, diagnostics,
+                  List.of("-proc:none", "-Xlint:-options"), // Suppress annotation processing warnings
+                  null, List.of(javaFile)).call();
 
-        compileWriter.flush(); // Flush the writer to capture compilation output
+          compileWriter.flush(); // Flush the writer to capture compilation output
 
-        // Check compilation success and handle errors directly from diagnostics
-        if (!success) {
-          throw new CodeHelpException("Compilation failed:\n" + diagnostics.getDiagnostics().stream()
-            .map(d -> d.getMessage(null))
-            .collect(Collectors.joining("\n")));
+          // Check compilation success and handle errors directly from diagnostics
+          if (!success) {
+            throw new CodeHelpException("Compilation failed:\n" + diagnostics.getDiagnostics().stream()
+                    .map(d -> d.getMessage(null))
+                    .collect(Collectors.joining("\n")));
+          }
+
+          URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{new File(System.getProperty("java.io.tmpdir")).toURI().toURL()});
+          // Redirect output streams to capture execution output separately
+          PrintStream originalOut = System.out;
+          PrintStream originalErr = System.err;
+          System.setOut(executionPrintStream);
+          System.setErr(executionPrintStream);
+
+          // Execute the main method
+          classLoader.loadClass(className).getDeclaredMethod("main", String[].class).invoke(null, (Object) new String[]{});
+
+          // Restore the original System.out and System.err
+          System.setOut(originalOut);
+          System.setErr(originalErr);
+
+          return executionOutput.toString();
+
+        } catch (CodeHelpException e) {
+          log.error(e.getMessage(), e);
+          throw new CodeHelpException(e.getMessage());
+        } catch (Exception e) {
+          log.error("Error executing code ", e);
+          throw new CodeHelpException(ApplicationErrorEnums.CODE_COMPILING_ERROR + e.getMessage());
         }
-
-        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{new File(System.getProperty("java.io.tmpdir")).toURI().toURL()});
-        // Redirect output streams to capture execution output separately
-        PrintStream originalOut = System.out;
-        PrintStream originalErr = System.err;
-        System.setOut(executionPrintStream);
-        System.setErr(executionPrintStream);
-
-        // Execute the main method
-        classLoader.loadClass(className).getDeclaredMethod("main", String[].class).invoke(null, (Object) new String[]{});
-
-        // Restore the original System.out and System.err
-        System.setOut(originalOut);
-        System.setErr(originalErr);
-
-        return executionOutput.toString();
-      }
-    } catch (CodeHelpException e) {
-      log.error(e.getMessage(), e);
-      throw new CodeHelpException(e.getMessage());
-    } catch (Exception e) {
-      log.error("Error executing code ", e);
-      throw new CodeHelpException(ApplicationErrorEnums.CODE_COMPILING_ERROR + e.getMessage());
+      }).get(10L, TimeUnit.SECONDS);
+    } catch (TimeoutException e) {
+      log.error("Timed out");
+      throw new CodeHelpException("Time limit exceeded");
+    } catch (ExecutionException e) {
+      throw new RuntimeException(e);
+    } catch (InterruptedException e) {
+      log.error("Intruppted");
+      throw new RuntimeException(e);
     }
   }
 
-  @Override
+      @Override
   public SubmitCodeResponse submitCode(SubmitCodeRequest request) {
     AtomicReference<Integer> count = new AtomicReference<>(0);
     AtomicReference<String> lastTestCaseResultBeforeFailure = new AtomicReference<>();

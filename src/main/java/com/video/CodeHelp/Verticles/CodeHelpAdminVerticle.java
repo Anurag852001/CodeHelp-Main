@@ -70,7 +70,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
 
     EventBus eventBus = vertx.eventBus();
     log.info("Starting the admin verticle");
-    cachePopulationFactory.populateAllCaches(codeHelpCofig.getCachePopulationTypes());
+//    cachePopulationFactory.populateAllCaches(codeHelpCofig.getCachePopulationTypes());
 
     eventBus.consumer(ApiEnums.WELCOME_API.getEventPath(), message ->
       vertx.executeBlocking(future -> {
@@ -147,7 +147,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
     )
     );
 
-    eventBus.consumer(ApiEnums.CACHE_GET_API.getEventPath(), message -> vertx.executeBlocking(future -> {
+    eventBus.consumer("cacheGet", message -> vertx.executeBlocking(future -> {
       try {
         JsonObject body = new JsonObject(message.body().toString());
         CacheTypeEnums cacheTypeEnum = CacheTypeEnums.valueOf(body.getString(DataConstants.CACHE_TYPE));

@@ -40,7 +40,7 @@ public class CommonUtils {
   public static TestCaseSaveRequest getTestCaseSaveRequest(List<TestCase> testCases, Long qid, String solution, CompilerTypeEnums language) {
     return TestCaseSaveRequest.builder()
       .testCases(testCases)
-      .qNo(qid)
+      .qid(qid)
       .solution(solution)
       .language(language)
       .testCaseType(TestCaseType.MAIN_TESTCASE)

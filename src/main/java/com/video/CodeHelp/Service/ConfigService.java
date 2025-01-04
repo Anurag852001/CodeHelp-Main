@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.video.CodeHelp.Caffine.CaffineCacheFactory;
 import com.video.CodeHelp.Dao.ConfigDao;
+import com.video.CodeHelp.Enums.ApplicationErrorEnums;
 import com.video.CodeHelp.Enums.CacheTTLS;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
+import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Pojo.Config;
 import com.video.CodeHelp.Pojo.SaveOrUpdateConfigRequest;
 import jakarta.inject.Inject;
@@ -36,14 +38,19 @@ public class ConfigService {
   }
 
   public Config getCodeHelpConfig(String configKey,String configType){
-    Cache<String,Object> cache =CacheTypeEnums.ONE_DAY_COMMON_CACHE.getCache();
-    Object config = cache.getIfPresent(configKey);
-    if(config == null){
-      config = configDao.getConfig(configKey, configType);
-      cache.put(configKey,config);
-      log.info("fetched config from db and cached with key:{}" ,configKey);
+    try {
+      Cache<String, Object> cache = CacheTypeEnums.ONE_DAY_COMMON_CACHE.getCache();
+      Object config = cache.getIfPresent(configKey);
+      if (config == null) {
+        config = configDao.getConfig(configKey, configType);
+        cache.put(configKey, config);
+        log.info("fetched config from db and cached with key:{}", configKey);
+      }
+      return new ObjectMapper().convertValue(config, Config.class);
+    } catch (Exception e){
+       log.error("Error while fetching config for config key:{}",configKey);
+       throw new CodeHelpException(ApplicationErrorEnums.ERROR_WHILE_FETCHING_CONFIG);
     }
-    return new ObjectMapper().convertValue(config, Config.class);
   }
 
 }

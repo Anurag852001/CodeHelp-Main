@@ -85,6 +85,7 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
             promise.complete(messageAsyncResult);
           } else {
             promise.fail(messageAsyncResult.cause());
+
           }
         });
         break;
