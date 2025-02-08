@@ -3,7 +3,7 @@
   "environment": "dev",
   "mySqlConfig":{
     "username": "root",
-    "password": "12345678",
+    "password": "root",
     "testStatement": "SELECT 1",
     "database": "codehelp"
   },
