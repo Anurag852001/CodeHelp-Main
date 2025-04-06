@@ -24,11 +24,14 @@ import com.video.CodeHelp.Service.ListingService.ListingFactory;
 import com.video.CodeHelp.Service.ListingService.handlers.QuestionsListingService;
 import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
 import com.video.CodeHelp.Service.TestCaseService.impl.TestCaseService;
+import com.video.CodeHelp.mongo.MongoService;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.file.FileSystem;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.SharedData;
+import io.vertx.ext.mongo.MongoClient;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -281,5 +284,17 @@ public class CodeHelpModule extends AbstractModule {
   public CorrectCodeService providesCorrectCodeService(CorrectCodeDao correctCodeDao,CachingService cachingService,CompilerFactory compilerFactory
                                                       ,ITestCaseService testCaseService){
     return new CorrectCodeService(correctCodeDao,cachingService,compilerFactory,testCaseService);
+  }
+
+  @Provides
+  @Singleton
+  public MongoClient providesMongoClient(CodeHelpConfig codeHelpConfig){
+    try{
+      return MongoClient.createShared(vertx, JsonObject.mapFrom(codeHelpConfig.getMongoConfig()));
+    } catch (Exception e){
+      log.error("Error while intializing mongo client",e);
+      return null;
+    }
+
   }
 }

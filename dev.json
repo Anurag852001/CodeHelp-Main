@@ -7,5 +7,11 @@
     "testStatement": "SELECT 1",
     "database": "codehelp"
   },
-  "cachePopulationTypes" : ["DEFAULT_CODE_CACHE","MAIN_CODE_CACHE"]
+  "cachePopulationTypes" : ["DEFAULT_CODE_CACHE","MAIN_CODE_CACHE"],
+  "mongoConfig": {
+    "connectionString": "mongodb://localhost:27017/",
+    "db_name": "CodeHelpDataBase",
+    "username": "",
+    "password": ""
+  }
 }
