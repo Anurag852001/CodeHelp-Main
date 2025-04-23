@@ -16,6 +16,8 @@ import com.video.CodeHelp.Service.*;
 import com.video.CodeHelp.Service.ListingService.ListingFactory;
 import com.video.CodeHelp.Service.ListingService.pojo.GetListingRequest;
 import com.video.CodeHelp.Service.ListingService.pojo.IListingResponse;
+import com.video.CodeHelp.Service.QuestionTrackerService.IQuestionTrackerService;
+import com.video.CodeHelp.Service.QuestionTrackerService.impl.QuestionTrackerServiceImpl;
 import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
@@ -44,12 +46,14 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
   private final MainCodeVariableService mainCodeVariableService;
   private final CorrectCodeService correctCodeService;
   private final ITestCaseService testCaseService;
+  private final IQuestionTrackerService questionTrackerService;
 
   @Inject
   public CodeHelpAdminVerticle(WelcomeService welcomeService, ConfigService configService, QuestionService questionService
     , CachePopulationFactory cachePopulationFactory, CodeHelpConfig codeHelpConfig, WrapperFactory wrapperFactory
     , CachingService cachingService, ListingFactory listingFactory, MainCodeVariableService mainCodeVariableService,
-                               CorrectCodeService correctCodeService, ITestCaseService testCaseService) {
+                               CorrectCodeService correctCodeService, ITestCaseService testCaseService,
+                               QuestionTrackerServiceImpl questionTrackerService) {
     this.mainCodeVariableService = mainCodeVariableService;
     this.correctCodeService = correctCodeService;
     this.testCaseService = testCaseService;
@@ -62,6 +66,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
     this.wrapperFactory = wrapperFactory;
     this.cachingService = cachingService;
     this.listingFactory = listingFactory;
+    this.questionTrackerService = questionTrackerService;
   }
 
 
@@ -168,6 +173,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
           JsonObject body = new JsonObject(message.body().toString());
           Long qNo = Long.parseLong(body.getString(DataConstants.Q_NO));
           CompleteQuestion completeQuestion = questionService.getQuestion(qNo);
+          questionTrackerService.trackQuestion(null);
           JsonObject response = new JsonObject();
           response.put(DataConstants.SUCCESS, true);
           response.put(DataConstants.MESSAGE, "Question fetched successfully");

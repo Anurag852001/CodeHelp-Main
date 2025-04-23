@@ -48,7 +48,7 @@ public class JavaCompilerService implements ICompilerService {
   @Override
   public String compileCode(CodeCompilingRequest request) {
     String wrappedCode = wrapCode(request);
-    log.info("final wrappedCode:{} ", wrappedCode);
+//    log.info("final wrappedCode:{} ", wrappedCode);
     return runSimpleCode(wrappedCode);
   }
 
@@ -60,7 +60,7 @@ public class JavaCompilerService implements ICompilerService {
       ByteArrayOutputStream executionOutput = new ByteArrayOutputStream();
       Writer compileWriter = new OutputStreamWriter(compileOutput);
       PrintStream executionPrintStream = new PrintStream(executionOutput);
-      log.info("code to be run:{} ", code);
+//      log.info("code to be run:{} ", code);
       String className = "Solution";
       JavaFileObject javaFile = new JavaSourceFromString(className, code);
 
@@ -163,7 +163,7 @@ public class JavaCompilerService implements ICompilerService {
     String newCode = wrapperFactory.getWrapperService(WrapperCodeEnums.MAIN_CODE).wrapCode(codeToBeWrappedWithMainCode, request.getQid(), CompilerTypeEnums.JAVA);
     StringBuilder stringBuilder2 = new StringBuilder().append(newCode);
     attachCode(stringBuilder2, basicCode4);
-    log.info("Time took to wrap code : {}", System.currentTimeMillis() - startTime);
+//    log.info("Time took to wrap code : {}", System.currentTimeMillis() - startTime);
     return stringBuilder2.toString();
 
   }

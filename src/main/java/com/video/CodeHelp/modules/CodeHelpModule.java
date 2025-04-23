@@ -32,6 +32,8 @@ import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.SharedData;
 import io.vertx.ext.mongo.MongoClient;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -296,5 +298,11 @@ public class CodeHelpModule extends AbstractModule {
       return null;
     }
 
+  }
+  @Provides
+  @Singleton
+  @Named(DataConstants.WEB_CLIENT)
+  public WebClient priovidesVertxWebClient(Vertx vertx){
+    return WebClient.create(vertx);
   }
 }

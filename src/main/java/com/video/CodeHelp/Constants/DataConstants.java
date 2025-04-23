@@ -43,4 +43,5 @@ public class DataConstants {
   public static final String INTEGER_ARRAY_RULE_ENGINE_SERVICE = "integerArrayRuleEngineService";
   public static final String SIZE = "size";
   public static final String MAXIMUM_VALUE = "maximumValue";
+  public static final String WEB_CLIENT = "WebClient";
 }
