@@ -1,6 +1,7 @@
 package com.video.CodeHelp.Config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.video.CodeHelp.Config.configPojos.CodeHelpReportingServiceConfig;
 import com.video.CodeHelp.Config.configPojos.MongoConfig;
 import com.video.CodeHelp.Config.configPojos.MySqlConfig;
 import com.video.CodeHelp.Service.CachePopulationService.enums.CachePopulationTypes;
@@ -23,4 +24,5 @@ public class CodeHelpConfig {
   public MySqlConfig mySqlConfig;
   public List<CachePopulationTypes> cachePopulationTypes;
   public MongoConfig mongoConfig;
+  public CodeHelpReportingServiceConfig codeHelpReportingServiceConfig;
 }

@@ -16,6 +16,7 @@ import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
 import com.video.CodeHelp.utils.CommonUtils;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import javax.tools.*;
 import java.io.*;
@@ -43,7 +44,6 @@ public class JavaCompilerService implements ICompilerService {
     this.mainCodeVariableService = mainCodeVariableService;
     this.testCaseService = testCaseService;
   }
-
 
   @Override
   public String compileCode(CodeCompilingRequest request) {
@@ -138,7 +138,7 @@ public class JavaCompilerService implements ICompilerService {
       Long timeTaken = System.currentTimeMillis() - startTime;
       submitCodeResponse.timeTake(timeTaken).totalTestCases(totalCount).testCasesPassed(count.get());
     } catch (Exception e) {
-      log.warn(e.getMessage());
+      log.error(e.getMessage());
       submitCodeResponse.testCasesPassed(totalCount).testCasesPassed(count.get()).totalTestCases(totalCount).failed(true);
     }
     return submitCodeResponse.build();
@@ -176,11 +176,14 @@ public class JavaCompilerService implements ICompilerService {
     }
   }
 
-  public void attachTestCase(@org.jetbrains.annotations.NotNull StringBuilder stringBuilder, CodeCompilingRequest request) {
+  public void attachTestCase( StringBuilder stringBuilder, CodeCompilingRequest request) {
     stringBuilder.append(System.lineSeparator());
     List<String> variables = mainCodeVariableService.getFormattedVariables(request.getQid(), CompilerTypeEnums.JAVA);
     List<String> testCases = testCaseService.getFormattedTestCase(request.getTestCase(), CompilerTypeEnums.JAVA);
-
+    if(CollectionUtils.isEmpty(testCases)){
+      log.info("No test cases found to test");
+      throw new CodeHelpException("No test cases found");
+    }
     for (int i = 0; i < testCases.size(); i++) {
       stringBuilder.append(variables.get(i)).append(" = ").append(testCases.get(i)).append(System.lineSeparator());
     }

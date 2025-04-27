@@ -16,6 +16,7 @@ import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -77,6 +78,10 @@ public class TestCaseService implements ITestCaseService {
 
 
   public List<String> getFormattedTestCaseForJava(List<TestCase> testCases) {
+    if(CollectionUtils.isEmpty(testCases)){
+      log.info("No test cases to format");
+      return new ArrayList<>();
+    }
     //lets sort first
     testCases.sort(Comparator.comparing(TestCase::getVariableNumber));
     return testCases.stream().map(testCase -> {

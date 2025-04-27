@@ -3,9 +3,8 @@ package com.video.CodeHelp.Verticles;
 import com.video.CodeHelp.Caffine.CaffineCacheFactory;
 import com.video.CodeHelp.Config.CodeHelpConfig;
 import com.video.CodeHelp.Constants.DataConstants;
-import com.video.CodeHelp.Enums.ApiEnums;
-import com.video.CodeHelp.Enums.CacheTypeEnums;
-import com.video.CodeHelp.Enums.CompilerTypeEnums;
+import com.video.CodeHelp.Enums.*;
+import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Pojo.*;
 import com.video.CodeHelp.Pojo.Responses.SaveQuestionResponse;
 import com.video.CodeHelp.Service.CachePopulationService.CachePopulationFactory;
@@ -19,6 +18,8 @@ import com.video.CodeHelp.Service.ListingService.pojo.IListingResponse;
 import com.video.CodeHelp.Service.QuestionTrackerService.IQuestionTrackerService;
 import com.video.CodeHelp.Service.QuestionTrackerService.impl.QuestionTrackerServiceImpl;
 import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
+import com.video.CodeHelp.Service.TestCaseService.TestCaseGeneratorService;
+import com.video.CodeHelp.Service.TestCaseService.pojo.TestCaseGeneratorRequest;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
@@ -28,6 +29,8 @@ import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 
@@ -47,13 +50,14 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
   private final CorrectCodeService correctCodeService;
   private final ITestCaseService testCaseService;
   private final IQuestionTrackerService questionTrackerService;
+  private final TestCaseGeneratorService testCaseGeneratorService;
 
   @Inject
   public CodeHelpAdminVerticle(WelcomeService welcomeService, ConfigService configService, QuestionService questionService
     , CachePopulationFactory cachePopulationFactory, CodeHelpConfig codeHelpConfig, WrapperFactory wrapperFactory
     , CachingService cachingService, ListingFactory listingFactory, MainCodeVariableService mainCodeVariableService,
                                CorrectCodeService correctCodeService, ITestCaseService testCaseService,
-                               QuestionTrackerServiceImpl questionTrackerService) {
+                               QuestionTrackerServiceImpl questionTrackerService,TestCaseGeneratorService testCaseGeneratorService) {
     this.mainCodeVariableService = mainCodeVariableService;
     this.correctCodeService = correctCodeService;
     this.testCaseService = testCaseService;
@@ -67,6 +71,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
     this.cachingService = cachingService;
     this.listingFactory = listingFactory;
     this.questionTrackerService = questionTrackerService;
+    this.testCaseGeneratorService = testCaseGeneratorService;
   }
 
 
@@ -418,6 +423,27 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
       });
     });
 
+    eventBus.consumer(ApiEnums.TESTCASE_GENERATE_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          log.info("Got request in generate test case consumer:{}",message.body());
+          JsonObject body = JsonObject.mapFrom(message.body());
+          if(body == null){
+            throw new CodeHelpException(ApplicationErrorEnums.BAD_REQUEST);
+          }
+          TestCaseGeneratorRequest testCaseGeneratorRequest = body.mapTo(TestCaseGeneratorRequest.class);
+          CompletableFuture.runAsync(()->{
+            testCaseGeneratorService.generateTestCase(testCaseGeneratorRequest.getQId(),CompilerTypeEnums.JAVA,testCaseGeneratorRequest.getNumberOfTestCases());
+          },CommonPoolFactory.getForkJoinPool(PoolEnums.GENERATE_TEST_CASES_POOL));
+          message.reply(new JsonObject().put(DataConstants.SUCCESS,true));
+          future.complete(true);
+        } catch (Exception e) {
+          log.error("Error while generating testcases", e);
+          message.reply(e);
+          future.fail(e);
+        }
+      });
+    });
 
   }
 

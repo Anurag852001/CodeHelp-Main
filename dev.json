@@ -13,5 +13,9 @@
     "db_name": "CodeHelpDataBase",
     "username": "",
     "password": ""
+  },
+  "codeHelpReportingServiceConfig": {
+    "host": "localhost",
+    "port": "9000"
   }
 }
