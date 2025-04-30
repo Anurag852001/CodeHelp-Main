@@ -99,4 +99,9 @@ public class TestCaseService implements ITestCaseService {
     return dao.getTestCaseGeneratorRules(qid, variableNumber);
   }
 
+  @Override
+  public void saveTestCasesRuleInfo(TestCaseRuleInfo testCaseRuleInfo) {
+    dao.saveTestCase();
+  }
+
 }

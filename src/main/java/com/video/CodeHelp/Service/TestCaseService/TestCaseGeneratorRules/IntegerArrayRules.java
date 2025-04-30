@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.util.function.BiFunction;
 
 @Getter
-public enum IntegerArrayRules {
+public enum IntegerArrayRules  {
   GENERATE_INTEGER_ARRAY(IntegerArrayRuleEngineService::generateIntegerArray),
   SORT_ARRAY(IntegerArrayRuleEngineService::sortIntegerArrayInAsc),
   GENERATE_UNIQUE_ARRAY(IntegerArrayRuleEngineService::generateUniqueIntegerArray),
@@ -23,3 +23,8 @@ public enum IntegerArrayRules {
     return ruleFunction.apply(size, maximumValue);
   }
 }
+
+// these are rules
+//lets pass
+//variable number -> 1
+//rules->

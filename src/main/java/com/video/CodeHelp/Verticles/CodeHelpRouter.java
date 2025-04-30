@@ -132,6 +132,12 @@ public class CodeHelpRouter extends AbstractVerticle {
               .handler(BodyHandler.create())
               .handler(codeHelpRoutingHandler);
 
+      router.post(ApiEnums.TEST_CASE_RULE_SAVE_API.getApiKey())
+              .produces(DataConstants.APPLICATION_JSON)
+              .consumes(DataConstants.APPLICATION_JSON)
+              .handler(BodyHandler.create())
+              .handler(codeHelpRoutingHandler);
+
 
       server.requestHandler(router).listen(codeHelpConfig.getPort().intValue());
     } catch (Exception e) {

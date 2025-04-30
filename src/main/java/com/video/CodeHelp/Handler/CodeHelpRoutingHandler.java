@@ -236,6 +236,16 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
           }
         });
         break;
+      case TEST_CASE_RULE_SAVE_API:
+        eventBus.request(TEST_CASE_RULE_SAVE_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
+        break;
     }
 
   }

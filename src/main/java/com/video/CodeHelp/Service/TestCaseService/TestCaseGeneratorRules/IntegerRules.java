@@ -8,7 +8,9 @@ import java.util.function.BiFunction;
 
 @Getter
 public enum IntegerRules {
-  GENERATE_RANDOM_INTEGER(IntegerRulesImpl::generateRandomInteger), SORT_DIGITS_IN_ASC(IntegerRulesImpl::sortIntegerDigitsInAsc), SORT_DIGITS_IN_DESC(IntegerRulesImpl::sortIntegerDigitsInAsc);
+  GENERATE_RANDOM_INTEGER(IntegerRulesImpl::generateRandomInteger),
+  SORT_DIGITS_IN_ASC(IntegerRulesImpl::sortIntegerDigitsInAsc),
+  SORT_DIGITS_IN_DESC(IntegerRulesImpl::sortIntegerDigitsInAsc);
 
   private final BiFunction<Integer, Integer, Integer> ruleFunction;
 

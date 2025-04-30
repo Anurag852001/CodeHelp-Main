@@ -40,6 +40,7 @@ public enum ApiEnums {
   TESTCASE_SAVE_API("/save/testcase", "testCaseSave"),
   TESTCASE_UPDATE_API("/update/testcase", "testCaseUpdate"),
   TESTCASE_GENERATE_API("/generate/testcase","generateTestCase"),
+  TEST_CASE_RULE_SAVE_API("/testcase/rule/save","testCaseRuleSave"),
 
 
   //generic listing api

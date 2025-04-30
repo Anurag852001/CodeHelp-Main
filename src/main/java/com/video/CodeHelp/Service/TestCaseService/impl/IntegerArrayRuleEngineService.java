@@ -1,6 +1,7 @@
 package com.video.CodeHelp.Service.TestCaseService.impl;
 
 import com.video.CodeHelp.Enums.ApplicationErrorEnums;
+import com.video.CodeHelp.Enums.TestCaseGeneratorRules;
 import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Pojo.Responses.RuleEngineResponse;
 import com.video.CodeHelp.Pojo.TestCaseRuleInfo;
@@ -69,7 +70,7 @@ public class IntegerArrayRuleEngineService implements IRuleEngineService {
 
 
   @Override
-  public RuleEngineResponse applyRule(List<TestCaseRuleInfo> testCaseRuleInfo) {
+  public RuleEngineResponse applyRule(List<TestCaseGeneratorRules> testCaseRuleInfo) {
     return null;
   }
 }

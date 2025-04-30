@@ -20,6 +20,7 @@ import com.video.CodeHelp.Service.QuestionTrackerService.impl.QuestionTrackerSer
 import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
 import com.video.CodeHelp.Service.TestCaseService.TestCaseGeneratorService;
 import com.video.CodeHelp.Service.TestCaseService.pojo.TestCaseGeneratorRequest;
+import com.video.CodeHelp.Service.validator.ValidationFactory;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
@@ -27,8 +28,10 @@ import io.vertx.core.json.JsonObject;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
@@ -51,17 +54,20 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
   private final ITestCaseService testCaseService;
   private final IQuestionTrackerService questionTrackerService;
   private final TestCaseGeneratorService testCaseGeneratorService;
+  private final ValidationFactory validationFactory;
 
   @Inject
   public CodeHelpAdminVerticle(WelcomeService welcomeService, ConfigService configService, QuestionService questionService
     , CachePopulationFactory cachePopulationFactory, CodeHelpConfig codeHelpConfig, WrapperFactory wrapperFactory
     , CachingService cachingService, ListingFactory listingFactory, MainCodeVariableService mainCodeVariableService,
                                CorrectCodeService correctCodeService, ITestCaseService testCaseService,
-                               QuestionTrackerServiceImpl questionTrackerService,TestCaseGeneratorService testCaseGeneratorService) {
+                               QuestionTrackerServiceImpl questionTrackerService, TestCaseGeneratorService testCaseGeneratorService,
+                               ValidationFactory validationFactory) {
     this.mainCodeVariableService = mainCodeVariableService;
     this.correctCodeService = correctCodeService;
     this.testCaseService = testCaseService;
-    log.info("Intializing the codeHelpAdminVerticle");
+      this.validationFactory = validationFactory;
+      log.info("Intializing the codeHelpAdminVerticle");
     this.welcomeService = welcomeService;
     this.configService = configService;
     this.questionService = questionService;
@@ -432,9 +438,34 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
             throw new CodeHelpException(ApplicationErrorEnums.BAD_REQUEST);
           }
           TestCaseGeneratorRequest testCaseGeneratorRequest = body.mapTo(TestCaseGeneratorRequest.class);
+          String error = validationFactory.getValidator(CodeHelpClasses.TestCaseGeneratorClass).genericValidate(testCaseGeneratorRequest);
+          if(StringUtils.isNotBlank(error)){
+            throw new CodeHelpException(error);
+          }
+
           CompletableFuture.runAsync(()->{
             testCaseGeneratorService.generateTestCase(testCaseGeneratorRequest.getQId(),CompilerTypeEnums.JAVA,testCaseGeneratorRequest.getNumberOfTestCases());
           },CommonPoolFactory.getForkJoinPool(PoolEnums.GENERATE_TEST_CASES_POOL));
+          message.reply(new JsonObject().put(DataConstants.SUCCESS,true));
+          future.complete(true);
+        } catch (Exception e) {
+          log.error("Error while generating testcases", e);
+          message.reply(e);
+          future.fail(e);
+        }
+      });
+    });
+
+
+    eventBus.consumer(ApiEnums.TEST_CASE_RULE_SAVE_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          log.info("Got request in  test case rule save consumer:{}",message.body());
+          JsonObject body = JsonObject.mapFrom(message.body());
+          if(body == null){
+            throw new CodeHelpException(ApplicationErrorEnums.BAD_REQUEST);
+          }
+
           message.reply(new JsonObject().put(DataConstants.SUCCESS,true));
           future.complete(true);
         } catch (Exception e) {

@@ -15,4 +15,5 @@ public interface ITestCaseService  {
   void saveTestCases(TestCaseSaveRequest testCaseSaveRequest);
   List<TestCaseResult> getTestCaseResults(Long qNo, CompilerTypeEnums language);
   List<TestCaseRuleInfo> getTestCaseRuleInfo(Long qid, Long variableNumber);
+  void saveTestCasesRuleInfo(TestCaseRuleInfo testCaseRuleInfo);
 }

@@ -1,11 +1,13 @@
 package com.video.CodeHelp.Service.TestCaseService.impl;
 
 import com.video.CodeHelp.Constants.DataConstants;
+import com.video.CodeHelp.Enums.TestCaseGeneratorRules;
 import com.video.CodeHelp.Pojo.Responses.RuleEngineResponse;
 import com.video.CodeHelp.Pojo.RunRuleRequest;
 import com.video.CodeHelp.Pojo.TestCaseRuleInfo;
 import com.video.CodeHelp.Service.TestCaseService.IRuleEngineService;
 import com.video.CodeHelp.Service.TestCaseService.TestCaseGeneratorRules.IntegerArrayRules;
+import com.video.CodeHelp.Service.TestCaseService.TestCaseGeneratorRules.IntegerRules;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Arrays;
@@ -21,6 +23,7 @@ public class IntegerRulesImpl implements IRuleEngineService {
     return (int) (Math.random() * Math.pow(10, size)) * (Math.random() < 0.5? -1 : 1);
   }
 
+
   public static Integer sortIntegerDigitsInAsc(Integer number,Integer input){
     char[] digits = number.toString().toCharArray();
     Arrays.sort(digits);
@@ -34,12 +37,9 @@ public class IntegerRulesImpl implements IRuleEngineService {
   }
 
   @Override
-  public RuleEngineResponse applyRule(List<TestCaseRuleInfo> testCaseRuleInfo) {
-    for (TestCaseRuleInfo info : testCaseRuleInfo) {
-     Integer[] array = IntegerArrayRules.valueOf(info.getRule())
-        .applyRule(info.getParams()
-            .getInteger(DataConstants.SIZE),
-          info.getParams().getInteger(DataConstants.MAXIMUM_VALUE));
+  public RuleEngineResponse applyRule(List<TestCaseGeneratorRules> testCaseRuleInfo) {
+    for (TestCaseGeneratorRules info : testCaseRuleInfo) {
+     IntegerArrayRules rule = IntegerArrayRules.valueOf(info.toString()).applyRule();
     }
     return null;
   }

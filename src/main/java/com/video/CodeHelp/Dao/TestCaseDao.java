@@ -7,6 +7,7 @@ import com.video.CodeHelp.Pojo.TestCaseResult;
 import com.video.CodeHelp.Pojo.TestCaseRuleInfo;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
@@ -32,5 +33,8 @@ public interface TestCaseDao {
   @RegisterBeanMapper(TestCaseRuleInfo.class)
   @SqlQuery("Select * from test_case_generator_rules where qid = :qid,variable_number =:variableNumber")
   public List<TestCaseRuleInfo> getTestCaseGeneratorRules(@Bind("qid") Long qid,@Bind("variableNumber") Long variableNumber);
+
+  @SqlUpdate("Insert into test_case_generator_rules(qid,variable_number,rule)")
+  public Integer saveTestCaseRuleInfo(@BindBean("testCaseRuleInfo") TestCaseRuleInfo testCaseRuleInfo);
 
 }
