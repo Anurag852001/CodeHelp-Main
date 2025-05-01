@@ -4,7 +4,10 @@ import com.video.CodeHelp.Service.validator.IValidator;
 
 import java.util.List;
 
-public class DefaultValidator extends IValidator {
+public class DefaultValidator<T> extends IValidator {
+
+
+
     @Override
     public void validate(Object obj, List errors) {
         return;

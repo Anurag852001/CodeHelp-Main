@@ -444,7 +444,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
           }
 
           CompletableFuture.runAsync(()->{
-            testCaseGeneratorService.generateTestCase(testCaseGeneratorRequest.getQId(),CompilerTypeEnums.JAVA,testCaseGeneratorRequest.getNumberOfTestCases());
+            testCaseGeneratorService.generateTestCase(testCaseGeneratorRequest.getQId(),CompilerTypeEnums.JAVA,testCaseGeneratorRequest.getNumberOfTestCases(),testCaseGeneratorRequest.getVariableNumberVsRules());
           },CommonPoolFactory.getForkJoinPool(PoolEnums.GENERATE_TEST_CASES_POOL));
           message.reply(new JsonObject().put(DataConstants.SUCCESS,true));
           future.complete(true);

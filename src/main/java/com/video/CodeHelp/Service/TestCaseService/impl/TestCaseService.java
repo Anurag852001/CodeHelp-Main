@@ -1,6 +1,8 @@
 package com.video.CodeHelp.Service.TestCaseService.impl;
 
 import com.google.inject.Inject;
+import com.video.CodeHelp.Constants.DataConstants;
+import com.video.CodeHelp.Constants.MongoConstants;
 import com.video.CodeHelp.Dao.TestCaseDao;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
@@ -11,10 +13,14 @@ import com.video.CodeHelp.Pojo.TestCaseRuleInfo;
 import com.video.CodeHelp.Pojo.TestCaseSaveRequest;
 import com.video.CodeHelp.Service.CachingService;
 import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
+import com.video.CodeHelp.mongo.MongoService;
 import com.video.CodeHelp.utils.CachingUtils;
+import io.vertx.core.json.JsonObject;
 import jakarta.inject.Singleton;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,11 +34,13 @@ public class TestCaseService implements ITestCaseService {
 
   private final TestCaseDao dao;
   private final CachingService cachingService;
+  private final MongoService mongoService;
 
   @Inject
-  public TestCaseService(TestCaseDao dao, CachingService cachingService) {
+  public TestCaseService(TestCaseDao dao, CachingService cachingService,MongoService mongoService) {
     this.dao = dao;
     this.cachingService = cachingService;
+    this.mongoService = mongoService;
   }
 
   @Override
@@ -59,8 +67,11 @@ public class TestCaseService implements ITestCaseService {
 
   @Override
   public void saveTestCases(TestCaseSaveRequest request) {
-    dao.saveTestCase(request.getQNo(),request.getLanguage(),request.getTestCases());
-    dao.saveTestCaseSolution(request.getTestCases().get(0).getTestCaseId(),request.getSolution());
+    //TODO need to add heavy validations here
+    List<JsonObject> docs = request.getTestCases().stream().map(testCase->{
+      return new JsonObject().put(DataConstants.QID,request.getQid()).put(DataConstants.TEST_CASE_CAMEL,testCase);
+    }).collect(Collectors.toList());
+    mongoService.insertMultiple(MongoConstants.TESTCASES,docs);
   }
 
   @Override
@@ -101,7 +112,7 @@ public class TestCaseService implements ITestCaseService {
 
   @Override
   public void saveTestCasesRuleInfo(TestCaseRuleInfo testCaseRuleInfo) {
-    dao.saveTestCase();
+
   }
 
 }

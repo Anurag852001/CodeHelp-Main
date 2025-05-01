@@ -3,6 +3,8 @@ package com.video.CodeHelp.Service.TestCaseService;
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.DataTypeEnums;
 import com.video.CodeHelp.Exception.CodeHelpException;
+import com.video.CodeHelp.Service.TestCaseService.impl.IntegerArrayRuleEngineService;
+import com.video.CodeHelp.Service.TestCaseService.impl.IntegerRulesImpl;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
@@ -17,8 +19,8 @@ public class RuleEngineFactory {
   IRuleEngineService integerArrayRuleEngineService;
 
   @Inject
-  public RuleEngineFactory(@Named(DataConstants.INTEGER_RULE_ENGINE_SERVICE) IRuleEngineService integerRuleEngineService,
-                           @Named(DataConstants.INTEGER_ARRAY_RULE_ENGINE_SERVICE) IRuleEngineService integerArrayRuleEngineService){
+  public RuleEngineFactory( IntegerArrayRuleEngineService integerArrayRuleEngineService,
+                            IntegerRulesImpl integerRuleEngineService){
     this.integerRuleEngineService = integerRuleEngineService;
     this.integerArrayRuleEngineService = integerArrayRuleEngineService;
   }

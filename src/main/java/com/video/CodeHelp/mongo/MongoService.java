@@ -2,18 +2,24 @@ package com.video.CodeHelp.mongo;
 
 import com.video.CodeHelp.Constants.MongoConstants;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.mongo.BulkOperation;
+import io.vertx.ext.mongo.BulkOperationType;
 import io.vertx.ext.mongo.MongoClient;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Singleton
 public class MongoService {
-
+    private static final String TYPE = "type";
+    private static final String MULTI = "multi";
+    private static final String FILTER = "filter";
+    private static final String DOCUMENT = "document";
     private final MongoClient mongoClient;
 
     @Inject
@@ -23,16 +29,38 @@ public class MongoService {
 
     public void insertDoc(String collectionName,JsonObject document){
         try {
-            log.info("Going to insert document into collection:{},");
+            log.info("Going to insert document into collection:{},",collectionName);
             mongoClient.insert(MongoConstants.CODE_HELP_DAY_WISE_QUESTIONS_TRACKING_COLLECTION, document,handler->{
                 if(handler.succeeded()){
                     log.info("Inserted successfully document into collection:{}",collectionName);
                 } else {
-                    log.error("Error occured while inserting into mongo collection: {}, cause :{}",collectionName,handler.cause());
+                    log.error("Error occurred while inserting into mongo collection: {}, cause :",collectionName,handler.cause());
                 }
             });
         } catch ( Exception e){
             log.error("Error while inserting into mongo collection",e);
         }
+    }
+
+    public void insertMultiple(String collectionName, List<JsonObject> documents){
+        try{
+            List<BulkOperation> bulkOperations = convertDocumentsToBulkOperation(documents);
+            long startTime = System.currentTimeMillis();
+            mongoClient.bulkWrite(collectionName,bulkOperations).onComplete(result->{
+                if(result.succeeded()){
+                    log.info("Successfully inserted bulk documents into collection:{},number:{}",collectionName,documents.size());
+                } else{
+                    log.error("Error occurred while inserting into collections:{},cause:",collectionName,result.cause());
+                }
+            });
+            log.info("Time taken to insert into mongo:{}",System.currentTimeMillis()-startTime);
+        } catch (Exception e){
+            log.error("Error while inserting multiple documents into mongo for collection:{}",collectionName);
+        }
+    }
+
+    private List<BulkOperation> convertDocumentsToBulkOperation(List<JsonObject> documents) {
+        return documents.stream().filter(Objects::nonNull).map(BulkOperation::createInsert
+        ).collect(Collectors.toList());
     }
 }

@@ -39,8 +39,8 @@ public class IntegerRulesImpl implements IRuleEngineService {
   @Override
   public RuleEngineResponse applyRule(List<TestCaseGeneratorRules> testCaseRuleInfo) {
     for (TestCaseGeneratorRules info : testCaseRuleInfo) {
-     IntegerArrayRules rule = IntegerArrayRules.valueOf(info.toString()).applyRule();
+     Integer[] rule = IntegerArrayRules.valueOf(info.toString()).applyRule(100,100);
     }
-    return null;
+    return RuleEngineResponse.builder().build();
   }
 }

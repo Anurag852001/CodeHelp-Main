@@ -32,7 +32,7 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
   @Override
   public void handle(RoutingContext routingContext) {
     Promise promise = Promise.promise();
-//    log.info("Recieved request for api :{}", routingContext.currentRoute().getPath());
+    log.info("Recieved request for api :{}", routingContext.currentRoute().getPath());
     ApiEnums api = ApiEnums.fromValue(routingContext.currentRoute().getPath());
     JsonObject body = routingContext.getBodyAsJson();
     if(body == null) body = new JsonObject();

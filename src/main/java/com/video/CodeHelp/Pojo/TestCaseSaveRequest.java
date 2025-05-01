@@ -3,10 +3,12 @@ package com.video.CodeHelp.Pojo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Enums.TestCaseType;
+import io.vertx.core.json.JsonArray;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -17,9 +19,6 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TestCaseSaveRequest {
-  private List<TestCase> testCases;
-  private String solution;
-  private CompilerTypeEnums language;
-  private TestCaseType testCaseType;
-  private Long qNo;
+  private Long qid;
+  private List<List<Object>> testCases;
 }
