@@ -65,7 +65,7 @@ public class TestCaseService implements ITestCaseService {
       cachingService.populateInCache(CachingUtils.getCacheKeyForTestCase(language, qId), testCases, CacheTypeEnums.TWO_HUNDERED_CACHE);
       return testCases;
     }
-    return null;
+    return testCases;
   }
 
   @Override

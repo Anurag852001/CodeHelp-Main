@@ -1,23 +1,25 @@
 package com.video.CodeHelp.mongo;
 
-import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Constants.MongoConstants;
-import com.video.CodeHelp.Enums.ApplicationErrorEnums;
-import com.video.CodeHelp.Exception.CodeHelpException;
+import com.video.CodeHelp.Enums.PoolEnums;
+import com.video.CodeHelp.Service.CommonPoolFactory;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.BulkOperation;
-import io.vertx.ext.mongo.BulkOperationType;
 import io.vertx.ext.mongo.MongoClient;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.units.qual.A;
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,10 +30,12 @@ public class MongoService {
     private static final String FILTER = "filter";
     private static final String DOCUMENT = "document";
     private final MongoClient mongoClient;
+    private final Vertx vertx;
 
     @Inject
-    public MongoService(MongoClient mongoClient) {
+    public MongoService(MongoClient mongoClient,Vertx vertx) {
         this.mongoClient = mongoClient;
+        this.vertx = vertx;
     }
 
     public void insertDoc(String collectionName,JsonObject document){
@@ -67,24 +71,20 @@ public class MongoService {
     }
 
     public List<JsonObject> getMultiple(String collectionName, JsonObject filterObject) {
-        try {
-            CompletableFuture<List<JsonObject>> future = new CompletableFuture<>();
-            mongoClient.find(collectionName, filterObject, res -> {
-                if (res.succeeded()) {
-                    log.info("Result:{}",res.result());
-                    future.complete(res.result());
-                } else {
-                    log.error("Mongo error for filter: {}", filterObject, res.cause());
-                    future.complete(new ArrayList<>());
-                }
-            });
-            return future.get(15, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            log.error("Error while getting data from mongo for filter object: {}", filterObject, e);
-            throw new CodeHelpException(ApplicationErrorEnums.MONGO_ERROR);
-        }
+        Promise<List<JsonObject>> promise = Promise.promise();
+        CompletableFuture.runAsync(()->
+        mongoClient.find(collectionName, filterObject, res -> {
+            if (res.succeeded()) {
+                List<JsonObject> result = res.result() != null ? res.result() : new ArrayList<>();
+                promise.complete(result);
+            } else {
+                log.error("Mongo error", res.cause());
+                promise.complete(new ArrayList<>());
+            }
+        }), CommonPoolFactory.getForkJoinPool(PoolEnums.MONGO_POOL));
+        log.info("Here");
+        return promise.future().toCompletionStage().toCompletableFuture().join();  // This will block
     }
-
 
 
     private List<BulkOperation> convertDocumentsToBulkOperation(List<JsonObject> documents) {

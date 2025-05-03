@@ -491,7 +491,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
           future.complete(true);
         } catch (Exception e) {
           log.error("Error while generating testcases", e);
-          message.reply(e);
+          message.reply(processResponse(e.getMessage()));
           future.fail(e);
         }
       });
