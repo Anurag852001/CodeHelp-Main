@@ -15,7 +15,8 @@ public enum ApplicationErrorEnums {
   ERROR_WHILE_UPDATING_CORRECT_CODE("Error while updating correct code ",7),
   TEST_CASE_FAILED("Test case failed",8),
   SIZE_SHOULD_BE_LESS_THAN_MAX("Size should be less than maximum value",9),
-  BAD_REQUEST("Invalid request",10);
+  BAD_REQUEST("Invalid request",10),
+  MONGO_ERROR("Mongo error",11);
 
   String message;
   Integer errorCode;

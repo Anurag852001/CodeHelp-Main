@@ -225,6 +225,15 @@ public class CodeHelpRoutingHandler implements Handler<RoutingContext> {
             promise.fail(messageAsyncResult.cause());
           }
         });
+      case TESTCASE_GET_API:
+        eventBus.request(TESTCASE_GET_API.getEventPath(), body, messageAsyncResult -> {
+          if (messageAsyncResult.succeeded()) {
+            handleSuccessResponse(routingContext, messageAsyncResult);
+            promise.complete(messageAsyncResult);
+          } else {
+            promise.fail(messageAsyncResult.cause());
+          }
+        });
         break;
       case TESTCASE_GENERATE_API:
         eventBus.request(TESTCASE_GENERATE_API.getEventPath(), body, messageAsyncResult -> {

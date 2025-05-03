@@ -20,5 +20,6 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TestCaseSaveRequest {
   private Long qid;
-  private List<List<Object>> testCases;
+  private List<List<String>> testCases;
+  private List<List<String>> solutions;
 }

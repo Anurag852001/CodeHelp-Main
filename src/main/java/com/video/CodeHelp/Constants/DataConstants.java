@@ -36,6 +36,7 @@ public class DataConstants {
   public static final String CORRECT_CODE_CAMEL = "correctCode";
   public static final String TEST_CASE = "TEST_CASE";
   public static final String TEST_CASE_CAMEL ="testCase";
+  public static final String TEST_CASES = "testCases";
   public static final String TEST_CASE_RESULTS = "TEST_CASE_RESULTS";
   public static final String RESULT = "result";
   public static final String EXPECTED_RESULT = "expectedResult";
@@ -45,4 +46,5 @@ public class DataConstants {
   public static final String SIZE = "size";
   public static final String MAXIMUM_VALUE = "maximumValue";
   public static final String WEB_CLIENT = "WebClient";
+  public static final String SOLUTION = "solution";
 }

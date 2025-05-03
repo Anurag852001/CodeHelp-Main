@@ -51,18 +51,18 @@ public class TestCaseGeneratorService {
   private List<TestCase> generateTestCaseForEachVariable(List<MainCodeVariable> mainCodeVariables,Map<Long,List<TestCaseGeneratorRules>> variableVsRules){
     List<TestCase> testCase = new ArrayList<>();
     mainCodeVariables.sort(Comparator.comparingLong(MainCodeVariable::getVariableNumber));
-    mainCodeVariables.forEach(mainCodeVariable -> {
-      IRuleEngineService ruleEngineService = ruleEngineFactory.getRuleEngineService(mainCodeVariable.getType());
+//    mainCodeVariables.forEach(mainCodeVariable -> {
+//      IRuleEngineService ruleEngineService = ruleEngineFactory.getRuleEngineService(mainCodeVariable.getType());
 
 
-      String generatedValue = ruleEngineService.applyRule(variableVsRules.get(mainCodeVariable.getVariableNumber())).getValue();
-      testCase.add(TestCase.builder()
-        .testCaseType(TestCaseType.MAIN_TESTCASE)
-        .testCaseId(mainCodeVariable.getVariableNumber())
-        .dataType(mainCodeVariable.getType())
-        .value(generatedValue)
-        .build());
-    });
+//      String generatedValue = ruleEngineService.applyRule(variableVsRules.get(mainCodeVariable.getVariableNumber())).getValue();
+//      testCase.add(TestCase.builder()
+//        .testCaseType(TestCaseType.MAIN_TESTCASE)
+//        .testCaseId(mainCodeVariable.getVariableNumber())
+//        .dataType(mainCodeVariable.getType())
+//        .value(generatedValue)
+//        .build());
+//    });
     return testCase;
   }
 }

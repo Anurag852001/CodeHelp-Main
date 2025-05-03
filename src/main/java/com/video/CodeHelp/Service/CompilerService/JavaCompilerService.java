@@ -118,23 +118,7 @@ public class JavaCompilerService implements ICompilerService {
     try {
       Long startTime = System.currentTimeMillis();
       List<TestCase> testCasesUngrouped = testCaseService.getTestCases(request.getQid(), request.getCompilerType(), TestCaseType.MAIN_TESTCASE);
-      Map<Long, List<TestCase>> groupedTestCases = testCasesUngrouped.stream().collect(Collectors.groupingBy(TestCase::getTestCaseId));
 
-      Map<Long, TestCaseResult> testCaseResultMap = testCaseService.getTestCaseResults(request.getQid(), request.getCompilerType())
-        .stream().collect(Collectors.toMap(TestCaseResult::getTestCaseId, Function.identity()));
-
-      totalCount = groupedTestCases.size();
-      groupedTestCases.entrySet().stream().forEach(testCase -> {
-        List<TestCase> testCases = testCase.getValue();
-        String wrappedCode = wrapCode(CommonUtils.getCodeCompilingRequest(request.getCode(), request.getCompilerType(), testCases, request.getQid()));
-        lastTestCaseResultBeforeFailure.set(runSimpleCode(wrappedCode));
-        TestCaseResult testCaseResult = testCaseResultMap.get(testCases.get(0).getTestCaseId());
-        lastExpectedResult.set(testCaseResult.getOutput());
-        if (!testCaseResult.getOutput().equalsIgnoreCase(lastTestCaseResultBeforeFailure.get())) {
-          throw new CodeHelpException(ApplicationErrorEnums.TEST_CASE_FAILED);
-        }
-        count.getAndSet(count.get() + 1);
-      });
       Long timeTaken = System.currentTimeMillis() - startTime;
       submitCodeResponse.timeTake(timeTaken).totalTestCases(totalCount).testCasesPassed(count.get());
     } catch (Exception e) {

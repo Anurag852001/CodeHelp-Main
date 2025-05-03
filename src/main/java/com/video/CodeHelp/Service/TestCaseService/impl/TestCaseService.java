@@ -27,6 +27,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.video.CodeHelp.Enums.DataTypeEnums.INTEGER_ARRAY;
+
 
 @Slf4j
 @Singleton
@@ -58,7 +60,8 @@ public class TestCaseService implements ITestCaseService {
   public List<TestCase> getTestCases(Long qId, CompilerTypeEnums language, TestCaseType testCaseType) {
     List<TestCase> testCases = (List<TestCase>) cachingService.getFromCache(CachingUtils.getCacheKeyForTestCase(language, qId), CacheTypeEnums.TWO_HUNDERED_CACHE);
     if (CollectionUtils.isEmpty(testCases)) {
-      testCases = dao.getTestCases(qId, testCaseType);
+      testCases = mongoService.getMultiple(MongoConstants.TESTCASES,new JsonObject().put(DataConstants.QID,qId))
+              .stream().map(jsonObject -> jsonObject.mapTo(TestCase.class)).collect(Collectors.toList());
       cachingService.populateInCache(CachingUtils.getCacheKeyForTestCase(language, qId), testCases, CacheTypeEnums.TWO_HUNDERED_CACHE);
       return testCases;
     }
@@ -68,9 +71,14 @@ public class TestCaseService implements ITestCaseService {
   @Override
   public void saveTestCases(TestCaseSaveRequest request) {
     //TODO need to add heavy validations here
-    List<JsonObject> docs = request.getTestCases().stream().map(testCase->{
-      return new JsonObject().put(DataConstants.QID,request.getQid()).put(DataConstants.TEST_CASE_CAMEL,testCase);
-    }).collect(Collectors.toList());
+    List<JsonObject> docs = new ArrayList<>();
+         for(int i = 0 ;i < request.getTestCases().size(); i++){
+           JsonObject jsonObject = new JsonObject();
+           jsonObject.put(DataConstants.QID,request.getQid());
+           jsonObject.put(DataConstants.TEST_CASE_CAMEL,request.getTestCases().get(i));
+           jsonObject.put(DataConstants.SOLUTION,request.getSolutions().get(i));
+           docs.add(jsonObject);
+         }
     mongoService.insertMultiple(MongoConstants.TESTCASES,docs);
   }
 
@@ -94,16 +102,18 @@ public class TestCaseService implements ITestCaseService {
       return new ArrayList<>();
     }
     //lets sort first
-    testCases.sort(Comparator.comparing(TestCase::getVariableNumber));
-    return testCases.stream().map(testCase -> {
-      String testCaseValue = testCase.getValue();
-      switch (testCase.getDataType()) {
-        case INTEGER_ARRAY:
-          return "{" + testCaseValue.substring(1, testCaseValue.length() - 1) +"};";
-        default:
-          return testCaseValue+";";
-      }
-    }).collect(Collectors.toList());
+//    testCases.sort(Comparator.comparing(
+//            TestCase::getVariableNumber));
+//    return testCases.stream().map(testCase -> {
+//      String testCaseValue = testCase.getValue();
+//      switch (testCase.getDataType()) {
+//        case INTEGER_ARRAY:
+//          return "{" + testCaseValue.substring(1, testCaseValue.length() - 1) +"};";
+//        default:
+//          return testCaseValue+";";
+//      }
+//    }).collect(Collectors.toList());
+    return new ArrayList<>();
   }
 
   public List<TestCaseRuleInfo> getTestCaseRuleInfo(Long qid,Long variableNumber){

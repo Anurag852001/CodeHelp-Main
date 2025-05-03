@@ -476,6 +476,27 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
       });
     });
 
+    eventBus.consumer(ApiEnums.TESTCASE_GET_API.getEventPath(), message -> {
+      vertx.executeBlocking(future -> {
+        try {
+          log.info("Got request in  test case get apir:{}",message.body());
+          JsonObject body = JsonObject.mapFrom(message.body());
+          if(body == null){
+            throw new CodeHelpException(ApplicationErrorEnums.BAD_REQUEST);
+          }
+          List<JsonObject> testCases = testCaseService.getTestCases(Long.valueOf(body.getString(DataConstants.QID)),null,null)
+                  .stream().map(JsonObject::mapFrom).collect(Collectors.toList());
+
+          message.reply(new JsonObject().put(DataConstants.SUCCESS,true).put(DataConstants.DATA,testCases));
+          future.complete(true);
+        } catch (Exception e) {
+          log.error("Error while generating testcases", e);
+          message.reply(e);
+          future.fail(e);
+        }
+      });
+    });
+
   }
 
   private JsonObject processResponse(String str){
