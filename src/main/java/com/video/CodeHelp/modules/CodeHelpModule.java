@@ -254,8 +254,8 @@ public class CodeHelpModule extends AbstractModule {
 
   @Provides
   @Singleton
-  public ITestCaseService providesTestCaseService(TestCaseDao testCaseDao,CachingService cachingService,MongoService mongoService){
-    return  new TestCaseService(testCaseDao,cachingService,mongoService);
+  public ITestCaseService providesTestCaseService(TestCaseDao testCaseDao,CachingService cachingService,MongoService mongoService,MainCodeVariableService mainCodeVariableService){
+    return  new TestCaseService(testCaseDao,cachingService,mongoService,mainCodeVariableService);
   }
 
   @Provides

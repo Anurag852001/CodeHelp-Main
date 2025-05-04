@@ -7,11 +7,9 @@ import com.video.CodeHelp.Dao.TestCaseDao;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
 import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Enums.TestCaseType;
-import com.video.CodeHelp.Pojo.TestCase;
-import com.video.CodeHelp.Pojo.TestCaseResult;
-import com.video.CodeHelp.Pojo.TestCaseRuleInfo;
-import com.video.CodeHelp.Pojo.TestCaseSaveRequest;
+import com.video.CodeHelp.Pojo.*;
 import com.video.CodeHelp.Service.CachingService;
+import com.video.CodeHelp.Service.MainCodeVariableService;
 import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
 import com.video.CodeHelp.mongo.MongoService;
 import com.video.CodeHelp.utils.CachingUtils;
@@ -23,6 +21,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,19 +36,21 @@ public class TestCaseService implements ITestCaseService {
   private final TestCaseDao dao;
   private final CachingService cachingService;
   private final MongoService mongoService;
+  private final MainCodeVariableService mainCodeVariableService;
 
   @Inject
-  public TestCaseService(TestCaseDao dao, CachingService cachingService,MongoService mongoService) {
+  public TestCaseService(TestCaseDao dao, CachingService cachingService,MongoService mongoService, MainCodeVariableService mainCodeVariableService) {
     this.dao = dao;
     this.cachingService = cachingService;
     this.mongoService = mongoService;
+    this.mainCodeVariableService =mainCodeVariableService;
   }
 
   @Override
-  public List<String> getFormattedTestCase(List<TestCase> testCases, CompilerTypeEnums language) {
+  public List<List<String>> getFormattedTestCase(List<TestCase> testCases,Long qid, CompilerTypeEnums language) {
     switch (language) {
       case JAVA:
-        return getFormattedTestCaseForJava(testCases);
+        return getFormattedTestCaseForJava(testCases,qid,language);
       default:
         log.error("Not implemented test case formmater for this");
         return null;
@@ -58,6 +59,7 @@ public class TestCaseService implements ITestCaseService {
 
   @Override
   public List<TestCase> getTestCases(Long qId, CompilerTypeEnums language, TestCaseType testCaseType) {
+    //these testcase should be refreshed into cache
     List<TestCase> testCases = (List<TestCase>) cachingService.getFromCache(CachingUtils.getCacheKeyForTestCase(language, qId), CacheTypeEnums.TWO_HUNDERED_CACHE);
     if (CollectionUtils.isEmpty(testCases)) {
       testCases = mongoService.getMultiple(MongoConstants.TESTCASES,new JsonObject().put(DataConstants.QID,qId))
@@ -96,24 +98,25 @@ public class TestCaseService implements ITestCaseService {
 
 
 
-  public List<String> getFormattedTestCaseForJava(List<TestCase> testCases) {
+  public List<List<String>> getFormattedTestCaseForJava(List<TestCase> testCases,Long qid,CompilerTypeEnums compilerTypeEnums) {
     if(CollectionUtils.isEmpty(testCases)){
       log.info("No test cases to format");
       return new ArrayList<>();
     }
-    //lets sort first
-//    testCases.sort(Comparator.comparing(
-//            TestCase::getVariableNumber));
-//    return testCases.stream().map(testCase -> {
-//      String testCaseValue = testCase.getValue();
-//      switch (testCase.getDataType()) {
-//        case INTEGER_ARRAY:
-//          return "{" + testCaseValue.substring(1, testCaseValue.length() - 1) +"};";
-//        default:
-//          return testCaseValue+";";
-//      }
-//    }).collect(Collectors.toList());
-    return new ArrayList<>();
+    List<List<String>> formattedTestCases = new ArrayList<>();
+    List<MainCodeVariable> mainCodeVariables = mainCodeVariableService.getVariables(qid,compilerTypeEnums);
+    Collections.sort(mainCodeVariables,(x,y)-> Long.compare(x.getVariableNumber() , y.getVariableNumber()));
+    testCases.forEach(testCase -> {
+      List<String> currentFormattedTestCase = new ArrayList<>();
+      for(int i = 0; i<mainCodeVariables.size(); i++){
+        switch (mainCodeVariables.get(i).getType()){
+          case INTEGER_ARRAY -> currentFormattedTestCase.add("{" + testCase.getTestCase().get(i).substring(1, testCase.getTestCase().get(i).length() - 1) +"};");
+          default ->currentFormattedTestCase.add(testCase.getTestCase().get(i)+";");
+        }
+      }
+      formattedTestCases.add(currentFormattedTestCase);
+    });
+    return formattedTestCases;
   }
 
   public List<TestCaseRuleInfo> getTestCaseRuleInfo(Long qid,Long variableNumber){

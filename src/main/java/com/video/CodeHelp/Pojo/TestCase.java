@@ -15,6 +15,6 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TestCase {
     private Long qid;
-    private List<String> inputs;
+    private List<String> testCase;
     private List<String> solution;
 }

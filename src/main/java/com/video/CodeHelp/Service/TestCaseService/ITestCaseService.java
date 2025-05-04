@@ -10,7 +10,7 @@ import com.video.CodeHelp.Pojo.TestCaseSaveRequest;
 import java.util.List;
 
 public interface ITestCaseService  {
-  List<String> getFormattedTestCase(List<TestCase> testCases, CompilerTypeEnums language);
+  List<List<String>> getFormattedTestCase(List<TestCase> testCases,Long qid, CompilerTypeEnums language);
   List<TestCase> getTestCases(Long qId, CompilerTypeEnums language, TestCaseType testCaseType);
   void saveTestCases(TestCaseSaveRequest testCaseSaveRequest);
   List<TestCaseResult> getTestCaseResults(Long qNo, CompilerTypeEnums language);

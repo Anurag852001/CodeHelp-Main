@@ -2,15 +2,17 @@ package com.video.CodeHelp.Service.CompilerService;
 
 import com.video.CodeHelp.Constants.DataConstants;
 import com.video.CodeHelp.Enums.ApplicationErrorEnums;
-import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Enums.ConfigTypeEnum;
 import com.video.CodeHelp.Enums.TestCaseType;
 import com.video.CodeHelp.Exception.CodeHelpException;
-import com.video.CodeHelp.Pojo.*;
+import com.video.CodeHelp.Pojo.CodeCompilingRequest;
+import com.video.CodeHelp.Pojo.JavaSourceFromString;
 import com.video.CodeHelp.Pojo.Responses.SubmitCodeResponse;
-import com.video.CodeHelp.Service.ConfigService;
+import com.video.CodeHelp.Pojo.SubmitCodeRequest;
+import com.video.CodeHelp.Pojo.TestCase;
 import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.WrapperFactory;
 import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.enums.WrapperCodeEnums;
+import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.Service.MainCodeVariableService;
 import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
 import com.video.CodeHelp.utils.CommonUtils;
@@ -22,11 +24,11 @@ import javax.tools.*;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static com.video.CodeHelp.Enums.CompilerTypeEnums.JAVA;
 
 @Slf4j
 public class JavaCompilerService implements ICompilerService {
@@ -47,9 +49,9 @@ public class JavaCompilerService implements ICompilerService {
 
   @Override
   public String compileCode(CodeCompilingRequest request) {
-    String wrappedCode = wrapCode(request);
+    SubmitCodeResponse submitCodeResponse = wrapAndSubmit(request.getCode(),request.getQid(),request.getTestCase(),true);
 //    log.info("final wrappedCode:{} ", wrappedCode);
-    return runSimpleCode(wrappedCode);
+    return submitCodeResponse.getLastTestCaseResultBeforeFailure();
   }
 
   @Override
@@ -110,46 +112,77 @@ public class JavaCompilerService implements ICompilerService {
 
   @Override
   public SubmitCodeResponse submitCode(SubmitCodeRequest request) {
-    AtomicReference<Integer> count = new AtomicReference<>(0);
-    AtomicReference<String> lastTestCaseResultBeforeFailure = new AtomicReference<>();
-    AtomicReference<String> lastExpectedResult = new AtomicReference<>();
-    SubmitCodeResponse.SubmitCodeResponseBuilder submitCodeResponse = SubmitCodeResponse.builder();
-    Integer totalCount = 0;
     try {
-      Long startTime = System.currentTimeMillis();
-      List<TestCase> testCasesUngrouped = testCaseService.getTestCases(request.getQid(), request.getCompilerType(), TestCaseType.MAIN_TESTCASE);
-
-      Long timeTaken = System.currentTimeMillis() - startTime;
-      submitCodeResponse.timeTake(timeTaken).totalTestCases(totalCount).testCasesPassed(count.get());
+      List<TestCase> testCases = testCaseService.getTestCases(request.getQid(), request.getCompilerType(), TestCaseType.MAIN_TESTCASE);
+      CodeCompilingRequest codeCompilingRequest= CommonUtils.getCodeCompilingRequest(request.getCode(),request.getCompilerType(),testCases,request.getQid());
+      return wrapAndSubmit(request.getCode(),request.getQid(),testCases,false);
     } catch (Exception e) {
-      log.error(e.getMessage());
-      submitCodeResponse.testCasesPassed(totalCount).testCasesPassed(count.get()).totalTestCases(totalCount).failed(true);
+      log.error("Error while submitting" ,e);
+      throw new CodeHelpException(ApplicationErrorEnums.SOMETHING_WENT_WRONG);
     }
-    return submitCodeResponse.build();
   }
 
 
-  private String wrapCode(CodeCompilingRequest request) {
+  private SubmitCodeResponse wrapAndSubmit(String code,Long qid,List<TestCase> testCase,boolean getResultOfAll) {
     //firstly we will start with the basic code from config
-    Long startTime = System.currentTimeMillis();
+
+    long startTime = System.currentTimeMillis();
+    StringBuilder stringBuilder1 = getWrappedWithBasicClass(code);
+    Integer passedTestCases = 0;
+    String expectedLastTestCaseResult = null;
+    boolean failed = false;
+
+    String basicCode4 = configService.getCodeHelpConfig(DataConstants.WRAPPER_CONFIG_JAVA_4, ConfigTypeEnum.WRAPPER_CONFIG.name()).getConfigValue();
+    List<List<String>> formattedTestCase = testCaseService.getFormattedTestCase(testCase,qid, JAVA);
+    List<String> resultOfAll = new ArrayList<>();
+    List<String> expectedResultOfAll = new ArrayList<>();
+    for(int i = 0;i < formattedTestCase.size(); i++) {
+      attachTestCase(stringBuilder1, formattedTestCase.get(i),qid);
+      String codeToBeWrappedWithMainCode = stringBuilder1.toString();
+      String newCode = wrapperFactory.getWrapperService(WrapperCodeEnums.MAIN_CODE).wrapCode(codeToBeWrappedWithMainCode, qid, JAVA);
+      StringBuilder stringBuilder2 = new StringBuilder().append(newCode);
+      attachCode(stringBuilder2, basicCode4);
+      String currentResult =  runSimpleCode(stringBuilder2.toString());
+      if(currentResult.equalsIgnoreCase(testCase.get(i).getSolution().toString())){
+        passedTestCases++;
+        resultOfAll.add(currentResult);
+      } else if(!getResultOfAll) {
+        failed = true;
+        expectedLastTestCaseResult = testCase.get(i).getSolution().toString();
+        break;
+      } else {
+        failed = true;
+      }
+      expectedResultOfAll.add(testCase.get(i).getSolution().toString());
+    }
+
+    Long timeTaken = System.currentTimeMillis() - startTime;
+    log.info("Time took to execute all testcases : {}", timeTaken);
+    SubmitCodeResponse submitCodeResponse = SubmitCodeResponse.builder().testCasesPassed(passedTestCases)
+            .totalTestCases(testCase.size())
+            .expectedLastTestCaseResultBeforeFailure(expectedLastTestCaseResult)
+            .failed(failed)
+            .timeTake(timeTaken)
+            .build();
+    if(getResultOfAll){
+      submitCodeResponse.setExpectedResultOfTestCase(expectedResultOfAll);
+      submitCodeResponse.setResultOfEachTestCase(resultOfAll);
+    }
+    return submitCodeResponse;
+  }
+
+  private StringBuilder getWrappedWithBasicClass(String code){
     String basicCode1 = configService.getCodeHelpConfig(DataConstants.WRAPPER_CONFIG_JAVA_1, ConfigTypeEnum.WRAPPER_CONFIG.name()).getConfigValue();
     String basicCode2 = configService.getCodeHelpConfig(DataConstants.WRAPPER_CONFIG_JAVA_2, ConfigTypeEnum.WRAPPER_CONFIG.name()).getConfigValue();
     String basicCode3 = configService.getCodeHelpConfig(DataConstants.WRAPPER_CONFIG_JAVA_3, ConfigTypeEnum.WRAPPER_CONFIG.name()).getConfigValue();
-    String basicCode4 = configService.getCodeHelpConfig(DataConstants.WRAPPER_CONFIG_JAVA_4, ConfigTypeEnum.WRAPPER_CONFIG.name()).getConfigValue();
 
-    StringBuilder stringBuilder1 = new StringBuilder();
-    attachCode(stringBuilder1, basicCode1);
-    attachCode(stringBuilder1, request.getCode());
-    attachCode(stringBuilder1, basicCode2);
-    attachCode(stringBuilder1, basicCode3);
-    attachTestCase(stringBuilder1, request);
-    String codeToBeWrappedWithMainCode = stringBuilder1.toString();
-    String newCode = wrapperFactory.getWrapperService(WrapperCodeEnums.MAIN_CODE).wrapCode(codeToBeWrappedWithMainCode, request.getQid(), CompilerTypeEnums.JAVA);
-    StringBuilder stringBuilder2 = new StringBuilder().append(newCode);
-    attachCode(stringBuilder2, basicCode4);
-//    log.info("Time took to wrap code : {}", System.currentTimeMillis() - startTime);
-    return stringBuilder2.toString();
 
+    StringBuilder stringBuilder = new StringBuilder();
+    attachCode(stringBuilder, basicCode1);
+    attachCode(stringBuilder, code);
+    attachCode(stringBuilder, basicCode2);
+    attachCode(stringBuilder, basicCode3);
+    return stringBuilder;
   }
 
   public void attachCode(StringBuilder stringBuilder, String code) {
@@ -160,10 +193,10 @@ public class JavaCompilerService implements ICompilerService {
     }
   }
 
-  public void attachTestCase( StringBuilder stringBuilder, CodeCompilingRequest request) {
+  public void attachTestCase( StringBuilder stringBuilder, List<String> testCases,Long qid) {
     stringBuilder.append(System.lineSeparator());
-    List<String> variables = mainCodeVariableService.getFormattedVariables(request.getQid(), CompilerTypeEnums.JAVA);
-    List<String> testCases = testCaseService.getFormattedTestCase(request.getTestCase(), CompilerTypeEnums.JAVA);
+    List<String> variables = mainCodeVariableService.getFormattedVariables(qid, JAVA);
+
     if(CollectionUtils.isEmpty(testCases)){
       log.info("No test cases found to test");
       throw new CodeHelpException("No test cases found");
