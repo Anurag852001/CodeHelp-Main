@@ -43,15 +43,13 @@ public class CodeHelpCompilerVerticle extends AbstractVerticle {
           CodeCompilingRequest request = new JsonObject(message.body().toString()).mapTo(CodeCompilingRequest.class);
           log.info("Recevied request for code compiling:{}", request);
           Long startTime = System.currentTimeMillis();
-          String result = compilerFactory.getCompiler(request.getCompilerType()).compileCode(request);
-          Long elapsedTime = System.currentTimeMillis()-startTime;
-          CorrectCodePojo correctCodePojo = correctCodeService.getCorrectCode(CorrectCodePojo.builder().qid(request.getQid()).language(request.getCompilerType()).build());
-          request.setCode(correctCodePojo.getCode());
-          String expectedResult = compilerFactory.getCompiler(request.getCompilerType()).compileCode(request);
+          String correctCode = correctCodeService.getCorrectCode(request.getQid(),request.getCompilerType()).getCode();
+          request.setCorrectCode(correctCode);
+          SubmitCodeResponse submitCodeResponse = compilerFactory.getCompiler(request.getCompilerType()).compileCode(request);
           JsonObject response = new JsonObject();
           response.put(DataConstants.SUCCESS, true);
           response.put(DataConstants.MESSAGE, DataConstants.SUCCESS);
-          response.put(DataConstants.DATA, CommonUtils.prepareResponseForCompileCodeApi(result,expectedResult,elapsedTime));
+          response.put(DataConstants.DATA, JsonObject.mapFrom(submitCodeResponse));
           future.complete(response);
           message.reply(response);
         } catch (Exception e){

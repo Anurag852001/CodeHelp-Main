@@ -5,7 +5,7 @@ import com.video.CodeHelp.Pojo.Responses.SubmitCodeResponse;
 import com.video.CodeHelp.Pojo.SubmitCodeRequest;
 
 public interface ICompilerService {
-  public String compileCode(CodeCompilingRequest request);
+  public SubmitCodeResponse compileCode(CodeCompilingRequest request);
   public String runSimpleCode(String code);
   public SubmitCodeResponse submitCode(SubmitCodeRequest request);
 }

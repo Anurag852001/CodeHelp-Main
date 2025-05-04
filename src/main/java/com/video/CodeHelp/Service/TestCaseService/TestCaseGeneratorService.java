@@ -4,6 +4,7 @@ import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Enums.TestCaseGeneratorRules;
 import com.video.CodeHelp.Enums.TestCaseType;
 import com.video.CodeHelp.Pojo.*;
+import com.video.CodeHelp.Pojo.Responses.SubmitCodeResponse;
 import com.video.CodeHelp.Service.CompilerService.CompilerFactory;
 import com.video.CodeHelp.Service.CorrectCodeService;
 import com.video.CodeHelp.Service.MainCodeVariableService;
@@ -36,12 +37,13 @@ public class TestCaseGeneratorService {
   public TestCaseGeneratorResponse generateTestCase(Long qid, CompilerTypeEnums language, Long numberOfTestCases, Map<Long,List<TestCaseGeneratorRules>> variableVsRules){
     List<MainCodeVariable> mainCodeVariables = mainCodeVariableService.getVariables(qid,language);
 
+    //need to change here for each test case to passing whole
     for(int i =0;i<numberOfTestCases;i++){
         mainCodeVariables.forEach(mcv->{
           List<TestCase> testCases = generateTestCaseForEachVariable(mainCodeVariables,variableVsRules);
-          String correctCode = correctCodeService.getCorrectCode(CorrectCodePojo.builder().qid(qid).language(language).build()).getCode();
-          String solution = compilerFactory.getCompiler(language).compileCode(CommonUtils.getCodeCompilingRequest(correctCode,language,testCases,qid));
-          TestCaseSaveRequest testCaseSaveRequest = CommonUtils.getTestCaseSaveRequest(testCases,qid,solution,language);
+          String correctCode = correctCodeService.getCorrectCode(qid,language).getCode();
+          SubmitCodeResponse submitCodeResponse = compilerFactory.getCompiler(language).compileCode(CommonUtils.getCodeCompilingRequest(correctCode,language,testCases,qid));
+          TestCaseSaveRequest testCaseSaveRequest = CommonUtils.getTestCaseSaveRequest(testCases,qid,"",language);
           testCaseService.saveTestCases(testCaseSaveRequest);
        } );
     }

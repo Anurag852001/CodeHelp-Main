@@ -384,7 +384,7 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
           JsonObject body = JsonObject.mapFrom(message.body());
           CorrectCodePojo correctCodePojo = body.mapTo(CorrectCodePojo.class);
           log.info("Received correct code get request with body:{}", correctCodePojo);
-          CorrectCodePojo responsePojo =  correctCodeService.getCorrectCode(correctCodePojo);
+          CorrectCodePojo responsePojo =  correctCodeService.getCorrectCode(correctCodePojo.getQid(),correctCodePojo.getLanguage());
           JsonObject response = new JsonObject();
           response.put(DataConstants.SUCCESS, true);
           response.put(DataConstants.MESSAGE, DataConstants.SUCCESS);

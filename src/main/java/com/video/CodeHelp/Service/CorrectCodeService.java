@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.video.CodeHelp.Dao.CorrectCodeDao;
 import com.video.CodeHelp.Enums.ApplicationErrorEnums;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
+import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Enums.TestCaseType;
 import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Pojo.CorrectCodePojo;
@@ -51,11 +52,12 @@ public class CorrectCodeService {
     }
   }
 
-  public CorrectCodePojo getCorrectCode(CorrectCodePojo correctCodePojo) {
-    CorrectCodePojo correctCodeFromCache = new ObjectMapper().convertValue(cachingService.getFromCache(CachingUtils.getCacheKeyForCorrectCode(correctCodePojo.getQid(),correctCodePojo.getLanguage()), CacheTypeEnums.TWO_HUNDERED_CACHE),CorrectCodePojo.class);
+
+  public CorrectCodePojo getCorrectCode(Long qid, CompilerTypeEnums compilerTypeEnums) {
+    CorrectCodePojo correctCodeFromCache = new ObjectMapper().convertValue(cachingService.getFromCache(CachingUtils.getCacheKeyForCorrectCode(qid,compilerTypeEnums), CacheTypeEnums.TWO_HUNDERED_CACHE),CorrectCodePojo.class);
     if(correctCodeFromCache == null){
       //reviving it from the database
-      CorrectCodePojo correctCode = dao.getCorrectCodeByQNoAndLanguage(correctCodePojo.getQid(), correctCodePojo.getLanguage());
+      CorrectCodePojo correctCode = dao.getCorrectCodeByQNoAndLanguage(qid, compilerTypeEnums);
       if(correctCode!= null){
         cachingService.populateInCache(CachingUtils.getCacheKeyForCorrectCode(correctCode.getQid(),correctCode.getLanguage()), correctCode, CacheTypeEnums.TWO_HUNDERED_CACHE);
       }
@@ -63,6 +65,7 @@ public class CorrectCodeService {
     }
     return correctCodeFromCache;
   }
+
 
   public void updateCorrectCode(CorrectCodePojo correctCodePojo) {
     try {

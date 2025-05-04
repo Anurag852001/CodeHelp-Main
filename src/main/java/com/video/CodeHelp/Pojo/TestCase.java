@@ -16,5 +16,5 @@ import java.util.List;
 public class TestCase {
     private Long qid;
     private List<String> testCase;
-    private List<String> solution;
+    private String solution;
 }

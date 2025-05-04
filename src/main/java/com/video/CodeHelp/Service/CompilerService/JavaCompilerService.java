@@ -5,17 +5,13 @@ import com.video.CodeHelp.Enums.ApplicationErrorEnums;
 import com.video.CodeHelp.Enums.ConfigTypeEnum;
 import com.video.CodeHelp.Enums.TestCaseType;
 import com.video.CodeHelp.Exception.CodeHelpException;
-import com.video.CodeHelp.Pojo.CodeCompilingRequest;
-import com.video.CodeHelp.Pojo.JavaSourceFromString;
+import com.video.CodeHelp.Pojo.*;
 import com.video.CodeHelp.Pojo.Responses.SubmitCodeResponse;
-import com.video.CodeHelp.Pojo.SubmitCodeRequest;
-import com.video.CodeHelp.Pojo.TestCase;
 import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.WrapperFactory;
 import com.video.CodeHelp.Service.CachePopulationService.WrapperCodeService.enums.WrapperCodeEnums;
 import com.video.CodeHelp.Service.ConfigService;
 import com.video.CodeHelp.Service.MainCodeVariableService;
 import com.video.CodeHelp.Service.TestCaseService.ITestCaseService;
-import com.video.CodeHelp.utils.CommonUtils;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -48,10 +44,15 @@ public class JavaCompilerService implements ICompilerService {
   }
 
   @Override
-  public String compileCode(CodeCompilingRequest request) {
-    SubmitCodeResponse submitCodeResponse = wrapAndSubmit(request.getCode(),request.getQid(),request.getTestCase(),true);
+  public SubmitCodeResponse compileCode(CodeCompilingRequest request) {
+    SubmitCodeResponse correctCodeSubmitResponse = wrapAndSubmit(request.getCorrectCode(),request.getQid(),request.getTestCase(),true,true);
+    //for every testcase lets set correct solutions
+    for(int i = 0 ; i <request.getTestCase().size();i++){
+      request.getTestCase().get(i).setSolution(correctCodeSubmitResponse.getExpectedResultOfTestCase().get(i));
+    }
+    SubmitCodeResponse submitCodeResponse = wrapAndSubmit(request.getCode(),request.getQid(),request.getTestCase(),true,false);
 //    log.info("final wrappedCode:{} ", wrappedCode);
-    return submitCodeResponse.getLastTestCaseResultBeforeFailure();
+    return submitCodeResponse;
   }
 
   @Override
@@ -114,8 +115,7 @@ public class JavaCompilerService implements ICompilerService {
   public SubmitCodeResponse submitCode(SubmitCodeRequest request) {
     try {
       List<TestCase> testCases = testCaseService.getTestCases(request.getQid(), request.getCompilerType(), TestCaseType.MAIN_TESTCASE);
-      CodeCompilingRequest codeCompilingRequest= CommonUtils.getCodeCompilingRequest(request.getCode(),request.getCompilerType(),testCases,request.getQid());
-      return wrapAndSubmit(request.getCode(),request.getQid(),testCases,false);
+      return wrapAndSubmit(request.getCode(),request.getQid(),testCases,false,false);
     } catch (Exception e) {
       log.error("Error while submitting" ,e);
       throw new CodeHelpException(ApplicationErrorEnums.SOMETHING_WENT_WRONG);
@@ -123,7 +123,7 @@ public class JavaCompilerService implements ICompilerService {
   }
 
 
-  private SubmitCodeResponse wrapAndSubmit(String code,Long qid,List<TestCase> testCase,boolean getResultOfAll) {
+  private SubmitCodeResponse wrapAndSubmit(String code,Long qid,List<TestCase> testCase,boolean getResultOfAll,boolean isCorrectCodeSubmission) {
     //firstly we will start with the basic code from config
 
     long startTime = System.currentTimeMillis();
@@ -143,17 +143,17 @@ public class JavaCompilerService implements ICompilerService {
       StringBuilder stringBuilder2 = new StringBuilder().append(newCode);
       attachCode(stringBuilder2, basicCode4);
       String currentResult =  runSimpleCode(stringBuilder2.toString());
-      if(currentResult.equalsIgnoreCase(testCase.get(i).getSolution().toString())){
+      if(currentResult.equalsIgnoreCase(testCase.get(i).getSolution())){
         passedTestCases++;
         resultOfAll.add(currentResult);
-      } else if(!getResultOfAll) {
+      } else if(!getResultOfAll && !isCorrectCodeSubmission) {
         failed = true;
-        expectedLastTestCaseResult = testCase.get(i).getSolution().toString();
+        expectedLastTestCaseResult = testCase.get(i).getSolution();
         break;
-      } else {
+      } else if(!isCorrectCodeSubmission) {
         failed = true;
       }
-      expectedResultOfAll.add(testCase.get(i).getSolution().toString());
+      expectedResultOfAll.add(testCase.get(i).getSolution());
     }
 
     Long timeTaken = System.currentTimeMillis() - startTime;

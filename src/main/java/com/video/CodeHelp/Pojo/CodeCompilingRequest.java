@@ -16,6 +16,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CodeCompilingRequest {
   private String code;
+  private String correctCode;
   private Long qid;
   private CompilerTypeEnums compilerType;
   private Boolean runOnAll;

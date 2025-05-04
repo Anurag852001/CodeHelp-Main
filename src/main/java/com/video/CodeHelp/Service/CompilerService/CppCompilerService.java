@@ -6,8 +6,8 @@ import com.video.CodeHelp.Pojo.SubmitCodeRequest;
 
 public class CppCompilerService implements ICompilerService {
   @Override
-  public String compileCode(CodeCompilingRequest request) {
-    return "";
+  public SubmitCodeResponse compileCode(CodeCompilingRequest request) {
+    return null;
   }
 
   @Override
