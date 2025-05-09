@@ -45,11 +45,8 @@ public class JavaCompilerService implements ICompilerService {
 
   @Override
   public SubmitCodeResponse compileCode(CodeCompilingRequest request) {
-    SubmitCodeResponse correctCodeSubmitResponse = wrapAndSubmit(request.getCorrectCode(),request.getQid(),request.getTestCase(),true,true);
+    wrapAndSubmit(request.getCorrectCode(),request.getQid(),request.getTestCase(),true,true);
     //for every testcase lets set correct solutions
-    for(int i = 0 ; i <request.getTestCase().size();i++){
-      request.getTestCase().get(i).setSolution(correctCodeSubmitResponse.getExpectedResultOfTestCase().get(i));
-    }
     SubmitCodeResponse submitCodeResponse = wrapAndSubmit(request.getCode(),request.getQid(),request.getTestCase(),true,false);
 //    log.info("final wrappedCode:{} ", wrappedCode);
     return submitCodeResponse;
@@ -143,7 +140,8 @@ public class JavaCompilerService implements ICompilerService {
       StringBuilder stringBuilder2 = new StringBuilder().append(newCode);
       attachCode(stringBuilder2, basicCode4);
       String currentResult =  runSimpleCode(stringBuilder2.toString());
-      if(currentResult.equalsIgnoreCase(testCase.get(i).getSolution())){
+
+      if(!isCorrectCodeSubmission && currentResult.equalsIgnoreCase(testCase.get(i).getSolution())){
         passedTestCases++;
         resultOfAll.add(currentResult);
       } else if(!getResultOfAll && !isCorrectCodeSubmission) {
@@ -152,8 +150,10 @@ public class JavaCompilerService implements ICompilerService {
         break;
       } else if(!isCorrectCodeSubmission) {
         failed = true;
+        expectedResultOfAll.add(testCase.get(i).getSolution());
+      } else {
+        testCase.get(i).setSolution(currentResult);
       }
-      expectedResultOfAll.add(testCase.get(i).getSolution());
     }
 
     Long timeTaken = System.currentTimeMillis() - startTime;

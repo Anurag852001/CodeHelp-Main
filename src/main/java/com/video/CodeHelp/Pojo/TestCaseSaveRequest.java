@@ -21,5 +21,5 @@ import java.util.List;
 public class TestCaseSaveRequest {
   private Long qid;
   private List<List<String>> testCases;
-  private List<List<String>> solutions;
+  private List<String> solutions;
 }
