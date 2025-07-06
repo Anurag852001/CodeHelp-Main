@@ -120,8 +120,8 @@ public class CodeHelpModule extends AbstractModule {
 
   @Provides
   @Singleton
-  public QuestionService providesQuestionService(CachingService cachingService, QuestionDao questionDao){
-    return new QuestionService(questionDao,cachingService);
+  public QuestionService providesQuestionService(CachingService cachingService, QuestionDao questionDao,CompilerFactory compilerFactory){
+    return new QuestionService(questionDao,cachingService,compilerFactory);
   }
 
   @Singleton
@@ -303,6 +303,7 @@ public class CodeHelpModule extends AbstractModule {
   @Singleton
   @Named(DataConstants.WEB_CLIENT)
   public WebClient priovidesVertxWebClient(Vertx vertx){
+    int webClientOptions = WebClientOptions.DEFAULT_POOL_EVENT_LOOP_SIZE;
     return WebClient.create(vertx);
   }
 }

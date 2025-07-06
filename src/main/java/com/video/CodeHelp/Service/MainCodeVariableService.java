@@ -7,9 +7,11 @@ import com.video.CodeHelp.Pojo.MainCodeVariable;
 import com.video.CodeHelp.utils.CachingUtils;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 
@@ -85,6 +87,72 @@ public class MainCodeVariableService {
 
   public List<String> formatCppMainCodeVariables(List<MainCodeVariable> variables){
     return null;
+  }
+
+  static Object sync = new Object();
+  static Boolean state = false;
+
+  public static void main(String[] args) throws InterruptedException {
+    Runnable runnable = () -> {
+      for (char c = 'a'; c <= 'z'; c++) {
+        try {
+          printChar(c);
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    };
+
+    Runnable runnable1 = () -> {
+      for (int i = 0; i < 26; i++) {
+        try {
+          printNumber(i);
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    };
+
+    Thread t1 = new Thread(runnable);
+    Thread t2 = new Thread(runnable1);
+
+    t1.start();
+    t2.start();
+
+
+  }
+
+  private static void printNumber(int number) throws InterruptedException {
+    synchronized (sync) {
+      while (true) {
+        System.out.println("Number");
+        if (state) {
+          System.out.println(number);
+          state = false;
+          sync.notify();
+          return;
+        } else {
+          System.out.println("Here");
+          sync.wait();
+        }
+      }
+    }
+  }
+
+  private static void printChar(char c) throws InterruptedException {
+    synchronized (sync) {
+      while (true) {
+
+        if (!state) {
+          System.out.println(c);
+          state = true;
+//          sync.notify();
+          return;
+        } else {
+          sync.wait();
+        }
+      }
+    }
   }
 
 }

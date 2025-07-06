@@ -16,7 +16,8 @@ public enum ApplicationErrorEnums {
   TEST_CASE_FAILED("Test case failed",8),
   SIZE_SHOULD_BE_LESS_THAN_MAX("Size should be less than maximum value",9),
   BAD_REQUEST("Invalid request",10),
-  MONGO_ERROR("Mongo error",11);
+  MONGO_ERROR("Mongo error",11),
+  COMPILATION_ERROR("Compilation failed please check the correct code",12);
 
   String message;
   Integer errorCode;

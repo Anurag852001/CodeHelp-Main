@@ -3,6 +3,7 @@ package com.video.CodeHelp;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.video.CodeHelp.Config.CodeHelpConfig;
 import com.video.CodeHelp.Exception.CodeHelpException;
 import com.video.CodeHelp.Guice.GuiceVerticleFactory;
@@ -23,6 +24,7 @@ import java.util.function.Supplier;
 
 
 @Slf4j
+@Singleton
 public class MainVerticle extends AbstractVerticle {
 
   @Override

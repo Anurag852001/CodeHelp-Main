@@ -1,8 +1,6 @@
 package com.video.CodeHelp.Pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Enums.DataTypeEnums;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,14 +9,10 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MainCodeVariable {
-  private Long id;
-  private String name;
-  private DataTypeEnums type;
-  private Integer questionNumber;
-  private CompilerTypeEnums language;
-  private Long variableNumber;
+public class VariableSaveRequest {
+    private String name;
+    private DataTypeEnums type;
 }

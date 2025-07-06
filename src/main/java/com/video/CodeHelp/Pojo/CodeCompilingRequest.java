@@ -21,4 +21,5 @@ public class CodeCompilingRequest {
   private CompilerTypeEnums compilerType;
   private Boolean runOnAll;
   private List<TestCase> testCase;
+  private boolean testCompilation;
 }

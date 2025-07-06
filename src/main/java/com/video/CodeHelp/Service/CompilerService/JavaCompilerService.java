@@ -113,18 +113,19 @@ public class JavaCompilerService implements ICompilerService {
     try {
       List<TestCase> testCases = testCaseService.getTestCases(request.getQid(), request.getCompilerType(), TestCaseType.MAIN_TESTCASE);
       return wrapAndSubmit(request.getCode(),request.getQid(),testCases,false,false);
-    } catch (Exception e) {
+    } catch (CodeHelpException e){
+      throw e;
+    }catch (Exception e) {
       log.error("Error while submitting" ,e);
       throw new CodeHelpException(ApplicationErrorEnums.SOMETHING_WENT_WRONG);
     }
   }
 
 
-  private SubmitCodeResponse wrapAndSubmit(String code,Long qid,List<TestCase> testCase,boolean getResultOfAll,boolean isCorrectCodeSubmission) {
+  private SubmitCodeResponse wrapAndSubmit(String code,Long qid,List<TestCase> testCase,boolean getResultOfAll,boolean isCorrectCodeSubmission,boolean testCompilation) {
     //firstly we will start with the basic code from config
-
     long startTime = System.currentTimeMillis();
-    StringBuilder stringBuilder1 = getWrappedWithBasicClass(code);
+    String nonTestCasesWrappedCode = getWrappedWithBasicClass(code).toString();
     Integer passedTestCases = 0;
     String expectedLastTestCaseResult = null;
     boolean failed = false;
@@ -134,6 +135,7 @@ public class JavaCompilerService implements ICompilerService {
     List<String> resultOfAll = new ArrayList<>();
     List<String> expectedResultOfAll = new ArrayList<>();
     for(int i = 0;i < formattedTestCase.size(); i++) {
+      StringBuilder stringBuilder1 = new StringBuilder().append(nonTestCasesWrappedCode);
       attachTestCase(stringBuilder1, formattedTestCase.get(i),qid);
       String codeToBeWrappedWithMainCode = stringBuilder1.toString();
       String newCode = wrapperFactory.getWrapperService(WrapperCodeEnums.MAIN_CODE).wrapCode(codeToBeWrappedWithMainCode, qid, JAVA);

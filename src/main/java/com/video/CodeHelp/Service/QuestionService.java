@@ -2,13 +2,15 @@ package com.video.CodeHelp.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.video.CodeHelp.Dao.QuestionDao;
+import com.video.CodeHelp.Enums.ApplicationErrorEnums;
 import com.video.CodeHelp.Enums.CacheTypeEnums;
+import com.video.CodeHelp.Enums.CompilerTypeEnums;
 import com.video.CodeHelp.Exception.CodeHelpException;
-import com.video.CodeHelp.Pojo.CompleteQuestion;
-import com.video.CodeHelp.Pojo.QuestionBody;
-import com.video.CodeHelp.Pojo.QuestionConstraints;
-import com.video.CodeHelp.Pojo.QuestionExamples;
+import com.video.CodeHelp.Pojo.*;
 import com.video.CodeHelp.Pojo.Responses.SaveQuestionResponse;
+import com.video.CodeHelp.Pojo.Responses.SubmitCodeResponse;
+import com.video.CodeHelp.Service.CompilerService.CompilerFactory;
+import com.video.CodeHelp.Service.CompilerService.ICompilerService;
 import com.video.CodeHelp.utils.CachingUtils;
 import io.vertx.core.eventbus.ReplyFailure;
 import jakarta.inject.Inject;
@@ -25,11 +27,13 @@ public class QuestionService {
 
   private final QuestionDao questionDao;
   private final CachingService cachingService;
+  private final CompilerFactory compilerFactory;
 
   @Inject
-  public QuestionService(QuestionDao questionDao,CachingService cachingService) {
+  public QuestionService(QuestionDao questionDao,CachingService cachingService,CompilerFactory compilerFactory) {
     this.questionDao = questionDao;
     this.cachingService = cachingService;
+    this.compilerFactory = compilerFactory;
   }
 
   public CompleteQuestion getQuestion(Long qNo) {
@@ -64,18 +68,34 @@ public class QuestionService {
   }
 
   public SaveQuestionResponse saveQuestion(CompleteQuestion question){
-    Long qId = questionDao.saveQuestionHeaders(question.getQuestionBody());
-    Long qDataId = questionDao.saveQuestionData(qId,question.getQuestionBody());
+    try {
+      //lets test it with compiler first the correct code
+      ICompilerService compilerService = compilerFactory.getCompiler(question.getLanguage());
+      SubmitCodeResponse submitCodeResponse = compilerService.compileCode(buildCodeCompileRequest(question.getCorrectCode(),question.getLanguage()));
+      if(submitCodeResponse.getFailed()){
+        throw new CodeHelpException(ApplicationErrorEnums.COMPILATION_ERROR);
+      }
+      Long qId = questionDao.saveQuestionHeaders(question.getQuestionBody());
+      Long qDataId = questionDao.saveQuestionData(qId, question.getQuestionBody());
 
-    List<Long> constraintIds = question.getQuestionConstraints().stream().map(constraint->{
-      return questionDao.saveConstraints(qId,constraint);
-    }).toList();
+      List<Long> constraintIds = question.getQuestionConstraints().stream().map(constraint -> {
+        return questionDao.saveConstraints(qId, constraint);
+      }).toList();
 
-    List<Long> exampleIds = question.getQuestionExamples().stream().map(example->{
-      return questionDao.saveExamples(qId,example);
-    }).toList();
+      List<Long> exampleIds = question.getQuestionExamples().stream().map(example -> {
+        return questionDao.saveExamples(qId, example);
+      }).toList();
 
-    return SaveQuestionResponse.builder().qId(qId).constraintId(constraintIds).examplesId(exampleIds).qDataId(qDataId).build();
+      return SaveQuestionResponse.builder().qId(qId).constraintId(constraintIds).examplesId(exampleIds).qDataId(qDataId).build();
+    } catch (Exception e){
+      log.error("Error occured while saving question: {}",question,e);
+      throw new CodeHelpException(ApplicationErrorEnums.SOMETHING_WENT_WRONG);
+    }
+  }
+
+
+  private CodeCompilingRequest buildCodeCompileRequest(String code, CompilerTypeEnums language){
+    return CodeCompilingRequest.builder().correctCode(code).compilerType(language).testCompilation(true).build();
   }
 
 }

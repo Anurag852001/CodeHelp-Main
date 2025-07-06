@@ -202,8 +202,11 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
     eventBus.consumer(ApiEnums.QUESTION_SAVE_API.getEventPath(), message -> {
       vertx.executeBlocking(future -> {
         try {
+          log.info("Received request to save question: {}",message.body());
+          Long startTime = System.currentTimeMillis();
           JsonObject body = new JsonObject(message.body().toString());
           SaveQuestionResponse saveQuestionResponse = questionService.saveQuestion(body.mapTo(CompleteQuestion.class));
+          log.info("Time taken to save question :{}",System.currentTimeMillis() - startTime);
           JsonObject response = new JsonObject();
           response.put(DataConstants.SUCCESS, true);
           response.put(DataConstants.MESSAGE, "Question saved successfully");
