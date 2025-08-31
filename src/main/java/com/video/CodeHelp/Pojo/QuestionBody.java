@@ -16,4 +16,5 @@ public class QuestionBody {
   private String description;
   private Long likes;
   private Long dislikes;
+  private String functionName;
 }

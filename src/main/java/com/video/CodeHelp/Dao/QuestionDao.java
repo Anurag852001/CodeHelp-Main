@@ -18,7 +18,7 @@ import java.util.List;
 public interface QuestionDao {
 
   @RegisterBeanMapper(QuestionBody.class)
-  @SqlQuery("Select q.id,q.question_heading,q.difficulty,qd.likes,qd.dislikes,qd.description from questions " +
+  @SqlQuery("Select q.id,q.question_heading,q.difficulty,qd.likes,qd.dislikes,qd.description,qd.function_name from questions " +
     "as q join questions_data as qd on q.id = qd.q_id where q.id = :qNo")
   QuestionBody getQuestionBodyResponse(@Bind("qNo") Long qNo);
 

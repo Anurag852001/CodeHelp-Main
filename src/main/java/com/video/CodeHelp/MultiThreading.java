@@ -1,54 +1,43 @@
 package com.video.CodeHelp;
 
-import java.io.*;
-import java.util.concurrent.locks.*;
+import java.util.ArrayList;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.*;
 
 public class MultiThreading {
-    static File file = new File("./sampleFile.txt");
-    static ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
-    static Lock readLock = rwLock.readLock();
-    static Lock writeLock = rwLock.writeLock();
+    static Lock lock = new ReentrantLock();
+    static Condition condition = lock.newCondition();
+    static boolean first = true;
+    static int turn = 0;
+    static final Object object = new Object();
 
     public static void main(String[] args) {
-        Runnable reader = makeReader();
-        Runnable writer = makeWriter();
+        List<Thread> threadList = new ArrayList<>();
+        for(int i = 0 ;i<20;i++){
+            threadList.add(new Thread(makeRunnable(i,false)));
+        }
 
-        Thread r1 = new Thread(reader);
-        Thread r2 = new Thread(reader);
-        Thread w = new Thread(writer);
 
-        w.start();
-        r1.start();
-        r2.start();
+        threadList.parallelStream().forEach(thread->thread.start());
     }
 
-    private static Runnable makeReader() {
+    private static Runnable makeRunnable(int threadNumber, boolean isFirst) {
         return () -> {
-            readLock.lock();
-            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                String line;
-                System.out.println(Thread.currentThread().getName() + " is reading:");
-                while ((line = br.readLine()) != null) {
-                    System.out.println(Thread.currentThread().getName() + " read: " + line);
+            for(int i  = 0;i<1;i++) {
+                synchronized (object) {
+                    while (turn != threadNumber) {
+                        try {
+                            object.wait();
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    System.out.println("hello from thread :" + threadNumber);
+                    turn = (turn+1)%20;
+                    object.notifyAll();
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } finally {
-                readLock.unlock();
-            }
-        };
-    }
-
-    private static Runnable makeWriter() {
-        return () -> {
-            writeLock.lock();
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
-                bw.write("Written by " + Thread.currentThread().getName());
-                bw.newLine();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } finally {
-                writeLock.unlock();
             }
         };
     }

@@ -22,11 +22,7 @@ public class CompleteQuestion {
   private List<QuestionConstraints> questionConstraints;
   @NotNull("questionExamples are mandatory")
   private List<QuestionExamples> questionExamples;
-  @NotNull("function name is mandatory")
-  private String functionName;
-  @NotNull("variables are mandatory")
   private List<VariableSaveRequest> variables;
-  @NotNull("correct code is mandatory")
   private String correctCode;
   @NotNull("language is mandatory")
   private CompilerTypeEnums language;

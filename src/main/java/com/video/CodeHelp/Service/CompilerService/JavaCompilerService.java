@@ -45,9 +45,9 @@ public class JavaCompilerService implements ICompilerService {
 
   @Override
   public SubmitCodeResponse compileCode(CodeCompilingRequest request) {
-    wrapAndSubmit(request.getCorrectCode(),request.getQid(),request.getTestCase(),true,true);
+    wrapAndSubmit(request.getCorrectCode(),request.getQid(),request.getTestCase(),true,true,false);
     //for every testcase lets set correct solutions
-    SubmitCodeResponse submitCodeResponse = wrapAndSubmit(request.getCode(),request.getQid(),request.getTestCase(),true,false);
+    SubmitCodeResponse submitCodeResponse = wrapAndSubmit(request.getCode(),request.getQid(),request.getTestCase(),true,false,false);
 //    log.info("final wrappedCode:{} ", wrappedCode);
     return submitCodeResponse;
   }
@@ -112,7 +112,7 @@ public class JavaCompilerService implements ICompilerService {
   public SubmitCodeResponse submitCode(SubmitCodeRequest request) {
     try {
       List<TestCase> testCases = testCaseService.getTestCases(request.getQid(), request.getCompilerType(), TestCaseType.MAIN_TESTCASE);
-      return wrapAndSubmit(request.getCode(),request.getQid(),testCases,false,false);
+      return wrapAndSubmit(request.getCode(),request.getQid(),testCases,false,false,false);
     } catch (CodeHelpException e){
       throw e;
     }catch (Exception e) {
@@ -207,5 +207,15 @@ public class JavaCompilerService implements ICompilerService {
       stringBuilder.append(variables.get(i)).append(" = ").append(testCases.get(i)).append(System.lineSeparator());
     }
     stringBuilder.append(System.lineSeparator());
+  }
+
+  public static void main(String[] args) {
+    long result  =0;
+    long startTime =  System.currentTimeMillis();
+    for(int i = 0;i<1000000000;i++){
+      result+=i;
+    }
+    System.out.println("Time took: "+ (System.currentTimeMillis() - startTime));
+    System.out.println("result: "+result);
   }
 }

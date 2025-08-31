@@ -17,6 +17,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,7 @@ public class QuestionService {
       String questionBodyCacheKey = CachingUtils.getCacheKeyForQuestionBody(qNo);
       String questionExamplesCacheKey = CachingUtils.getCacheKeyForQuestionExamples(qNo);
       String questionConstraintsCacheKey = CachingUtils.getCacheKeyForQuestionConstraints(qNo);
+
       QuestionBody questionBody = new ObjectMapper().convertValue(cachingService.getFromCache(CachingUtils.getCacheKeyForQuestionBody(qNo), CacheTypeEnums.ONE_DAY_COMMON_CACHE), QuestionBody.class);
       if (questionBody == null) {
         questionBody = questionDao.getQuestionBodyResponse(qNo);
@@ -59,7 +61,11 @@ public class QuestionService {
         cachingService.populateInCache(questionConstraintsCacheKey, questionConstraints, CacheTypeEnums.ONE_DAY_COMMON_CACHE);
         log.info("fetched questions constraints from db and cached with key:{}", questionBodyCacheKey);
       }
-      return new CompleteQuestion(questionBody, questionConstraints, questionExamples);
+      String functionName =
+      return CompleteQuestion.builder().questionBody(questionBody).questionExamples(questionExamples)
+              .variables(new ArrayList<>()).questionConstraints(new ArrayList<>())
+              .language(CompilerTypeEnums.JAVA).build();
+
     } catch (Exception e){
       log.error("Error occurred while fetching question", e);
       throw new CodeHelpException(ReplyFailure.ERROR,"Error occured while fetching question info");
