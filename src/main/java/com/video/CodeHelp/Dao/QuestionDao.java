@@ -36,8 +36,8 @@ public interface QuestionDao {
   Long saveQuestionHeaders(@BindBean("body") QuestionBody body);
 
   @GetGeneratedKeys("id")
-  @SqlUpdate("Insert into questions_data(q_id,likes,dislikes,description)" +
-    "values(:qId, :body.likes, :body.dislikes,:body.description)")
+  @SqlUpdate("Insert into questions_data(q_id,likes,dislikes,description,function_name)" +
+    "values(:qId, :body.likes, :body.dislikes,:body.description,:body.functionName)")
   Long saveQuestionData(@Bind("qId") Long qId, @BindBean("body") QuestionBody body);
 
   @GetGeneratedKeys("id")

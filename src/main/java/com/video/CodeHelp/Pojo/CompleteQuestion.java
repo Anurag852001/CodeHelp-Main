@@ -26,4 +26,6 @@ public class CompleteQuestion {
   private String correctCode;
   @NotNull("language is mandatory")
   private CompilerTypeEnums language;
+  //to be set when getting
+  private String defaultCode = "ssdadsd";
 }

@@ -215,8 +215,8 @@ public class CodeHelpAdminVerticle extends AbstractVerticle {
           future.complete(response);
         } catch (Exception e) {
           log.error("Error while saving config", e);
-          message.reply(e);
-          future.fail(e);
+          message.reply(processResponse(e.getMessage()));
+          future.complete(processResponse(e.getMessage()));
         }
       });
     });

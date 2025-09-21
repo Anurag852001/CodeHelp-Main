@@ -12,6 +12,7 @@ import com.video.CodeHelp.Pojo.Responses.SubmitCodeResponse;
 import com.video.CodeHelp.Service.CompilerService.CompilerFactory;
 import com.video.CodeHelp.Service.CompilerService.ICompilerService;
 import com.video.CodeHelp.utils.CachingUtils;
+import io.netty.handler.codec.string.LineSeparator;
 import io.vertx.core.eventbus.ReplyFailure;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -61,9 +62,10 @@ public class QuestionService {
         cachingService.populateInCache(questionConstraintsCacheKey, questionConstraints, CacheTypeEnums.ONE_DAY_COMMON_CACHE);
         log.info("fetched questions constraints from db and cached with key:{}", questionBodyCacheKey);
       }
-      String functionName =
+      String defaultCode = buildDefaultCode(questionBody.getFunctionName());
       return CompleteQuestion.builder().questionBody(questionBody).questionExamples(questionExamples)
-              .variables(new ArrayList<>()).questionConstraints(new ArrayList<>())
+              .variables(new ArrayList<>()).questionConstraints(questionConstraints)
+              .defaultCode(defaultCode)
               .language(CompilerTypeEnums.JAVA).build();
 
     } catch (Exception e){
@@ -73,11 +75,19 @@ public class QuestionService {
 
   }
 
+  private String buildDefaultCode(String functionName){
+    StringBuilder stringBuilder = new StringBuilder();
+    stringBuilder.append("public class Solution { ").append(System.lineSeparator()).append("   ")
+            .append(functionName).append("{ ").append(System.lineSeparator()).append("     // Write your code here")
+            .append(System.lineSeparator()).append("   }").append(System.lineSeparator()).append("}");
+    return stringBuilder.toString();
+  }
+
   public SaveQuestionResponse saveQuestion(CompleteQuestion question){
     try {
       //lets test it with compiler first the correct code
       ICompilerService compilerService = compilerFactory.getCompiler(question.getLanguage());
-      SubmitCodeResponse submitCodeResponse = compilerService.compileCode(buildCodeCompileRequest(question.getCorrectCode(),question.getLanguage()));
+      SubmitCodeResponse submitCodeResponse = compilerService.compileCorrectCode(buildCodeCompileRequest(question.getCorrectCode(),question.getLanguage()));
       if(submitCodeResponse.getFailed()){
         throw new CodeHelpException(ApplicationErrorEnums.COMPILATION_ERROR);
       }

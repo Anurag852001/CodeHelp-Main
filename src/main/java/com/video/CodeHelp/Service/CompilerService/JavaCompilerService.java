@@ -22,6 +22,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.video.CodeHelp.Enums.CompilerTypeEnums.JAVA;
@@ -51,6 +52,15 @@ public class JavaCompilerService implements ICompilerService {
 //    log.info("final wrappedCode:{} ", wrappedCode);
     return submitCodeResponse;
   }
+
+  @Override
+  public SubmitCodeResponse compileCorrectCode(CodeCompilingRequest request) {
+   SubmitCodeResponse submitCodeResponse = wrapAndSubmit(request.getCorrectCode(),request.getQid(),request.getTestCase(),true,true,false);
+    //for every testcase lets set correct solutions
+//    log.info("final wrappedCode:{} ", wrappedCode);
+    return submitCodeResponse;
+  }
+
 
   @Override
   public String runSimpleCode(String code) {
@@ -161,7 +171,7 @@ public class JavaCompilerService implements ICompilerService {
     Long timeTaken = System.currentTimeMillis() - startTime;
     log.info("Time took to execute all testcases : {}", timeTaken);
     SubmitCodeResponse submitCodeResponse = SubmitCodeResponse.builder().testCasesPassed(passedTestCases)
-            .totalTestCases(testCase.size())
+            .totalTestCases(Optional.ofNullable(testCase).map(List::size).orElse(0))
             .expectedLastTestCaseResultBeforeFailure(expectedLastTestCaseResult)
             .failed(failed)
             .timeTake(timeTaken)
@@ -209,13 +219,4 @@ public class JavaCompilerService implements ICompilerService {
     stringBuilder.append(System.lineSeparator());
   }
 
-  public static void main(String[] args) {
-    long result  =0;
-    long startTime =  System.currentTimeMillis();
-    for(int i = 0;i<1000000000;i++){
-      result+=i;
-    }
-    System.out.println("Time took: "+ (System.currentTimeMillis() - startTime));
-    System.out.println("result: "+result);
-  }
 }

@@ -14,7 +14,7 @@ public class QuestionBody {
   private String questionHeading;
   private String difficulty;
   private String description;
-  private Long likes;
-  private Long dislikes;
+  private Long likes = 0L;
+  private Long dislikes = 0L;
   private String functionName;
 }

@@ -11,6 +11,11 @@ public class PythonCompilerService implements ICompilerService{
   }
 
   @Override
+  public SubmitCodeResponse compileCorrectCode(CodeCompilingRequest request) {
+    return null;
+  }
+
+  @Override
   public String runSimpleCode(String code) {
     return "";
   }
